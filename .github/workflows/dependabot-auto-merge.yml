@@ -1,0 +1,60 @@
+name: Dependabot auto-merge
+
+# Minor and patch Dependabot PRs merge themselves once the pull_request run of
+# test.yml's "test" job reports success. Major bumps are never touched here and
+# always wait for manual review.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  actions: write
+
+jobs:
+  auto-merge:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v3
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Wait for checks and merge
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          for i in $(seq 1 60); do
+            run="$(gh api "repos/$REPO/commits/$SHA/check-runs?check_name=test" --jq '.check_runs[0] // {}')"
+            status="$(echo "$run" | jq -r '.status // "queued"')"
+            conclusion="$(echo "$run" | jq -r '.conclusion // ""')"
+            if [ "$status" = "completed" ]; then
+              case "$conclusion" in
+                success|neutral|skipped)
+                  echo "test passed."
+                  break
+                  ;;
+                *)
+                  echo "test concluded '$conclusion'."
+                  exit 1
+                  ;;
+              esac
+            fi
+            echo "Waiting on test (status: $status)..."
+            sleep 15
+          done
+          if [ "$status" != "completed" ]; then
+            echo "Timed out waiting for test."
+            exit 1
+          fi
+          gh pr merge --squash --delete-branch "$PR_URL"
+          gh workflow run build-and-deploy.yml --repo "$REPO" --ref main
