@@ -7,7 +7,7 @@ RUN set -eux && cargo install --locked monolith
 # ==============================================================================
 # Stage 2: App Builder (Where the heavy building happens)
 # ==============================================================================
-FROM node:22.23-bullseye-slim AS app-builder
+FROM node:26.5-bullseye-slim AS app-builder
 
 ENV YARN_HTTP_TIMEOUT=10000000
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
@@ -46,7 +46,7 @@ RUN yarn workspaces focus --production muninn @linkwarden/web @linkwarden/worker
 # ==============================================================================
 # Stage 3: Final Runtime (This stage will be ~400MB total)
 # ==============================================================================
-FROM node:22.23-bullseye-slim AS main-app
+FROM node:26.5-bullseye-slim AS main-app
 ENV NODE_ENV=production
 ENV PRISMA_HIDE_UPDATE_MESSAGE=1
 # Version surfaced at /api/v1/health and the UI footer (baked by CI from VERSION).
