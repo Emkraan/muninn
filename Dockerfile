@@ -1,7 +1,7 @@
 # ==============================================================================
 # Stage 1: Monolith Builder
 # ==============================================================================
-FROM docker.io/rust:1.96-bullseye AS monolith-builder
+FROM docker.io/rust:1.97-bullseye AS monolith-builder
 RUN set -eux && cargo install --locked monolith
 
 # ==============================================================================
