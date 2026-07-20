@@ -47,6 +47,7 @@ export default function AuthRedirect({ children }: Props) {
       { path: "/auth/reset-password", isProtected: false },
       { path: "/", isProtected: false },
       { path: "/subscribe", isProtected: true },
+      { path: "/board", isProtected: true },
       { path: "/dashboard", isProtected: true },
       { path: "/settings", isProtected: true },
       { path: "/collections", isProtected: true },
@@ -68,7 +69,8 @@ export default function AuthRedirect({ children }: Props) {
         isLoggedIn &&
         !routes.some((e) => router.pathname.startsWith(e.path) && e.isProtected)
       ) {
-        redirectTo("/dashboard");
+        // Muninn is a launcher: the board is home, not the link stats dashboard.
+        redirectTo("/board");
       } else if (
         isUnauthenticated &&
         routes.some((e) => router.pathname.startsWith(e.path) && e.isProtected)
