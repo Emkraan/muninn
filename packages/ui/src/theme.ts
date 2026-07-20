@@ -3,16 +3,49 @@ import { createTheme, rem } from "@mantine/core";
 import { modalComponent } from "./theme/modal";
 
 export const theme = createTheme({
-  primaryColor: "red",
+  // Emkraan Cobalt: logo-blue accent + a dark surface ladder that leans blue.
+  primaryColor: "cobalt",
+  primaryShade: { light: 6, dark: 5 },
   autoContrast: true,
   respectReducedMotion: true,
   cursorType: "pointer",
 
-  fontFamily: "Inter, system-ui, -apple-system, sans-serif",
-  fontFamilyMonospace: "ui-monospace, 'Cascadia Code', 'Fira Code', monospace",
+  colors: {
+    // Logo-blue ramp (500 #2486B9 peak, 600 #1B6FB8 token).
+    cobalt: [
+      "#E8F1FB",
+      "#C6DEF5",
+      "#93C2EC",
+      "#5FA4E0",
+      "#4A9FE0",
+      "#2486B9",
+      "#1B6FB8",
+      "#155A95",
+      "#114B7C",
+      "#0D3A61",
+    ],
+    // Cobalt "Elevated" dark ladder: [0..3]=text, 4=border, 5=hover, 6=card,
+    // 7=canvas/body, 8=inset. Mantine maps body->dark[7], surfaces->dark[6],
+    // borders->dark[4], text->dark[0].
+    dark: [
+      "#F4F7FB",
+      "#AEB8C6",
+      "#7C879A",
+      "#5A6576",
+      "#263049",
+      "#182238",
+      "#131B2E",
+      "#0B1220",
+      "#080E1A",
+      "#05090F",
+    ],
+  },
+
+  fontFamily: "var(--font-sans), Inter, system-ui, -apple-system, sans-serif",
+  fontFamilyMonospace: "var(--font-mono), 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace",
 
   headings: {
-    fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+    fontFamily: "var(--font-display), Sora, Inter, system-ui, sans-serif",
     fontWeight: "600",
     sizes: {
       h1: { fontSize: rem(36), lineHeight: "1.1", fontWeight: "700" },

@@ -55,8 +55,8 @@ export const getAvailableUpdatesAsync = async (currentVersion: string) => {
   const isCurrentPrerelease = isPrereleaseTag(currentVersion);
 
   const releases = await octokit.rest.repos.listReleases({
-    owner: "homarr-labs",
-    repo: "homarr",
+    owner: "Emkraan",
+    repo: "muninn",
   });
 
   const { skippedTags, semanticReleases } = releases.data
