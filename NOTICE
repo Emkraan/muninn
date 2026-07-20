@@ -1,81 +1,16 @@
 Muninn
-======
+Copyright 2026 Emkraan
 
-Muninn is a self-hosted app launcher and bookmark manager with a live-widget
-tile dashboard: owner-scoped collections and boards with granular per-member
-sharing, a full versioned REST API covering every layout mutation, and a
-pluggable widget framework for at-a-glance service status.
+This product is a fork of Homarr (https://github.com/homarr-labs/homarr),
+Copyright the Homarr contributors, licensed under the Apache License, Version 2.0.
+Muninn is based on Homarr v1.71.0.
 
-Source repository: https://github.com/Emkraan/muninn
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. A copy of the License is
+included in the LICENSE file at the root of this repository, or you may obtain
+one at http://www.apache.org/licenses/LICENSE-2.0.
 
-
-Attribution and origin
-----------------------
-
-Muninn is a derivative work ("work based on the Program") of Linkwarden.
-
-  Original work:  Linkwarden
-  Copyright (C)   Linkwarden (linkwarden.app)
-  Upstream:       https://github.com/linkwarden/linkwarden
-
-Muninn is derived from the Linkwarden project (upstream commit
-8ff513df946a7a068b9cd20fc30b5c51bb384cf9, 2026-07-10). The original copyright
-notices and license notices of the upstream Linkwarden project are retained as
-required by the GNU Affero General Public License, version 3 (AGPL-3.0),
-sections 4 and 5. Muninn is likewise licensed under AGPL-3.0; see LICENSE.md.
-
-  Modifications:  Copyright (C) 2026 Emkraan
-
-
-Modifications
--------------
-
-The Muninn fork began in 2026, based on the Linkwarden baseline noted above.
-Relative to that baseline, the modifications include the following. This section
-is provided to satisfy AGPL-3.0 section 5(a), which requires a modified work to
-carry prominent notices stating that it was changed and giving a relevant date.
-
-  - Added a board/dashboard layer (Board, Section, BoardItem, BoardMember data
-    models) on top of the existing owner-scoped Collection/Link model, providing
-    a Homarr-style tile dashboard while inheriting the per-user data-isolation
-    and granular member-permission (create/update/delete) model.
-  - Added complete versioned REST API coverage for every board and layout
-    mutation (boards, sections, items, single and bulk item repositioning, board
-    members, widget-type registry) so a client can manage layout end to end
-    without any browser interaction.
-  - Added a server-side widget framework and a set of pluggable, configuration-
-    driven widget integrations (torrent queue, media-request list, indexer
-    health, an arbitrary-PromQL stat tile, ping/uptime, and calendar). Widget
-    endpoints and credentials are supplied per item at runtime; none are
-    hardcoded.
-  - Fixed the admin-user-provisioning defect (upstream issue #984) so that
-    disabling public self-registration no longer disables administrator-initiated
-    user creation; introduced a real instance-level admin role and centralized
-    the admin-authorization check.
-  - Added a tamper-evident, append-only, hash-chained administrative audit log.
-  - Rebranded the user interface and application identity from the upstream
-    project to Muninn, with a dark "Cobalt" theme.
-
-Relevant date: fork initiated 2026; see https://github.com/Emkraan/muninn for
-the complete revision history.
-
-
-Third-party components
-----------------------
-
-Muninn is built on the Linkwarden codebase and bundles or depends on the same
-major third-party open-source components, each remaining the property of its
-respective authors and distributed under its own license, including:
-
-  - Next.js       (Vercel)                MIT
-  - React         (Meta)                  MIT
-  - Prisma        (Prisma)                Apache-2.0
-  - NextAuth.js   (nextauthjs)            ISC
-  - Tailwind CSS  (Tailwind Labs)         MIT
-  - DaisyUI       (Pouya Saadeghi)        MIT
-  - Meilisearch   (Meili SAS)             MIT
-  - Monolith      (Sunshine)              MIT
-  - Playwright    (Microsoft)             Apache-2.0
-
-The Corresponding Source for the version of Muninn distributed to you is the
-public repository at https://github.com/Emkraan/muninn.
+Muninn is rebranded and extended by Emkraan with the Emkraan first-party
+standard: a Cobalt UI, strict per-user RBAC (nothing default-shared),
+multi-provider OIDC, and a documented REST API. These modifications are
+likewise licensed under the Apache License, Version 2.0.

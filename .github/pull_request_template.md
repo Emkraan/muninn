@@ -1,46 +1,21 @@
-## What does this PR do?
+<br/>
+<div align="center">
+  <img src="https://homarr.dev/img/logo.png" height="80" alt="" />
+  <h3>Homarr</h3>
+</div>
 
-<!-- Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change. -->
+**Thank you for your contribution. Please ensure that your pull request meets the following pull request:**
 
-- Fixes #XXXX (GitHub issue number)
+- [ ] Builds without warnings or errors (`pnpm build`, autofix with `pnpm format:fix`)
+- [ ] Pull request targets `dev` branch
+- [ ] Commits follow the [conventional commits guideline](https://www.conventionalcommits.org/en/v1.0.0/)
+- [ ] No shorthand variable names are used (eg. `x`, `y`, `i` or any abbrevation)
+- [ ] Documentation is up to date. Create a pull request [here](https://github.com/homarr-labs/documentation/).
+- [ ] When using AI; No temp files are checked in, the code style follows the rest of the project
 
-## Visual Demo
+**When contributing a new integration or widget:**
 
-A visual demonstration is strongly recommended, for both the original and new change **(video / image)**.
-
-#### Video Demo (if applicable):
-
-- Show screen recordings of the issue or feature.
-- Demonstrate how to reproduce the issue, the behavior before and after the change.
-
-#### Image Demo (if applicable):
-
-- Add side-by-side screenshots of the original and updated change.
-- Highlight any significant change(s).
-
-## AI Assistance (Required)
-
-We allow AI-assisted development, but reviewers need transparency to assess risk, maintainability, and correctness.
-
-#### AI usage level (check one)
-
-- [ ] None (no AI used)
-- [ ] Light (spellcheck/rewording/comments/docs only)
-- [ ] Medium (AI suggested small code changes/snippets that I adapted)
-- [ ] Heavy (AI significantly shaped the implementation or architecture)
-
-#### Which tool(s) where used?
-
-- e.g., ChatGPT, Copilot, Cursor, etc.
-
-## What was verified by the author?
-
-<!-- Add what you personally checked to ensure correctness and safety. -->
-
-- [ ] I reviewed **and** understood all AI/human generated code
-- [ ] I validated behavior locally (tests/manual verification)
-- [ ] I checked edge cases and failure modes
-
-## Submission Acknowledgement
-
-- [ ] I acknowledge that a decent size PR without self-review might be rejected
+- [ ] I confirmed manually that the integration or widget is working with a real system and performed basic smoke
+  tests (e.g. what happens if it is offline)
+- [ ] Optional but recommended: I confirm that I am willing to be added to the `CODEOWNERS` of this feature and will
+  provide support and maintain the integration (e.g. in case of breaking or failure)

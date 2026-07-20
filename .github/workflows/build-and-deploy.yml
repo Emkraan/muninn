@@ -1,10 +1,10 @@
 # ===========================================================================
 # Muninn - build and publish the container image to GHCR.
 #
-# This workflow BUILDS AND PUBLISHES the image only. Deployment to the homelab
-# is handled out-of-band by the private stack repo (Emkraan/hq-muninn), which
-# pins the image reference and fires its own Portainer webhook. Do NOT add a
-# deploy webhook or any internal URL to this file: this is a public repo.
+# Muninn is a fork of Homarr (Apache-2.0). This workflow BUILDS AND PUBLISHES
+# the image only; deployment to the homelab is handled out-of-band by the
+# private stack repo (Emkraan/hq-muninn), which pins the image reference.
+# Do NOT add a deploy webhook or any internal URL to this file.
 #
 # Triggers:
 #   push to main            -> :latest, :edge, :sha-<short-sha>
@@ -35,6 +35,7 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,29 +70,30 @@ jobs:
           {
             echo "tags=${TAGS}"
             echo "app_version=${APP_VERSION}"
-            echo "short_sha=${SHORT_SHA}"
             echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           } >> "${GITHUB_OUTPUT}"
 
           echo "Publishing tags:"
           echo "${TAGS}" | tr ',' '\n'
 
+      # Homarr's Dockerfile is a self-contained multi-stage build (pnpm fetch/
+      # install/turbo build -> alpine runner with nginx+redis+next). The TURBO_*
+      # secret mounts are optional (build proceeds without a remote cache).
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ./Dockerfile
           platforms: linux/amd64
           push: true
-          build-args: |
-            APP_VERSION=${{ steps.meta.outputs.app_version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: |
             org.opencontainers.image.title=Muninn
-            org.opencontainers.image.description=Self-hosted app launcher and bookmark manager with a live-widget tile dashboard, owner-scoped sharing, and a full REST API for every layout mutation.
+            org.opencontainers.image.description=Self-hosted dashboard and app launcher (fork of Homarr) with a Cobalt UI, strict per-user RBAC, multi-provider OIDC, and a documented REST API.
             org.opencontainers.image.source=https://github.com/Emkraan/muninn
             org.opencontainers.image.url=https://github.com/Emkraan/muninn
             org.opencontainers.image.documentation=https://github.com/Emkraan/muninn
-            org.opencontainers.image.licenses=AGPL-3.0
-            org.opencontainers.image.version=v${{ steps.meta.outputs.app_version }}
+            org.opencontainers.image.licenses=Apache-2.0
+            org.opencontainers.image.version=${{ steps.meta.outputs.app_version }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.created=${{ steps.meta.outputs.created }}

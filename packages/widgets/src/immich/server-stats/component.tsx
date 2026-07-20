@@ -1,0 +1,76 @@
+"use client";
+
+import React from "react";
+import { Group, Stack, Text } from "@mantine/core";
+import { IconDatabase, IconPhoto, IconUsers, IconVideo } from "@tabler/icons-react";
+
+import { clientApi } from "@homarr/api/client";
+import { formatBytes } from "@homarr/common";
+import { useI18n } from "@homarr/translation/client";
+
+import { WidgetEmptyState } from "../../common/empty-state";
+import type { WidgetComponentProps } from "../../definition";
+import classes from "./component.module.css";
+
+export default function ImmichServerStatsWidget({
+  integrationIds,
+  options,
+}: WidgetComponentProps<"immich-serverStats">) {
+  const t = useI18n();
+  const { data: stats } = clientApi.widget.immich.getServerStats.useQuery({
+    integrationId: integrationIds[0] ?? "",
+  });
+
+  if (!stats) return <WidgetEmptyState />;
+
+  return (
+    <Stack gap="md" h="100%" p="md">
+      {options.showUsers && (
+        <StatItem icon={<IconUsers size={20} />} label={t("widget.immich-serverStats.users")} value={stats.userCount} />
+      )}
+      {options.showPhotos && (
+        <StatItem
+          icon={<IconPhoto size={20} />}
+          label={t("widget.immich-serverStats.photos")}
+          value={stats.photoCount}
+        />
+      )}
+      {options.showVideos && (
+        <StatItem
+          icon={<IconVideo size={20} />}
+          label={t("widget.immich-serverStats.videos")}
+          value={stats.videoCount}
+        />
+      )}
+      {options.showStorage && (
+        <StatItem
+          icon={<IconDatabase size={20} />}
+          label={t("widget.immich-serverStats.storage")}
+          value={formatBytes(stats.totalLibraryUsageInBytes)}
+        />
+      )}
+    </Stack>
+  );
+}
+
+interface StatItemProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+}
+
+function StatItem({ icon, label, value }: StatItemProps) {
+  return (
+    <Group justify="space-between" align="center" className={classes.statItem}>
+      <Group gap="sm" align="center">
+        {icon}
+        <Text size="sm" fw={500}>
+          {label}
+        </Text>
+      </Group>
+      <Text size="sm" fw={700} c="var(--mantine-primary-color)">
+        {value}
+      </Text>
+    </Group>
+  );
+}

@@ -1,40 +1,75 @@
 {
   "name": "muninn",
-  "packageManager": "yarn@4.12.0+sha512.f45ab632439a67f8bc759bf32ead036a1f413287b9042726b7cc4818b7b49e14e9423ba49b18f9e06ea4941c1ad062385b1d8760a8d5091a1a31e5f6219afca8",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
-    "web:dev": "dotenv -- yarn workspace @linkwarden/web dev",
-    "web:build": "dotenv -- yarn workspace @linkwarden/web build",
-    "web:start": "dotenv -- yarn workspace @linkwarden/web start",
-    "update:browserslist-db": "npx update-browserslist-db@latest",
-    "worker:dev": "dotenv -- yarn workspace @linkwarden/worker dev",
-    "worker:start": "dotenv -- yarn workspace @linkwarden/worker start",
-    "concurrently:dev": "concurrently \"dotenv -- yarn workspace @linkwarden/web dev\" \"dotenv -- yarn workspace @linkwarden/worker dev\"",
-    "concurrently:start": "concurrently \"dotenv -- yarn workspace @linkwarden/web start\" \"dotenv -- yarn workspace @linkwarden/worker start\"",
-    "prisma:deploy": "dotenv -- yarn workspace @linkwarden/prisma deploy",
-    "prisma:dev": "dotenv -- yarn workspace @linkwarden/prisma dev",
-    "prisma:generate": "yarn workspace @linkwarden/prisma generate",
-    "prisma:studio": "yarn workspace @linkwarden/prisma studio",
-    "format": "yarn workspaces run format",
-    "test": "vitest",
-    "coverage": "vitest run --coverage",
-    "postinstall": "yarn workspace @linkwarden/web run postinstall && patch-package"
-  },
-  "devDependencies": {
-    "dotenv-cli": "^8.0.0",
-    "vitest": "^4.1.0"
+    "build": "cross-env CI=true turbo build",
+    "clean": "git clean -xdf node_modules",
+    "clean:workspaces": "turbo clean",
+    "ci:act:all": "bash scripts/ci/act.sh all",
+    "ci:act:cleanup": "bash scripts/ci/act.sh cleanup",
+    "ci:act:docker": "bash scripts/ci/act.sh docker",
+    "ci:act:fast": "bash scripts/ci/act.sh fast",
+    "cli": "pnpm with-env tsx packages/cli/index.ts",
+    "db:migration:mysql:generate": "pnpm -F db migration:mysql:generate",
+    "db:migration:mysql:run": "pnpm -F db migration:mysql:run",
+    "db:migration:postgresql:generate": "pnpm -F db migration:postgresql:generate",
+    "db:migration:postgresql:run": "pnpm -F db migration:postgresql:run",
+    "db:migration:sqlite:generate": "pnpm -F db migration:sqlite:generate",
+    "db:migration:sqlite:run": "pnpm -F db migration:sqlite:run",
+    "db:push": "pnpm -F db push:sqlite",
+    "db:studio": "pnpm -F db studio",
+    "dev": "pnpm -F nextjs dev",
+    "dev:docs": "pnpm -F @homarr/docs dev",
+    "docker:dev": "docker compose -f ./development/development.docker-compose.yml up",
+    "format": "turbo format --continue -- --check",
+    "format:fix": "turbo format --continue",
+    "lint": "turbo lint --continue",
+    "lint:fix": "turbo lint --continue -- --fix",
+    "lint:ws": "pnpm dlx sherif@latest",
+    "release": "semantic-release",
+    "scripts:update-bug-report-template": "tsx ./scripts/update-bug-report-template.mts",
+    "scripts:update-readme-integrations": "tsx ./scripts/update-integration-list.mts",
+    "start": "concurrently \"pnpm with-env node apps/tasks/tasks.cjs\" \"pnpm with-env node apps/websocket/wssServer.cjs\" \"pnpm -F nextjs start\"",
+    "test": "cross-env NODE_ENV=development CI=true vitest run --exclude e2e --coverage.enabled ",
+    "test:e2e": "cross-env NODE_ENV=development CI=true vitest e2e",
+    "test:ui": "cross-env NODE_ENV=development CI=true vitest --exclude e2e --ui --coverage.enabled",
+    "typecheck": "turbo typecheck",
+    "with-env": "dotenv -e .env --"
   },
   "dependencies": {
-    "concurrently": "^9.1.2",
-    "patch-package": "^8.0.0"
+    "jsonpath-plus": "catalog:"
   },
-  "resolutions": {
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
-  }
+  "devDependencies": {
+    "@playwright/test": "catalog:",
+    "@semantic-release/changelog": "catalog:",
+    "@semantic-release/commit-analyzer": "catalog:",
+    "@semantic-release/git": "catalog:",
+    "@semantic-release/github": "catalog:",
+    "@semantic-release/npm": "catalog:",
+    "@semantic-release/release-notes-generator": "catalog:",
+    "@testcontainers/redis": "catalog:",
+    "@turbo/gen": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "@vitest/ui": "catalog:",
+    "conventional-changelog-conventionalcommits": "catalog:",
+    "cross-env": "catalog:",
+    "jsdom": "catalog:",
+    "json5": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "semantic-release": "catalog:",
+    "testcontainers": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.18.0",
+    "pnpm": ">=11.11.0"
+  },
+  "packageManager": "pnpm@11.11.0"
 }

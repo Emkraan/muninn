@@ -1,0 +1,144 @@
+import type { IntegrationKind } from "@homarr/definitions";
+
+import { AdGuardHomeIntegration } from "../adguard-home/adguard-home-integration";
+import { BeszelIntegration } from "../beszel/beszel-integration";
+import { BazarrIntegration } from "../bazarr/bazarr-integration";
+import { AnchorIntegration } from "../anchor/anchor-integration";
+import { AudiobookshelfIntegration } from "../audiobookshelf/audiobookshelf-integration";
+import { CoolifyIntegration } from "../coolify/coolify-integration";
+import { DashDotIntegration } from "../dashdot/dashdot-integration";
+import { Aria2Integration } from "../download-client/aria2/aria2-integration";
+import { DelugeIntegration } from "../download-client/deluge/deluge-integration";
+import { NzbGetIntegration } from "../download-client/nzbget/nzbget-integration";
+import { QBitTorrentIntegration } from "../download-client/qbittorrent/qbittorrent-integration";
+import { SabnzbdIntegration } from "../download-client/sabnzbd/sabnzbd-integration";
+import { SlskdIntegration } from "../download-client/slskd/slskd-integration";
+import { TransmissionIntegration } from "../download-client/transmission/transmission-integration";
+import { EmbyIntegration } from "../emby/emby-integration";
+import { GlancesIntegration } from "../glances/glances-integration";
+import { ArchiveTeamWarriorIntegration } from "../archive-team-warrior/archive-team-warrior-integration";
+import { GluetunIntegration } from "../gluetun/gluetun-integration";
+import { HomeAssistantIntegration } from "../homeassistant/homeassistant-integration";
+import { ICalIntegration } from "../ical/ical-integration";
+import { ImmichIntegration } from "../immich/immich-integration";
+import { JellyfinIntegration } from "../jellyfin/jellyfin-integration";
+import { JellyseerrIntegration } from "../jellyseerr/jellyseerr-integration";
+import { LidarrIntegration } from "../media-organizer/lidarr/lidarr-integration";
+import { RadarrIntegration } from "../media-organizer/radarr/radarr-integration";
+import { ReadarrIntegration } from "../media-organizer/readarr/readarr-integration";
+import { SonarrIntegration } from "../media-organizer/sonarr/sonarr-integration";
+import { TdarrIntegration } from "../media-transcoding/tdarr-integration";
+import { MockIntegration } from "../mock/mock-integration";
+import { NavidromeIntegration } from "../navidrome/navidrome-integration";
+import { NextcloudIntegration } from "../nextcloud/nextcloud.integration";
+import { GotifyIntegration } from "../gotify/gotify-integration";
+import { NTFYIntegration } from "../ntfy/ntfy-integration";
+import { OpenMediaVaultIntegration } from "../openmediavault/openmediavault-integration";
+import { OPNsenseIntegration } from "../opnsense/opnsense-integration";
+import { OverseerrIntegration } from "../overseerr/overseerr-integration";
+import { PaperlessNgxIntegration } from "../paperless-ngx/paperless-ngx-integration";
+import { PatchMonIntegration } from "../patchmon/patchmon-integration";
+import { PeaNutIntegration } from "../peanut/peanut-integration";
+import { createPiHoleIntegrationAsync } from "../pi-hole/pi-hole-integration-factory";
+import { createTechnitiumDnsIntegrationAsync } from "../technitium/technitium-integration-factory";
+import { PlexIntegration } from "../plex/plex-integration";
+import { ProwlarrIntegration } from "../prowlarr/prowlarr-integration";
+import { ProxmoxIntegration } from "../proxmox/proxmox-integration";
+import { SeerrIntegration } from "../seerr/seerr-integration";
+import { SpeedtestTrackerIntegration } from "../speedtest-tracker/speedtest-tracker-integration";
+import { TracearrIntegration } from "../tracearr/tracearr-integration";
+import { TraefikIntegration } from "../traefik/traefik-integration";
+import { SynologyIntegration } from "../synology/synology-integration";
+import { TrueNasIntegration } from "../truenas/truenas-integration";
+import { UmamiIntegration } from "../umami/umami-integration";
+import { UptimeKumaIntegration } from "../uptime-kuma/uptime-kuma-integration";
+import { UnifiControllerIntegration } from "../unifi-controller/unifi-controller-integration";
+import { UnraidIntegration } from "../unraid/unraid-integration";
+import type { Integration, IntegrationInput } from "./integration";
+
+export const createIntegrationAsync = async <TKind extends keyof typeof integrationCreators>(
+  integration: IntegrationInput & { kind: TKind },
+) => {
+  if (!(integration.kind in integrationCreators)) {
+    throw new Error(
+      `Unknown integration kind ${integration.kind}. Did you forget to add it to the integration creator?`,
+    );
+  }
+
+  const creator = integrationCreators[integration.kind];
+
+  // factories are an array, to differentiate in js between class constructors and functions
+  if (Array.isArray(creator)) {
+    return (await creator[0](integration)) as IntegrationInstanceOfKind<TKind>;
+  }
+
+  return new creator(integration) as IntegrationInstanceOfKind<TKind>;
+};
+
+type IntegrationInstance = new (integration: IntegrationInput) => Integration;
+
+// factories are an array, to differentiate in js between class constructors and functions
+export const integrationCreators = {
+  anchor: AnchorIntegration,
+  piHole: [createPiHoleIntegrationAsync],
+  adGuardHome: AdGuardHomeIntegration,
+  technitiumDns: [createTechnitiumDnsIntegrationAsync],
+  homeAssistant: HomeAssistantIntegration,
+  jellyfin: JellyfinIntegration,
+  plex: PlexIntegration,
+  sonarr: SonarrIntegration,
+  radarr: RadarrIntegration,
+  sabNzbd: SabnzbdIntegration,
+  nzbGet: NzbGetIntegration,
+  qBittorrent: QBitTorrentIntegration,
+  deluge: DelugeIntegration,
+  transmission: TransmissionIntegration,
+  slskd: SlskdIntegration,
+  aria2: Aria2Integration,
+  jellyseerr: JellyseerrIntegration,
+  seerr: SeerrIntegration,
+  overseerr: OverseerrIntegration,
+  prowlarr: ProwlarrIntegration,
+  openmediavault: OpenMediaVaultIntegration,
+  lidarr: LidarrIntegration,
+  readarr: ReadarrIntegration,
+  dashDot: DashDotIntegration,
+  tdarr: TdarrIntegration,
+  proxmox: ProxmoxIntegration,
+  emby: EmbyIntegration,
+  nextcloud: NextcloudIntegration,
+  unifiController: UnifiControllerIntegration,
+  opnsense: OPNsenseIntegration,
+  ical: ICalIntegration,
+  ntfy: NTFYIntegration,
+  gotify: GotifyIntegration,
+  mock: MockIntegration,
+  truenas: TrueNasIntegration,
+  synology: SynologyIntegration,
+  unraid: UnraidIntegration,
+  coolify: CoolifyIntegration,
+  tracearr: TracearrIntegration,
+  glances: GlancesIntegration,
+  immich: ImmichIntegration,
+  paperlessNgx: PaperlessNgxIntegration,
+  patchmon: PatchMonIntegration,
+  speedtestTracker: SpeedtestTrackerIntegration,
+  audiobookshelf: AudiobookshelfIntegration,
+  navidrome: NavidromeIntegration,
+  umami: UmamiIntegration,
+  gluetun: GluetunIntegration,
+  archiveTeamWarrior: ArchiveTeamWarriorIntegration,
+  uptimeKuma: UptimeKumaIntegration,
+  peaNut: PeaNutIntegration,
+  beszel: BeszelIntegration,
+  bazarr: BazarrIntegration,
+  traefik: TraefikIntegration,
+} satisfies Record<IntegrationKind, IntegrationInstance | [(input: IntegrationInput) => Promise<Integration>]>;
+
+type IntegrationInstanceOfKind<TKind extends keyof typeof integrationCreators> = {
+  [kind in TKind]: (typeof integrationCreators)[kind] extends [(input: IntegrationInput) => Promise<Integration>]
+    ? Awaited<ReturnType<(typeof integrationCreators)[kind][0]>>
+    : (typeof integrationCreators)[kind] extends IntegrationInstance
+      ? InstanceType<(typeof integrationCreators)[kind]>
+      : never;
+}[TKind];

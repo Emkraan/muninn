@@ -1,20 +1,22 @@
-import path from "path";
-import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
+import tsconfigPaths from "vite-tsconfig-paths";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      "@": path.resolve(process.cwd(), "apps/web"),
-    },
-  },
+  plugins: [react(), tsconfigPaths()],
   test: {
-    exclude: [
-      "**/node_modules/**",
-      "**/dist/**",
-      "**/e2e/**",
-      // Integration tests that require a live DATABASE_URL are run at deploy
-      // time (see tests/gates), not in the default unit-test CI run.
-      "**/importFromHTMLFile.test.ts",
-    ],
+    setupFiles: ["./vitest.setup.ts"],
+    environment: "jsdom",
+    include: ["**/*.spec.ts"],
+    clearMocks: true,
+    coverage: {
+      provider: "v8",
+      reporter: ["html", "json-summary", "json"],
+      all: true,
+      exclude: (configDefaults.coverage.exclude ?? []).concat("apps/nextjs/.next/"),
+      reportOnFailure: true,
+    },
+
+    exclude: [...configDefaults.exclude, "apps/nextjs/.next"],
   },
 });

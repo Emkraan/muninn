@@ -1,0 +1,6151 @@
+{
+  "init": {
+    "step": {
+      "start": {
+        "title": "Welcome to Muninn",
+        "subtitle": "Let's start setting your Muninn instance up.",
+        "description": "To get started, please select how you want to continue.",
+        "action": {
+          "scratch": "Start from scratch",
+          "importOldmarr": "Import from a Muninn version before v1.0",
+          "restoreSqlite": "Restore from SQLite backup",
+          "restoreSqliteDescription": "Upload a full SQLite database backup from a previous Muninn instance. This will restore all boards, users, apps, integrations, and settings.",
+          "backToOptions": "← Back to setup options"
+        }
+      },
+      "import": {
+        "title": "Import data",
+        "subtitle": "You can import data from an existing Muninn instance.",
+        "dropzone": {
+          "title": "Drag your ZIP file here or click to browse your files",
+          "description": "The ZIP file you uploaded will be processed and you will be able to select what you would like to import"
+        },
+        "fileInfo": {
+          "action": {
+            "change": "Change file"
+          }
+        },
+        "importSettings": {
+          "title": "Import settings",
+          "description": "Configure the import behaviour"
+        },
+        "boardSelection": {
+          "title": "Found {count} boards",
+          "description": "Choose all the boards with the size you want to import",
+          "action": {
+            "selectAll": "Select all",
+            "unselectAll": "Deselect all"
+          }
+        },
+        "summary": {
+          "title": "Import summary",
+          "description": "In the summary below, you can see what will be imported",
+          "action": {
+            "import": "Please confirm import and continue"
+          },
+          "entities": {
+            "apps": "Applications",
+            "boards": "Boards",
+            "integrations": "Integrations",
+            "credentialUsers": "Credential users"
+          }
+        },
+        "tokenModal": {
+          "title": "Enter import token",
+          "field": {
+            "token": {
+              "label": "Token",
+              "description": "Enter the import token shown in your previous Muninn instance"
+            }
+          },
+          "notification": {
+            "error": {
+              "title": "Invalid Token",
+              "message": "Sorry, but the token you entered is invalid"
+            }
+          }
+        }
+      },
+      "user": {
+        "title": "Administrative user",
+        "subtitle": "Please specify the credentials for your administrator user.",
+        "notification": {
+          "success": {
+            "title": "User created",
+            "message": "The user has been created successfully"
+          },
+          "error": {
+            "title": "User creation failed"
+          }
+        }
+      },
+      "group": {
+        "title": "External group",
+        "subtitle": "Please specify the group which should be used for external users.",
+        "form": {
+          "name": {
+            "label": "Group name",
+            "description": "The name needs to match the admin group of your external provider"
+          }
+        }
+      },
+      "settings": {
+        "title": "Settings",
+        "subtitle": "Configure server settings"
+      },
+      "integrations": {
+        "title": "Integrations",
+        "subtitle": "Select the services you use.",
+        "description": "Choose the integrations you'd like to connect. We'll set up your dashboard with matching widgets automatically.",
+        "action": {
+          "continue": "Continue",
+          "skip": "Skip for now"
+        },
+        "configure": {
+          "progress": "{current} of {total}",
+          "skip": "Skip this integration",
+          "finishing": "Setting up your dashboard...",
+          "error": {
+            "title": "Setup failed",
+            "message": "Something went wrong while setting up your dashboard. Please try again."
+          },
+          "helpers": {
+            "tooltip": "URL helpers",
+            "description": "These helpers try to guess the URL for your services. If it doesn't work, just type the address manually."
+          }
+        },
+        "urlTemplate": {
+          "label": "Base URL",
+          "placeholder": "homelab.local or 192.168.1.1",
+          "hint": "Enter your base domain or IP to auto-fill integration URLs",
+          "warning": "Setting your base URL now will auto-fill all integration URLs, saving you time during setup",
+          "preview": "e.g. {example}",
+          "mode": {
+            "subdomain": "Subdomain",
+            "hostPort": "Host:Port"
+          }
+        },
+        "docker": {
+          "detected": "Docker detected {count} services",
+          "detectedBreakdown": "{integrations} integrations · {apps} apps",
+          "summary": "Muninn detected {apps} apps, {integrations} of which have integrations built-in",
+          "appBadge": "App",
+          "appSectionLabel": "Apps to add to dashboard ({count} selected)",
+          "scanning": "Scanning Docker...",
+          "scanningDescription": "Looking for running containers on your system"
+        }
+      },
+      "finish": {
+        "title": "Finish set-up",
+        "subtitle": "Congratulations, you are ready to go!",
+        "description": "You have successfully finished the setup process. You can now start using Muninn. Please select your next action:",
+        "action": {
+          "goToBoard": "Go to {name} board",
+          "createBoard": "Create your first board",
+          "inviteUser": "Invite other users",
+          "docs": "Read the documentation"
+        }
+      }
+    },
+    "backToStart": "Go back to the start"
+  },
+  "user": {
+    "title": "Users",
+    "name": "User",
+    "page": {
+      "login": {
+        "title": "Log-in to your account",
+        "subtitle": "Welcome back! Please enter your credentials"
+      },
+      "invite": {
+        "title": "Join Muninn",
+        "subtitle": "Welcome to Muninn! Please create an account",
+        "description": "You were invited by {username}"
+      },
+      "init": {
+        "title": "New Muninn installation",
+        "subtitle": "Please create the initial administrator user"
+      }
+    },
+    "field": {
+      "email": {
+        "label": "Email",
+        "verified": "Verified"
+      },
+      "username": {
+        "label": "User-name"
+      },
+      "password": {
+        "label": "Password",
+        "suggestionsTitle": "Password suggestions",
+        "suggestion": {
+          "length": "Includes a minimum of 8 characters",
+          "lowercase": "Includes a lower-case letter",
+          "uppercase": "Includes an upper-case letter",
+          "number": "Includes a number",
+          "special": "Includes a special symbol"
+        }
+      },
+      "passwordConfirm": {
+        "label": "Confirm password"
+      },
+      "previousPassword": {
+        "label": "Previous password"
+      },
+      "homeBoard": {
+        "label": "Home board"
+      },
+      "pingIconsEnabled": {
+        "label": "Use icons for pings"
+      },
+      "defaultSearchEngine": {
+        "label": "Default search engine"
+      },
+      "openSearchInNewTab": {
+        "label": "Open the search results in a new tab"
+      },
+      "ddgBangs": {
+        "label": "Enable DuckDuckGo bangs"
+      }
+    },
+    "error": {
+      "usernameTaken": "User-name has already been taken"
+    },
+    "action": {
+      "login": {
+        "label": "Log-in",
+        "labelWith": "Log-in with {provider}",
+        "notification": {
+          "success": {
+            "title": "Log-in is successful",
+            "message": "You are now logged-in"
+          },
+          "error": {
+            "title": "Log-in failed",
+            "message": "Your log-in attempt failed"
+          }
+        },
+        "forgotPassword": {
+          "label": "Have you forgotten your password?",
+          "description": "An administrator can use the following command to reset your password:"
+        }
+      },
+      "register": {
+        "label": "Create an account",
+        "notification": {
+          "success": {
+            "title": "Account has been created",
+            "message": "Please log in to continue"
+          },
+          "error": {
+            "title": "Account creation has failed",
+            "message": "Your account could not be created"
+          }
+        }
+      },
+      "create": "Create a user",
+      "changePassword": {
+        "label": "Change your password",
+        "notification": {
+          "success": {
+            "message": "Your password has been changed successfully"
+          },
+          "error": {
+            "message": "Unable to change your password"
+          }
+        }
+      },
+      "changeHomeBoard": {
+        "notification": {
+          "success": {
+            "message": "Home board has been changed successfully"
+          },
+          "error": {
+            "message": "Unable to change the home board"
+          }
+        }
+      },
+      "changeSearchPreferences": {
+        "notification": {
+          "success": {
+            "message": "Search preferences have been changed successfully"
+          },
+          "error": {
+            "message": "Unable to change the search preferences"
+          }
+        }
+      },
+      "changeFirstDayOfWeek": {
+        "notification": {
+          "success": {
+            "message": "The first day of the week has been changed successfully"
+          },
+          "error": {
+            "message": "Unable to change the first day of the week"
+          }
+        }
+      },
+      "changePingIconsEnabled": {
+        "notification": {
+          "success": {
+            "message": "Ping icons have been toggled successfully"
+          },
+          "error": {
+            "message": "Unable to toggle the ping icons"
+          }
+        }
+      },
+      "changeDdgBangs": {
+        "notification": {
+          "success": {
+            "message": "DuckDuckGo bangs toggled successfully"
+          },
+          "error": {
+            "message": "Unable to toggle DuckDuckGo bangs"
+          }
+        }
+      },
+      "manageAvatar": {
+        "changeImage": {
+          "label": "Change image",
+          "notification": {
+            "success": {
+              "message": "The image has been changed successfully"
+            },
+            "error": {
+              "message": "Unable to change the image"
+            },
+            "toLarge": {
+              "title": "The image is too large",
+              "message": "The maximum image size is {size}"
+            }
+          }
+        },
+        "removeImage": {
+          "label": "Remove image",
+          "confirm": "Are you certain that you would like to remove the image?",
+          "notification": {
+            "success": {
+              "message": "Image has been removed successfully"
+            },
+            "error": {
+              "message": "Unable to remove image"
+            }
+          }
+        }
+      },
+      "editProfile": {
+        "notification": {
+          "success": {
+            "message": "Profile has been updated successfully"
+          },
+          "error": {
+            "message": "Unable to update profile"
+          }
+        }
+      },
+      "delete": {
+        "label": "Permanently delete user",
+        "description": "This deletes this user, including their preferences. This will not delete any boards. The user will not be notified.",
+        "confirm": "Are you sure that you want to delete the user {username}, as well as their preferences"
+      },
+      "select": {
+        "label": "Select a user",
+        "notFound": "No user found"
+      },
+      "transfer": {
+        "label": "Select a new owner"
+      }
+    }
+  },
+  "group": {
+    "title": "Groups",
+    "name": "Group",
+    "search": "Find a group",
+    "field": {
+      "name": "Name",
+      "members": "Members",
+      "homeBoard": {
+        "label": "Home board",
+        "description": "Only boards that are accessible to the group can be selected \\"
+      },
+      "mobileBoard": {
+        "label": "Mobile board",
+        "description": "Only boards that are accessible to the group can be selected"
+      }
+    },
+    "permission": {
+      "admin": {
+        "title": "Administrator",
+        "item": {
+          "admin": {
+            "label": "Administrator",
+            "description": "Members who have this permission will have full access to all features and settings"
+          }
+        }
+      },
+      "app": {
+        "title": "Applications",
+        "item": {
+          "create": {
+            "label": "Create applications",
+            "description": "Allow members to create applications"
+          },
+          "use-all": {
+            "label": "Use all applications",
+            "description": "Allow members to add any applications to their boards"
+          },
+          "modify-all": {
+            "label": "Modify all applications",
+            "description": "Allow members to modify applications"
+          },
+          "full-all": {
+            "label": "Full application access",
+            "description": "Allow members to use, manage, and delete any application"
+          }
+        }
+      },
+      "board": {
+        "title": "Boards",
+        "item": {
+          "create": {
+            "label": "Create boards",
+            "description": "Allow members to create boards"
+          },
+          "view-all": {
+            "label": "View all boards",
+            "description": "Allow members to view all boards"
+          },
+          "modify-all": {
+            "label": "Modify all boards",
+            "description": "Allow members to modify all boards (This does not include access control and danger zones)"
+          },
+          "full-all": {
+            "label": "Full board access",
+            "description": "Allow members to view, modify, and delete all boards (This includes access control and danger zones)"
+          }
+        }
+      },
+      "integration": {
+        "title": "Integrations",
+        "item": {
+          "create": {
+            "label": "Create integrations",
+            "description": "Allow members to create integrations"
+          },
+          "use-all": {
+            "label": "Use all integrations",
+            "description": "Allow members to add any integrations to their boards"
+          },
+          "interact-all": {
+            "label": "Interact with any integration",
+            "description": "Allow members to interact with any integration"
+          },
+          "full-all": {
+            "label": "Full integration access",
+            "description": "Allow members to use, manage, and interact with any integrations"
+          }
+        }
+      },
+      "media": {
+        "title": "Media",
+        "item": {
+          "upload": {
+            "label": "Upload media content",
+            "description": "Allow members to upload media content"
+          },
+          "view-all": {
+            "label": "View all media content",
+            "description": "Allow members to view all media content"
+          },
+          "full-all": {
+            "label": "Full media access",
+            "description": "Allow members to manage and delete any media content"
+          }
+        }
+      },
+      "other": {
+        "title": "Other",
+        "item": {
+          "view-logs": {
+            "label": "View logs",
+            "description": "Allow members to view logs"
+          }
+        }
+      },
+      "search-engine": {
+        "title": "Search engines",
+        "item": {
+          "create": {
+            "label": "Create search engine",
+            "description": "Allow members to create search engines"
+          },
+          "modify-all": {
+            "label": "Modify all existing search engines",
+            "description": "Allow members to modify all existing search engines"
+          },
+          "full-all": {
+            "label": "Full search engine access",
+            "description": "Allow members to manage and delete any search engine"
+          }
+        }
+      }
+    },
+    "memberNotice": {
+      "mixed": "Some members can not be managed because they are from an external provider",
+      "external": "All members can not be managed because they are from an external provider"
+    },
+    "reservedNotice": {
+      "message": "This group is reserved for system use and can restrict some actions. <checkoutDocs></checkoutDocs>"
+    },
+    "action": {
+      "create": {
+        "label": "Create a new group",
+        "notification": {
+          "success": {
+            "message": "The group was created successfully"
+          },
+          "error": {
+            "message": "The group could not be created"
+          }
+        }
+      },
+      "transfer": {
+        "label": "Transfer group ownership",
+        "description": "Transfer ownership of this group to another user.",
+        "confirm": "Are you want to transfer the ownership of the group, {name} to {username}",
+        "notification": {
+          "success": {
+            "message": "Successfully transferred group {group} to {user}"
+          },
+          "error": {
+            "message": "Unable to transfer the group's ownership"
+          }
+        }
+      },
+      "addMember": {
+        "label": "Add member"
+      },
+      "removeMember": {
+        "label": "Remove member",
+        "confirm": "Are you sure you want to remove the user, {user} from this group?"
+      },
+      "delete": {
+        "label": "Delete group",
+        "description": "Once you delete this group, you can not revert the change. Please be careful",
+        "confirm": "Are you sure you want to delete the group, {name}?",
+        "notification": {
+          "success": {
+            "message": "Successfully deleted the group, {name}"
+          },
+          "error": {
+            "message": "Unable to delete the group, {name}"
+          }
+        }
+      },
+      "changePermissions": {
+        "notification": {
+          "success": {
+            "title": "Permissions have been saved",
+            "message": "Successfully saved permissions"
+          },
+          "error": {
+            "title": "Permissions have not been saved",
+            "message": "Permissions were not saved"
+          }
+        }
+      },
+      "update": {
+        "notification": {
+          "success": {
+            "message": "The group, {name} was successfully saved"
+          },
+          "error": {
+            "message": "Unable to save the group, {name}"
+          }
+        }
+      },
+      "select": {
+        "label": "Select a group",
+        "notFound": "No group was found"
+      },
+      "settings": {
+        "board": {
+          "notification": {
+            "success": {
+              "title": "Settings have been saved",
+              "message": "The settings have been saved successfully"
+            },
+            "error": {
+              "title": "Settings have not been saved",
+              "message": "The settings were unable to be saved"
+            }
+          }
+        }
+      },
+      "changePosition": {
+        "notification": {
+          "success": {
+            "message": "The position has been successfully changed"
+          },
+          "error": {
+            "message": "The position was unable to be changed"
+          }
+        }
+      }
+    },
+    "defaultGroup": {
+      "name": "Default group",
+      "description": "{name} - All users that are signed in"
+    }
+  },
+  "app": {
+    "search": "Find an application",
+    "page": {
+      "list": {
+        "title": "Application",
+        "noResults": {
+          "title": "There are currently no applications",
+          "action": "Create the first application"
+        }
+      },
+      "create": {
+        "title": "Create application",
+        "notification": {
+          "success": {
+            "title": "Creation successful",
+            "message": "The application has been successfully created"
+          },
+          "error": {
+            "title": "Creation Failed",
+            "message": "The application was unable to be created"
+          }
+        }
+      },
+      "edit": {
+        "title": "Edit application",
+        "notification": {
+          "success": {
+            "title": "Changes have been successfully applied",
+            "message": "The application was successfully saved"
+          },
+          "error": {
+            "title": "Changes have not been applied",
+            "message": "The application was unable to be saved"
+          }
+        }
+      },
+      "delete": {
+        "title": "Delete application",
+        "message": "Are you certain that you want to delete the application, {name}?",
+        "notification": {
+          "success": {
+            "title": "Deleted successfully",
+            "message": "The application was successfully deleted"
+          },
+          "error": {
+            "title": "Deletion failed",
+            "message": "The application was unable to be deleted"
+          }
+        }
+      }
+    },
+    "field": {
+      "name": {
+        "label": "Name"
+      },
+      "description": {
+        "label": "Description"
+      },
+      "url": {
+        "label": "URL"
+      },
+      "useDifferentUrlForPing": {
+        "checkbox": {
+          "label": "Use a different URL for pings",
+          "description": "Useful if it is possible to connect to an internal IP to avoid using up ISP bandwidth"
+        }
+      }
+    },
+    "action": {
+      "select": {
+        "label": "Select an application",
+        "notFound": "No application found",
+        "search": "Search for an app",
+        "noResults": "No results",
+        "action": "Select {app}",
+        "title": "Select an app to add to this board"
+      },
+      "create": {
+        "title": "Create new app",
+        "description": "Create a new app ",
+        "action": "Open app creation"
+      },
+      "add": "Add an app"
+    }
+  },
+  "customWidget": {
+    "page": {
+      "list": {
+        "title": "Custom Widgets",
+        "noResults": "No custom widgets yet. Create your first one!",
+        "loading": "Loading..."
+      },
+      "create": {
+        "title": "Create Custom Widget",
+        "subtitle": "Define an API URL, authentication, and how to display the response data."
+      },
+      "edit": {
+        "title": "Edit Custom Widget"
+      }
+    },
+    "action": {
+      "create": "Create",
+      "import": "Import",
+      "save": "Save",
+      "delete": "Delete Custom Widget",
+      "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+      "export": "Export",
+      "addMapping": "Add Mapping",
+      "addColumn": "Add Column",
+      "edit": "Edit",
+      "removeMapping": "",
+      "removeColumn": "",
+      "addItem": "",
+      "removeItem": "",
+      "addBar": "",
+      "duplicate": "",
+      "copyAiPrompt": "",
+      "enable": "",
+      "disable": "",
+      "menu": ""
+    },
+    "field": {
+      "name": "",
+      "description": "",
+      "iconUrl": "",
+      "url": "",
+      "authType": "",
+      "headerName": "",
+      "method": "",
+      "requestBody": "",
+      "displayType": "",
+      "jsonPath": "",
+      "jsonPathHint": "",
+      "label": "",
+      "unit": "",
+      "mappings": "",
+      "tablePath": "",
+      "tablePathHint": "",
+      "columns": "",
+      "header": "",
+      "items": "",
+      "gridColumns": "",
+      "cardStyle": "",
+      "bars": "",
+      "valuePath": "",
+      "maxPath": "",
+      "showPercentage": "",
+      "barSize": "",
+      "goodValues": "",
+      "dotSize": "",
+      "valueSize": "",
+      "labelPosition": "",
+      "kvLayout": "",
+      "striped": "",
+      "compact": "",
+      "maxHeight": "",
+      "color": "",
+      "buttonLabel": "",
+      "buttonColor": "",
+      "confirmText": "",
+      "confirmTextHint": "",
+      "successMessage": "",
+      "successMessageHint": "",
+      "enabled": "",
+      "template": {
+        "label": "",
+        "description": ""
+      }
+    },
+    "placeholder": {
+      "exampleLabel": "",
+      "exampleLabelShort": "",
+      "exampleHeader": "",
+      "exampleUnit": "",
+      "iconUrl": "",
+      "url": "",
+      "headerName": "",
+      "jsonPath": "",
+      "tablePath": "",
+      "columnJsonPath": "",
+      "valuePath": "",
+      "maxPath": "",
+      "goodValues": "",
+      "color": ""
+    },
+    "cardStyleOption": {
+      "filled": "",
+      "outline": "",
+      "subtle": ""
+    },
+    "layoutOption": {
+      "list": "",
+      "grid": ""
+    },
+    "sizeOption": {
+      "sm": "",
+      "md": "",
+      "lg": "",
+      "xl": ""
+    },
+    "labelPositionOption": {
+      "above": "",
+      "below": ""
+    },
+    "fieldset": {
+      "general": "",
+      "connection": "",
+      "display": ""
+    },
+    "displayTypeDescription": {
+      "singleValue": "",
+      "keyValue": "",
+      "table": "",
+      "statGrid": "",
+      "progressBars": "",
+      "statusIndicator": "",
+      "countGrid": "",
+      "raw": "",
+      "actionButton": "",
+      "customJsx": ""
+    },
+    "method": {
+      "GET": "",
+      "POST": "",
+      "PUT": "",
+      "DELETE": "",
+      "PATCH": ""
+    },
+    "authType": {
+      "none": "",
+      "bearer": "",
+      "basic": "",
+      "apiKeyHeader": "",
+      "apiKeyQuery": ""
+    },
+    "displayType": {
+      "singleValue": "",
+      "keyValue": "",
+      "table": "",
+      "statGrid": "",
+      "progressBars": "",
+      "statusIndicator": "",
+      "countGrid": "",
+      "raw": "",
+      "actionButton": "",
+      "customJsx": ""
+    },
+    "secret": {
+      "apiKey": "",
+      "username": "",
+      "password": "",
+      "savedPlaceholder": ""
+    },
+    "preview": {
+      "title": "",
+      "test": "",
+      "hint": "",
+      "rawResponse": ""
+    },
+    "notification": {
+      "created": "",
+      "updated": "",
+      "deleted": "",
+      "imported": "",
+      "aiPromptCopied": "",
+      "aiPromptDescription": "",
+      "aiPromptCopy": "",
+      "aiPromptNoResponse": "",
+      "aiPromptCopyError": "",
+      "createError": "",
+      "updateError": "",
+      "importError": "",
+      "exportError": "",
+      "duplicated": "",
+      "duplicateError": "",
+      "toggleError": "",
+      "deleteError": "",
+      "previewError": "",
+      "executed": "",
+      "executeError": ""
+    },
+    "table": {
+      "name": "",
+      "url": "",
+      "display": ""
+    },
+    "widget": {
+      "disabled": ""
+    }
+  },
+  "integration": {
+    "page": {
+      "list": {
+        "title": "Integrations",
+        "search": "Search your integrations",
+        "noResults": {
+          "title": "There are currently no integrations"
+        }
+      },
+      "create": {
+        "title": "New {name} integration",
+        "notification": {
+          "success": {
+            "title": "Creation successful",
+            "message": "The integration has been successfully created"
+          },
+          "error": {
+            "title": "Creation failed",
+            "message": "The integration was unable to be created"
+          }
+        },
+        "app": {
+          "option": {
+            "existing": {
+              "title": "Existing",
+              "label": "Select existing app"
+            },
+            "new": {
+              "title": "New",
+              "url": {
+                "label": "App URL",
+                "description": "The URL the app will open when accessed from the dashboard"
+              }
+            }
+          }
+        }
+      },
+      "edit": {
+        "title": "Edit {name} integration",
+        "notification": {
+          "success": {
+            "title": "Changes have been successfully applied",
+            "message": "The integration was successfully saved"
+          },
+          "error": {
+            "title": "Changes have not been applied",
+            "message": "The integration was unable to be saved"
+          }
+        },
+        "app": {
+          "action": {
+            "add": "Link an app",
+            "remove": "Unlink",
+            "select": "Select an app to link"
+          }
+        }
+      },
+      "delete": {
+        "title": "Delete integration",
+        "message": "Are you certain that you want to delete the integration, {name}?",
+        "notification": {
+          "success": {
+            "title": "Deletion successful",
+            "message": "The integration was successfully deleted"
+          },
+          "error": {
+            "title": "Deletion failed",
+            "message": "The integration was unable to be deleted"
+          }
+        }
+      }
+    },
+    "field": {
+      "name": {
+        "label": "Name"
+      },
+      "url": {
+        "label": "URL"
+      },
+      "attemptSearchEngineCreation": {
+        "label": "Create a search engine",
+        "description": "Integration, {kind} can be used with the search engine. Please check this to automatically configure the search engine."
+      },
+      "app": {
+        "sectionTitle": "Linked App"
+      },
+      "createApp": {
+        "label": "Create application",
+        "description": "Create an application with the same information as the integration. Please leave the input field below empty to create the application with the integration URL."
+      },
+      "appHref": {
+        "placeholder": "Custom application URL"
+      },
+      "apiKeySettings": {
+        "label": ""
+      }
+    },
+    "action": {
+      "create": "New integration"
+    },
+    "grid": {
+      "widgetCount": "",
+      "noWidgets": "",
+      "detected": ""
+    },
+    "category": {
+      "dnsHole": "",
+      "mediaService": "",
+      "calendar": "",
+      "mediaSearch": "",
+      "mediaRelease": "",
+      "mediaRequest": "",
+      "downloadClient": "",
+      "usenet": "",
+      "torrent": "",
+      "miscellaneous": "",
+      "smartHomeServer": "",
+      "indexerManager": "",
+      "healthMonitoring": "",
+      "search": "",
+      "mediaTranscoding": "",
+      "networkController": "",
+      "releasesProvider": "",
+      "notifications": "",
+      "firewall": "",
+      "timetable": "",
+      "photoService": "",
+      "documents": "",
+      "notes": "",
+      "mediaMonitoring": "",
+      "speedtest": "",
+      "analytics": "",
+      "vpn": "",
+      "mediaLibrary": "",
+      "uptimeMonitoring": ""
+    },
+    "testConnection": {
+      "action": {
+        "create": "Test the connection and create integration",
+        "edit": "Test the connection and save"
+      },
+      "error": {
+        "common": {
+          "cause": {
+            "title": "Cause with more details"
+          }
+        },
+        "unknown": {
+          "title": "Unknown error",
+          "description": "An unknown error occurred, open the cause below to see more details"
+        },
+        "parse": {
+          "title": "Parse error",
+          "description": "The response could not be parsed. Please verify that the URL is pointing to the base URL of the service."
+        },
+        "authorization": {
+          "title": "Authorisation error",
+          "description": "The request was not authorised. Please verify that the credentials are correct and you have them configured with enough permissions."
+        },
+        "statusCode": {
+          "title": "Response error",
+          "description": "Received unexpected {statusCode} ({reason}) response from <url></url>. Please verify that the URL is pointing to the base URL of the integration.",
+          "otherDescription": "Received unexpected {statusCode} response from <url></url>. Please verify that the URL is pointing to the base URL of the integration.",
+          "reason": {
+            "badRequest": "Bad request",
+            "notFound": "Not found",
+            "tooManyRequests": "Too many requests",
+            "internalServerError": "Internal server error",
+            "serviceUnavailable": "Service unavailable",
+            "gatewayTimeout": "Gateway timeout"
+          }
+        },
+        "certificate": {
+          "title": "Certificate error",
+          "description": {
+            "expired": "The certificate has expired.",
+            "notYetValid": "The certificate is not yet valid.",
+            "untrusted": "The certificate is not trusted.",
+            "hostnameMismatch": "The certificate hostname does not match the URL."
+          },
+          "alert": {
+            "permission": {
+              "title": "Not enough permissions",
+              "message": "You are not allowed to trust or upload certificates. Please contact your administrator to upload the necessary root certificate."
+            },
+            "hostnameMismatch": {
+              "title": "Hostname mismatch",
+              "message": "The hostname in the certificate does not match the hostname you are connecting to. This could indicate a security risk, but you can still choose to trust this certificate."
+            },
+            "extract": {
+              "title": "CA certificate extraction failed",
+              "message": "Only self-signed certificates without a chain can be fetched automatically. If you are using a self-signed certificate, please make sure to upload the CA certificate manually. You can find instructions on how to do this <docsLink></docsLink>."
+            }
+          },
+          "action": {
+            "retry": {
+              "label": "Retry creation"
+            },
+            "trust": {
+              "label": "Trust certificate"
+            },
+            "upload": {
+              "label": "Upload certificate"
+            }
+          },
+          "hostnameMismatch": {
+            "confirm": {
+              "title": "Trust hostname mismatch",
+              "message": "Are you sure you want to trust the certificate with a hostname mismatch?"
+            },
+            "notification": {
+              "success": {
+                "title": "Trusted certificate",
+                "message": "Added hostname to trusted certificate list"
+              },
+              "error": {
+                "title": "Failed to trust certificate",
+                "message": "The certificate with a hostname mismatch could not be trusted"
+              }
+            }
+          },
+          "selfSigned": {
+            "confirm": {
+              "title": "Trust self-signed certificate",
+              "message": "Are you sure you want to trust this self-signed certificate?"
+            },
+            "notification": {
+              "success": {
+                "title": "Trusted certificate",
+                "message": "Added certificate to trusted certificate list"
+              },
+              "error": {
+                "title": "Failed to trust certificate",
+                "message": "Failed to add certificate to trusted certificate list"
+              }
+            }
+          },
+          "details": {
+            "title": "Details",
+            "description": "Review the certificate information before deciding to trust it.",
+            "content": {
+              "action": "Show content",
+              "title": "PEM Certificate"
+            }
+          }
+        },
+        "request": {
+          "title": "Request error",
+          "description": {
+            "connection": {
+              "hostUnreachable": "The server could not be reached. This usually means the host is offline or unreachable from your network.",
+              "networkUnreachable": "The network is unreachable. Please check your Internet connection or network configuration.",
+              "refused": "The server refused the connection. It may not be running or is rejecting requests on the specified port.",
+              "reset": "The connection was unexpectedly closed by the server. This can happen if the server is unstable or restarted."
+            },
+            "dns": {
+              "notFound": "The server address could not be found. Please check the URL for typos or invalid domain names.",
+              "timeout": "DNS lookup timed out. This may be a temporary issue—please try again in a few moments.",
+              "noAnswer": "The DNS server didn't return a valid response. The domain may exist but has no valid records."
+            },
+            "timeout": {
+              "aborted": "The request was aborted before it could complete. This might be due to a user action or system timeout.",
+              "timeout": "The request took too long to complete and was timed out. Check your network or try again later."
+            }
+          }
+        }
+      },
+      "alertNotice": "The save button is enabled once the connection is successfully established",
+      "notification": {
+        "success": {
+          "title": "Connection successful",
+          "message": "The connection has been successfully established"
+        },
+        "invalidUrl": {
+          "title": "Invalid URL",
+          "message": "The URL provided is invalid"
+        },
+        "secretNotDefined": {
+          "title": "Missing credentials",
+          "message": "Some credentials were not provided"
+        },
+        "invalidCredentials": {
+          "title": "Invalid credentials",
+          "message": "The credentials you provided are invalid"
+        },
+        "commonError": {
+          "title": "Connection failed",
+          "message": "The connection was unable to be established"
+        },
+        "badRequest": {
+          "title": "Bad request",
+          "message": "The request was malformed"
+        },
+        "unauthorized": {
+          "title": "Unauthorised",
+          "message": "The credentials provided were unauthorized. Please double-check what you entered"
+        },
+        "forbidden": {
+          "title": "Forbidden",
+          "message": "The server was forbidden to connect. Please double-check the permissions"
+        },
+        "notFound": {
+          "title": "Not found",
+          "message": "The URL provided did not return anything. Please double-check the URL"
+        },
+        "internalServerError": {
+          "title": "Internal server error",
+          "message": "The server encountered an error. Please try again later"
+        },
+        "serviceUnavailable": {
+          "title": "Service unavailable",
+          "message": "The server is currently unavailable. Please try again later"
+        },
+        "connectionAborted": {
+          "title": "Connection aborted",
+          "message": "The connection was aborted. Please try again later"
+        },
+        "domainNotFound": {
+          "title": "Domain not found",
+          "message": "The domain was not found. Please try again later"
+        },
+        "connectionRefused": {
+          "title": "Connection refused",
+          "message": "The server was refused connection. Please try again later"
+        },
+        "invalidJson": {
+          "title": "Invalid JSON",
+          "message": "The connection's response provided invalid JSON. Please try again later"
+        },
+        "wrongPath": {
+          "title": "Wrong path",
+          "message": "The path is incorrect. Please double-check the URL"
+        },
+        "tooManyRequests": {
+          "title": "Too many requests in a given time",
+          "message": "There were too many requests. You are likely being rate-limited or rejected by the target system"
+        }
+      }
+    },
+    "secrets": {
+      "title": "Secrets",
+      "lastUpdated": "Last updated on {date}",
+      "notSet": {
+        "label": "No value is set",
+        "tooltip": "The required secret has not currently been set"
+      },
+      "secureNotice": "The secret can not be viewed after creation",
+      "reset": {
+        "title": "Reset secret",
+        "message": "Are you certain that you want to reset the secret?"
+      },
+      "noSecretsRequired": {
+        "segmentTitle": "No secrets",
+        "text": "There are no secrets required for this integration to work"
+      },
+      "kind": {
+        "username": {
+          "label": "Username",
+          "newLabel": "New username"
+        },
+        "apiKey": {
+          "label": "API key",
+          "newLabel": "New API key"
+        },
+        "password": {
+          "label": "Password",
+          "newLabel": "New password"
+        },
+        "tokenId": {
+          "label": "Token ID",
+          "newLabel": "New token ID"
+        },
+        "realm": {
+          "label": "Realm",
+          "newLabel": "New realm"
+        },
+        "personalAccessToken": {
+          "label": "Personal Access Token",
+          "newLabel": "New Personal Access Token"
+        },
+        "topic": {
+          "label": "Topic",
+          "newLabel": "New topic"
+        },
+        "url": {
+          "label": "URL",
+          "newLabel": "New URL"
+        },
+        "opnsenseApiKey": {
+          "label": "API Key (Key)",
+          "newLabel": "New API Key (Key)"
+        },
+        "opnsenseApiSecret": {
+          "label": "API Key (Secret)",
+          "newLabel": "New API Key (Secret)"
+        },
+        "githubAppId": {
+          "label": "App Id",
+          "newLabel": "New App Id"
+        },
+        "githubInstallationId": {
+          "label": "Installation Id",
+          "newLabel": "New Installation Id"
+        },
+        "privateKey": {
+          "label": "Private key",
+          "newLabel": "New private key"
+        },
+        "slug": {
+          "label": "",
+          "newLabel": ""
+        }
+      }
+    },
+    "permission": {
+      "use": "Select integrations in items",
+      "interact": "Interact with integrations",
+      "full": "Full integration access"
+    },
+    "audiobookshelf": {
+      "name": "",
+      "description": ""
+    },
+    "navidrome": {
+      "name": "",
+      "description": ""
+    },
+    "uptimeKuma": {
+      "name": "",
+      "description": "",
+      "secret": {
+        "slug": {
+          "description": ""
+        },
+        "apiKey": {
+          "description": ""
+        }
+      }
+    },
+    "paperlessNgx": {
+      "name": "",
+      "description": ""
+    }
+  },
+  "media": {
+    "plural": "Media",
+    "search": "Find media",
+    "field": {
+      "name": "Name",
+      "size": "Size",
+      "creator": "Creator"
+    },
+    "action": {
+      "upload": {
+        "label": "Upload media",
+        "file": "Select file",
+        "notification": {
+          "success": {
+            "message": "The media was successfully uploaded"
+          },
+          "error": {
+            "message": "The media was unable to be uploaded"
+          }
+        }
+      },
+      "delete": {
+        "label": "Delete media",
+        "description": "Are you certain that you want to delete the media, <bName></bName>?",
+        "notification": {
+          "success": {
+            "message": "The media was successfully deleted"
+          },
+          "error": {
+            "message": "The media was unable to be deleted"
+          }
+        }
+      },
+      "copy": {
+        "label": "Copy URL"
+      },
+      "open": {
+        "label": "Open media"
+      }
+    },
+    "noResults": {
+      "title": ""
+    }
+  },
+  "common": {
+    "success": "Success",
+    "beta": "Beta",
+    "error": "Alpha",
+    "action": {
+      "add": "Add",
+      "apply": "Apply",
+      "backToOverview": "Back to overview",
+      "skip": "",
+      "change": "Change",
+      "create": "Create",
+      "createAnother": "Create and start over",
+      "edit": "Edit",
+      "import": "Import",
+      "insert": "Insert",
+      "remove": "Remove",
+      "save": "Save",
+      "saveChanges": "Save your changes",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "discard": "Discard",
+      "close": "Close",
+      "confirm": "Confirm",
+      "continue": "Continue",
+      "previous": "Previous",
+      "next": "Next",
+      "checkoutDocs": "Check the documentation",
+      "checkLogs": "Check logs for more information",
+      "tryAgain": "Try again",
+      "loading": "Loading",
+      "show": "",
+      "hide": ""
+    },
+    "here": "here",
+    "iconPicker": {
+      "label": "Icon URL",
+      "header": "Please enter a name or object to filter for the icon. Muninn will search throughout {countIcons} different icons to find the right one.",
+      "headerLoading": "",
+      "noResults": "",
+      "error": ""
+    },
+    "colorScheme": {
+      "options": {
+        "auto": "Auto",
+        "light": "Light",
+        "dark": "Dark"
+      }
+    },
+    "information": {
+      "min": "Minimum",
+      "max": "Maximum",
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Minutes"
+    },
+    "notification": {
+      "create": {
+        "success": "Creation successful",
+        "error": "Creation failed"
+      },
+      "delete": {
+        "success": "Deletion successful",
+        "error": "Deletion failed"
+      },
+      "update": {
+        "success": "Changed were successfully applied",
+        "error": "Changes were unable to be applied"
+      },
+      "transfer": {
+        "success": "Transfer successful",
+        "error": "Transfer failed"
+      }
+    },
+    "multiSelect": {
+      "placeholder": "Please pick one or more values"
+    },
+    "multiText": {
+      "placeholder": "Add more values",
+      "addLabel": "Add {value}"
+    },
+    "select": {
+      "placeholder": "Pick value",
+      "badge": {
+        "recommended": "Recommended"
+      }
+    },
+    "userAvatar": {
+      "menu": {
+        "switchToDarkMode": "Switch to dark mode",
+        "switchToLightMode": "Switch to light mode",
+        "management": "Management",
+        "docker": "",
+        "preferences": "Your preferences",
+        "logout": "Log-out",
+        "login": "Log-in",
+        "homeBoard": "Your home board",
+        "loggedOut": "Logged out",
+        "updateAvailable": "New update available: {tag}"
+      }
+    },
+    "dangerZone": "Danger zone",
+    "noResults": "No results have been found",
+    "unsavedChanges": "You have unsaved changes!",
+    "servers": "Servers",
+    "applications": "Apps",
+    "services": "Services",
+    "preview": {
+      "show": "Show a preview",
+      "hide": "Hide the preview"
+    },
+    "zod": {
+      "errors": {
+        "default": "This field contains invalid data",
+        "required": "This field is required",
+        "string": {
+          "startsWith": "This field must start with \"{startsWith}\"",
+          "endsWith": "This field must end with \"{endsWith}\"",
+          "includes": "This field must include {includes}",
+          "invalidEmail": "This field must contain a valid email address"
+        },
+        "tooSmall": {
+          "string": "This field must contain at least {minimum} characters",
+          "number": "This field must be more than or equal to {minimum} characters"
+        },
+        "tooBig": {
+          "string": "This field must contain at most {maximum} characters",
+          "number": "This field must be less than or equal to {maximum} characters"
+        },
+        "custom": {
+          "passwordsDoNotMatch": "The passwords do not match",
+          "passwordRequirements": "The password does not meet the recommended requirements",
+          "boardAlreadyExists": "An existing board already has this name",
+          "invalidFileType": "Invalid file type provided, expected {expected}",
+          "invalidFileName": "Invalid file name provided",
+          "fileTooLarge": "The file is too large, the maximum size is {maxSize}",
+          "invalidConfiguration": "Configuration is invalid",
+          "groupNameTaken": "An existing group already has this name"
+        }
+      }
+    },
+    "unit": {
+      "speed": {
+        "kilometersPerHour": "km/h",
+        "milesPerHour": "mph"
+      }
+    }
+  },
+  "section": {
+    "dynamic": {
+      "action": {
+        "create": "Create a new dynamic section",
+        "remove": "Delete dynamic section"
+      },
+      "option": {
+        "title": {
+          "label": "Title"
+        },
+        "customCssClasses": {
+          "label": "Custom CSS classes"
+        },
+        "borderColor": {
+          "label": "Border colour"
+        }
+      },
+      "remove": {
+        "title": "Remove dynamic section",
+        "message": "Are you certain that you want to remove this dynamic section? All items inside will be moved to the same location within the parent section."
+      }
+    },
+    "category": {
+      "field": {
+        "name": {
+          "label": "Name"
+        }
+      },
+      "action": {
+        "create": "New category",
+        "edit": "Rename category",
+        "remove": "Remove category",
+        "moveUp": "Move upwards",
+        "moveDown": "Move downwards",
+        "createAbove": "Create new category above",
+        "createBelow": "Create new category below",
+        "openAllInNewTabs": "Open all in new tabs"
+      },
+      "create": {
+        "title": "New category",
+        "submit": "Add category"
+      },
+      "remove": {
+        "title": "Remove category",
+        "message": "Are you sure you want to remove the category {name}?"
+      },
+      "edit": {
+        "title": "Rename category",
+        "submit": "Rename category"
+      },
+      "menu": {
+        "label": {
+          "create": "New category",
+          "changePosition": "Change position",
+          "settings": ""
+        }
+      },
+      "openAllInNewTabs": {
+        "title": "Open all in tabs",
+        "text": "Some browsers may block the bulk-opening of tabs for security reasons. Muninn was unable to open all windows, because your browser blocked this action. Please allow \"Open pop-up windows\" and re-try."
+      }
+    }
+  },
+  "item": {
+    "action": {
+      "create": "New item",
+      "import": "Import item",
+      "edit": "Edit item",
+      "moveResize": "Move / resize item",
+      "duplicate": "Duplicate item",
+      "remove": "Remove item"
+    },
+    "menu": {
+      "label": {
+        "settings": "",
+        "refresh": "",
+        "options": "",
+        "actions": ""
+      },
+      "status": {
+        "success": "",
+        "error": "",
+        "loading": "",
+        "idle": ""
+      }
+    },
+    "create": {
+      "title": "Choose item to add",
+      "search": "Filter items",
+      "addToBoard": "Add to board"
+    },
+    "moveResize": {
+      "title": "Move / resize item",
+      "field": {
+        "width": {
+          "label": "Width"
+        },
+        "height": {
+          "label": "Height"
+        },
+        "xOffset": {
+          "label": "X offset"
+        },
+        "yOffset": {
+          "label": "Y offset"
+        }
+      }
+    },
+    "edit": {
+      "title": "Edit item",
+      "tab": {
+        "widget": "",
+        "app": ""
+      },
+      "app": {
+        "propagationNotice": ""
+      },
+      "advancedOptions": {
+        "label": "Advanced options",
+        "title": "Advanced item options"
+      },
+      "field": {
+        "integrations": {
+          "label": "Integrations"
+        },
+        "title": {
+          "label": "Title"
+        },
+        "customCssClasses": {
+          "label": "Custom CSS classes"
+        },
+        "borderColor": {
+          "label": "Border colour"
+        }
+      }
+    },
+    "remove": {
+      "title": "Remove item",
+      "message": "Are you sure you want to remove this item?"
+    }
+  },
+  "widget": {
+    "integrationSelect": {
+      "configureIntegrationFirst": "",
+      "loading": "",
+      "placeholder": "",
+      "noResults": "",
+      "loadError": ""
+    },
+    "app": {
+      "name": "App",
+      "description": "Embeds an app into the board.",
+      "option": {
+        "appId": {
+          "label": "Choose app"
+        },
+        "openInNewTab": {
+          "label": "Open in new tab"
+        },
+        "showTitle": {
+          "label": "Show app name"
+        },
+        "pingEnabled": {
+          "label": "Enable status check"
+        },
+        "layout": {
+          "label": "Layout",
+          "option": {
+            "row": "Horizontal",
+            "row-reverse": "Horizontal (reversed)",
+            "column": "Vertical",
+            "column-reverse": "Vertical (reversed)"
+          }
+        },
+        "descriptionDisplayMode": {
+          "label": "Description display mode",
+          "description": "Choose how to display the app description",
+          "option": {
+            "normal": "Within widget",
+            "tooltip": "As tooltip",
+            "hidden": "Hidden"
+          }
+        }
+      },
+      "error": {
+        "notFound": {
+          "label": "No app",
+          "tooltip": "You have no valid app selected"
+        }
+      }
+    },
+    "bookmarks": {
+      "name": "Bookmarks",
+      "description": "Displays multiple app links",
+      "option": {
+        "title": {
+          "label": "Title"
+        },
+        "layout": {
+          "label": "Layout",
+          "option": {
+            "row": {
+              "label": "Horizontal"
+            },
+            "column": {
+              "label": "Vertical"
+            },
+            "grid": {
+              "label": "Grid"
+            },
+            "gridHorizontal": {
+              "label": "Grid horizontal"
+            }
+          }
+        },
+        "hideTitle": {
+          "label": "Hide title"
+        },
+        "hideIcon": {
+          "label": "Hide icons"
+        },
+        "hideHostname": {
+          "label": "Hide hostnames"
+        },
+        "openNewTab": {
+          "label": "Open in new tab"
+        },
+        "withBorder": {
+          "label": ""
+        },
+        "items": {
+          "label": "Bookmarks",
+          "add": "Add bookmark"
+        }
+      }
+    },
+    "archiveTeamWarrior": {
+      "name": "",
+      "description": "",
+      "option": {
+        "showBroadcastMessage": {
+          "label": ""
+        }
+      }
+    },
+    "dnsHoleSummary": {
+      "name": "DNS Hole Summary",
+      "description": "Displays the summary of your DNS Hole",
+      "option": {
+        "layout": {
+          "label": "Layout",
+          "option": {
+            "row": {
+              "label": "Horizontal"
+            },
+            "column": {
+              "label": "Vertical"
+            },
+            "grid": {
+              "label": "Grid"
+            }
+          }
+        },
+        "usePiHoleColors": {
+          "label": "Use Pi-Hole colours"
+        }
+      },
+      "error": {
+        "internalServerError": "Failed to fetch DNS Hole Summary",
+        "integrationsDisconnected": "No data available, all integrations disconnected"
+      },
+      "data": {
+        "adsBlockedToday": "Blocked today",
+        "adsBlockedTodayPercentage": "Blocked today",
+        "dnsQueriesToday": "Queries today",
+        "domainsBeingBlocked": "Domains on blocklist"
+      },
+      "domainsTooltip": "Due to multiple integrations Muninn can't calculate the exact number of domains being blocked"
+    },
+    "dnsHoleControls": {
+      "name": "DNS Hole Controls",
+      "description": "Control PiHole or AdGuard from your dashboard",
+      "option": {
+        "layout": {
+          "label": "Layout",
+          "option": {
+            "row": {
+              "label": "Horizontal"
+            },
+            "column": {
+              "label": "Vertical"
+            },
+            "grid": {
+              "label": "Grid"
+            }
+          }
+        },
+        "showToggleAllButtons": {
+          "label": "Show Toggle All Buttons"
+        }
+      },
+      "error": {
+        "internalServerError": "Failed to control DNS Hole"
+      },
+      "controls": {
+        "enableAll": "Enable All",
+        "disableAll": "Disable All",
+        "setTimer": "Set Timer",
+        "set": "Set",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "processing": "Processing",
+        "disconnected": "Disconnected",
+        "hours": "Hours",
+        "minutes": "Minutes",
+        "unlimited": "Leave blank to unlimited"
+      }
+    },
+    "clock": {
+      "name": "Date and time",
+      "description": "Displays the current date and time.",
+      "option": {
+        "customTitleToggle": {
+          "label": "Custom Title/City display",
+          "description": "Show off a custom title or the name of the city/country on top of the clock."
+        },
+        "customTitle": {
+          "label": "Title"
+        },
+        "is24HourFormat": {
+          "label": "24-hour format",
+          "description": "Use 24-hour format instead of 12-hour format"
+        },
+        "showSeconds": {
+          "label": "Display seconds"
+        },
+        "useCustomTimezone": {
+          "label": " "
+        },
+        "timezone": {
+          "label": "Time zone",
+          "description": "Choose the time zone following the IANA standard"
+        },
+        "showDate": {
+          "label": "Show the date"
+        },
+        "dateFormat": {
+          "label": "Date Format",
+          "description": "How the date should look like"
+        },
+        "customTimeFormat": {
+          "label": "Custom time format",
+          "description": "Use ISO 8601 to format time (this will override other options)"
+        },
+        "customDateFormat": {
+          "label": "Custom date format",
+          "description": "Use ISO 8601 to format date (this will override other options)"
+        }
+      }
+    },
+    "minecraftServerStatus": {
+      "name": "Minecraft Server Status",
+      "description": "Displays the status of a Minecraft server",
+      "option": {
+        "title": {
+          "label": "Title"
+        },
+        "domain": {
+          "label": "Server address"
+        },
+        "isBedrockServer": {
+          "label": "Bedrock server"
+        }
+      },
+      "status": {
+        "online": "Online",
+        "offline": "Offline"
+      }
+    },
+    "timetable": {
+      "name": "Timetable",
+      "description": "Displays departure times for a station",
+      "title": "Departures {station}",
+      "noStation": "No station selected",
+      "option": {
+        "baseUrl": {
+          "label": ""
+        },
+        "station": {
+          "label": "Station"
+        }
+      }
+    },
+    "notebook": {
+      "name": "Notebook",
+      "description": "A simple notebook widget that supports markdown",
+      "option": {
+        "showToolbar": {
+          "label": "Show the toolbar to help you write markdown"
+        },
+        "allowReadOnlyCheck": {
+          "label": "Allow check in read only mode"
+        },
+        "content": {
+          "label": "The content of the notebook"
+        }
+      },
+      "controls": {
+        "bold": "Bold",
+        "italic": "Italic",
+        "strikethrough": "Strikethrough",
+        "underline": "Underline",
+        "colorText": "Colour text",
+        "colorHighlight": "Coloured highlight text",
+        "code": "Code",
+        "clear": "Clear formatting",
+        "heading": "Heading {level}",
+        "align": "Align text: {position}",
+        "blockquote": "Blockquote",
+        "horizontalLine": "Horizontal line",
+        "bulletList": "Bullet list",
+        "orderedList": "Ordered list",
+        "checkList": "Check list",
+        "increaseIndent": "Increase Indent",
+        "decreaseIndent": "Decrease Indent",
+        "link": "Link",
+        "unlink": "Remove link",
+        "image": "Embed Image",
+        "addTable": "Add table",
+        "deleteTable": "Delete Table",
+        "colorCell": "Colour cell",
+        "mergeCell": "Toggle cell merging",
+        "addColumnLeft": "Add column before",
+        "addColumnRight": "Add column after",
+        "deleteColumn": "Delete column",
+        "addRowTop": "Add row before",
+        "addRowBelow": "Add row after",
+        "deleteRow": "Delete row"
+      },
+      "align": {
+        "left": "Left",
+        "center": "Centre",
+        "right": "Right"
+      },
+      "popover": {
+        "clearColor": "Clear colour",
+        "source": "Source",
+        "widthPlaceholder": "Value in % or pixels",
+        "columns": "Columns",
+        "rows": "Rows",
+        "width": "Width",
+        "height": "Height"
+      },
+      "placeholder": "Start writing your notes",
+      "dismiss": {
+        "title": "Dismiss changes?",
+        "message": "You have unsaved changes in your notebook. Are you sure you want to discard them?",
+        "action": {
+          "discard": "Discard changes",
+          "keepEditing": "Keep editing"
+        }
+      }
+    },
+    "anchorNote": {
+      "name": "Anchor Note",
+      "description": "Displays a selected note from Anchor",
+      "option": {
+        "noteId": {
+          "label": "Note"
+        },
+        "showTitle": {
+          "label": "Show title"
+        },
+        "showUpdatedAt": {
+          "label": "Show last updated"
+        }
+      },
+      "empty": "Select a note to display",
+      "emptyContent": "This note has no content",
+      "notFound": "Note not found",
+      "noNotes": "No notes found",
+      "integrationRequired": "Select an Anchor integration first",
+      "updatedAt": "Updated {date}",
+      "untitled": "Untitled",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "readOnlyViewer": "You have viewer access to this note. Editing is disabled.",
+      "saveForbidden": "You do not have permission to edit this note.",
+      "saveFailed": "Failed to save this note. Please try again."
+    },
+    "iframe": {
+      "name": "iFrame",
+      "description": "Embed any content from the Internet. Some websites may restrict access.",
+      "option": {
+        "embedUrl": {
+          "label": "Embed URL"
+        },
+        "allowFullScreen": {
+          "label": "Allow full screen"
+        },
+        "allowTransparency": {
+          "label": "Allow transparency"
+        },
+        "allowScrolling": {
+          "label": "Allow scrolling"
+        },
+        "allowPayment": {
+          "label": "Allow payment"
+        },
+        "allowAutoPlay": {
+          "label": "Allow auto play"
+        },
+        "allowMicrophone": {
+          "label": "Allow microphone"
+        },
+        "allowCamera": {
+          "label": "Allow camera"
+        },
+        "allowGeolocation": {
+          "label": "Allow geolocation"
+        },
+        "allowModals": {
+          "label": "Allow modals"
+        }
+      },
+      "error": {
+        "noUrl": "No iFrame URL provided",
+        "unsupportedProtocol": "The URL provided is using an unsupported protocol. Please use one of ({supportedProtocols})",
+        "noBrowerSupport": "Your Browser does not support iframes. Please update your browser."
+      }
+    },
+    "smartHome-entityState": {
+      "name": "Entity State",
+      "description": "Display the state of an entity and toggle it optionally",
+      "option": {
+        "entityId": {
+          "label": "Entity ID"
+        },
+        "displayName": {
+          "label": "Display-name"
+        },
+        "entityUnit": {
+          "label": "Entity Unit"
+        },
+        "clickable": {
+          "label": "Clickable"
+        }
+      }
+    },
+    "smartHome-executeAutomation": {
+      "name": "Execute Automation",
+      "description": "Trigger an automation with one click",
+      "option": {
+        "displayName": {
+          "label": "Display name"
+        },
+        "automationId": {
+          "label": "Automation ID"
+        }
+      },
+      "spotlightAction": {
+        "run": "Run {name}"
+      }
+    },
+    "stockPrice": {
+      "name": "Stock Price",
+      "description": "Displays the current stock price of a company",
+      "option": {
+        "stock": {
+          "label": "Stock symbol"
+        },
+        "timeRange": {
+          "label": "Time Range",
+          "option": {
+            "1d": {
+              "label": "1 Day"
+            },
+            "5d": {
+              "label": "5 Day"
+            },
+            "1mo": {
+              "label": "1 Month"
+            },
+            "3mo": {
+              "label": "3 Months"
+            },
+            "6mo": {
+              "label": "6 Months"
+            },
+            "ytd": {
+              "label": "Year to Date"
+            },
+            "1y": {
+              "label": "1 Year"
+            },
+            "2y": {
+              "label": "2 Years"
+            },
+            "5y": {
+              "label": "5 Years"
+            },
+            "10y": {
+              "label": "10 Years"
+            },
+            "max": {
+              "label": "Max"
+            }
+          }
+        },
+        "timeInterval": {
+          "label": "Time Interval",
+          "option": {
+            "5m": {
+              "label": "5 Minutes"
+            },
+            "15m": {
+              "label": "15 Minutes"
+            },
+            "30m": {
+              "label": "30 Minutes"
+            },
+            "1h": {
+              "label": "1 Hour"
+            },
+            "1d": {
+              "label": "1 Day"
+            },
+            "5d": {
+              "label": "5 Days"
+            },
+            "1wk": {
+              "label": "1 Week"
+            },
+            "1mo": {
+              "label": "1 Month"
+            }
+          }
+        }
+      }
+    },
+    "calendar": {
+      "name": "Calendar",
+      "description": "Display events from your integrations in a calendar view within a certain relative time period",
+      "duration": {
+        "allDay": "All day"
+      },
+      "option": {
+        "releaseType": {
+          "label": "Radarr release type",
+          "options": {
+            "inCinemas": "In cinemas",
+            "digitalRelease": "Digital release",
+            "physicalRelease": "Physical release"
+          }
+        },
+        "filterPastMonths": {
+          "label": "Start from"
+        },
+        "filterFutureMonths": {
+          "label": "End at"
+        },
+        "showUnmonitored": {
+          "label": "Show unmonitored"
+        }
+      }
+    },
+    "weather": {
+      "name": "Weather",
+      "description": "Displays the current weather information of a set location.",
+      "option": {
+        "isFormatFahrenheit": {
+          "label": "Temperature in Fahrenheit"
+        },
+        "disableTemperatureDecimals": {
+          "label": "Disable temperature decimals"
+        },
+        "showCurrentWindSpeed": {
+          "label": "Show current wind speed",
+          "description": "Only on current weather"
+        },
+        "useImperialSpeed": {
+          "label": "Use mph for windspeed"
+        },
+        "location": {
+          "label": "Weather location"
+        },
+        "showCity": {
+          "label": "Show city"
+        },
+        "hasForecast": {
+          "label": "Show forecast"
+        },
+        "forecastDayCount": {
+          "label": "Amount of forecast days",
+          "description": "When the widget is not wide enough, less days are shown"
+        },
+        "dateFormat": {
+          "label": "Date Format",
+          "description": "How the date should look like"
+        }
+      },
+      "currentWindSpeed": "{currentWindSpeed} {unit}",
+      "dailyForecast": {
+        "sunrise": "Sunrise",
+        "sunset": "Sunset",
+        "maxWindSpeed": "Max wind speed: {maxWindSpeed} {unit}",
+        "maxWindGusts": "Max wind gusts: {maxWindGusts} {unit}"
+      },
+      "kind": {
+        "clear": "Clear",
+        "mainlyClear": "Mainly clear",
+        "fog": "Fog",
+        "drizzle": "Drizzle",
+        "freezingDrizzle": "Freezing drizzle",
+        "rain": "Rain",
+        "freezingRain": "Freezing rain",
+        "snowFall": "Snow fall",
+        "snowGrains": "Snow grains",
+        "rainShowers": "Rain showers",
+        "snowShowers": "Snow showers",
+        "thunderstorm": "Thunderstorm",
+        "thunderstormWithHail": "Thunderstorm with hail",
+        "unknown": "Unknown"
+      }
+    },
+    "indexerManager": {
+      "name": "Indexer manager status",
+      "description": "Status of your indexers",
+      "option": {
+        "openIndexerSiteInNewTab": {
+          "label": "Open indexer site in new tab"
+        }
+      },
+      "title": "Indexer manager",
+      "testAll": "Test all",
+      "error": {
+        "internalServerError": "Failed to fetch indexers status"
+      }
+    },
+    "healthMonitoring": {
+      "name": "System Health Monitoring",
+      "description": "Displays information showing the health and status of your system(s).",
+      "tab": {
+        "system": "System",
+        "cluster": "Cluster"
+      },
+      "option": {
+        "fahrenheit": {
+          "label": "CPU Temp in Fahrenheit"
+        },
+        "cpu": {
+          "label": "Show CPU Info"
+        },
+        "memory": {
+          "label": "Show Memory Info"
+        },
+        "gpu": {
+          "label": "Show GPU Info"
+        },
+        "showUptime": {
+          "label": "Show Uptime"
+        },
+        "fileSystem": {
+          "label": "Show Filesystem Info"
+        },
+        "visibleStorageVolumes": {
+          "label": "",
+          "description": "",
+          "placeholder": ""
+        },
+        "defaultTab": {
+          "label": "Default tab"
+        },
+        "visibleClusterSections": {
+          "label": "Visible cluster sections"
+        },
+        "sectionIndicatorRequirement": {
+          "label": "Section indicator requirement"
+        }
+      },
+      "popover": {
+        "information": "Information",
+        "processor": "Processor: {cpuModelName}",
+        "memory": "Memory: {memory}GiB",
+        "memoryAvailable": "Available: {memoryAvailable}GiB ({percent}%)",
+        "version": "Version: {version}",
+        "uptime": "Uptime: {months} Months, {days} Days, {hours} Hours, {minutes} Minutes",
+        "loadAverage": "Load average:",
+        "minute": "1 minute",
+        "minutes": "{count} minutes",
+        "used": "Used",
+        "available": "Available",
+        "lastSeen": "Last status update: {lastSeen}"
+      },
+      "memory": {},
+      "error": {
+        "internalServerError": "Failed to fetch health status"
+      },
+      "cluster": {
+        "summary": {
+          "cpu": "CPU",
+          "memory": "RAM"
+        },
+        "resource": {
+          "node": {
+            "name": "Nodes"
+          },
+          "qemu": {
+            "name": "VMs"
+          },
+          "lxc": {
+            "name": "LXCs"
+          },
+          "storage": {
+            "name": "Storage"
+          }
+        },
+        "popover": {
+          "rightSection": {
+            "node": "Node",
+            "vmId": "VM ID",
+            "plugin": "Plugin"
+          },
+          "detail": {
+            "cpu": "Cores",
+            "memory": "Memory",
+            "storage": "Storage",
+            "uptime": "Uptime",
+            "haState": "HA State",
+            "storageType": {
+              "local": "Local storage",
+              "shared": "Shared storage"
+            }
+          }
+        },
+        "table": {
+          "header": {
+            "name": "Name",
+            "cpu": "CPU",
+            "memory": "RAM",
+            "node": "Node"
+          }
+        }
+      }
+    },
+    "dockerContainers": {
+      "name": "Docker stats",
+      "description": "Stats of your containers (This widget can only be added with administrator privileges)",
+      "option": {
+        "columns": {
+          "label": ""
+        },
+        "enableRowSorting": {
+          "label": "Enable items sorting"
+        },
+        "defaultSort": {
+          "label": "Column used for sorting by default",
+          "option": {
+            "name": "Name",
+            "state": "State",
+            "cpuUsage": "CPU usage",
+            "memoryUsage": "Memory usage"
+          }
+        },
+        "descendingDefaultSort": {
+          "label": "Invert sorting"
+        }
+      },
+      "error": {
+        "internalServerError": "Failed to fetch containers stats"
+      }
+    },
+    "coolify": {
+      "name": "Coolify",
+      "description": "Overview of your Coolify instance with servers and applications",
+      "option": {
+        "showServers": {
+          "label": "Show servers"
+        },
+        "showApplications": {
+          "label": "Show applications"
+        },
+        "showServices": {
+          "label": "Show services"
+        }
+      },
+      "empty": {
+        "servers": "No servers found",
+        "applications": "No applications found",
+        "services": "No services found"
+      },
+      "footer": {
+        "updated": "Updated {when}"
+      },
+      "error": {
+        "noIntegration": "No Coolify integration configured",
+        "internalServerError": "Failed to fetch Coolify data"
+      },
+      "server": {
+        "buildServer": "Build"
+      },
+      "instances": {
+        "title": "Instances"
+      }
+    },
+    "vpn": {
+      "name": "",
+      "description": "",
+      "serviceUnavailable": "",
+      "option": {}
+    },
+    "ups": {
+      "name": "",
+      "description": "",
+      "option": {
+        "showBattery": {
+          "label": ""
+        },
+        "showLoad": {
+          "label": ""
+        },
+        "showVoltage": {
+          "label": ""
+        }
+      },
+      "status": {
+        "online": "",
+        "onBattery": "",
+        "lowBattery": "",
+        "charging": "",
+        "unknown": ""
+      },
+      "field": {
+        "runtime": "",
+        "load": "",
+        "input": "",
+        "output": ""
+      },
+      "error": {
+        "internalServerError": ""
+      }
+    },
+    "tracearr": {
+      "name": "Tracearr",
+      "description": "Enhanced media server monitoring with detailed stream and transcoding data",
+      "option": {
+        "showStreams": {
+          "label": "Show active streams"
+        },
+        "showStats": {
+          "label": "Show stats summary"
+        },
+        "showRecentActivity": {
+          "label": "Show recent activity"
+        },
+        "showViolations": {
+          "label": "Show violations"
+        }
+      },
+      "stats": {
+        "activeStreams": "Active Streams",
+        "totalUsers": "Total Users",
+        "transcodes": "Transcodes",
+        "bandwidth": "Bandwidth"
+      },
+      "streams": {
+        "empty": "No active streams",
+        "user": "User",
+        "media": "Media",
+        "state": "State",
+        "quality": "Quality",
+        "device": "Device",
+        "progress": "Progress",
+        "videoDecision": {
+          "directPlay": "Direct Play",
+          "transcode": "Transcode",
+          "directStream": "Direct Stream"
+        }
+      },
+      "recentActivity": {
+        "title": "Recent Activity",
+        "empty": "No recent activity",
+        "watched": "Watched",
+        "partial": "Partial"
+      },
+      "violations": {
+        "title": "Violations",
+        "empty": "No recent violations",
+        "rule": "Rule",
+        "user": "User"
+      },
+      "noSectionsEnabled": "No sections enabled",
+      "error": {
+        "noIntegration": "No Tracearr integration configured",
+        "internalServerError": "Failed to fetch Tracearr data"
+      }
+    },
+    "umami": {
+      "name": "Umami Analytics",
+      "description": "Display visitor stats from your Umami analytics instance",
+      "visitors": "visitors",
+      "active": "active",
+      "pageviews": "",
+      "visits": "",
+      "bounceRate": "",
+      "avgDuration": "",
+      "option": {
+        "websiteId": {
+          "label": "",
+          "description": "",
+          "placeholder": "",
+          "loading": "",
+          "noWebsites": "",
+          "configureIntegrationFirst": ""
+        },
+        "timeFrame": {
+          "label": "",
+          "description": "",
+          "option": {
+            "today": "",
+            "24h": "",
+            "7d": "",
+            "30d": "",
+            "month": "",
+            "lastMonth": ""
+          }
+        },
+        "eventName": {
+          "label": "",
+          "description": "",
+          "placeholder": "",
+          "loading": "",
+          "noEvents": "",
+          "none": "",
+          "configureWebsiteFirst": ""
+        },
+        "chartType": {
+          "label": "",
+          "description": "",
+          "option": {
+            "bar": "",
+            "sparkline": ""
+          }
+        },
+        "chartStyle": {
+          "label": "",
+          "description": "",
+          "option": {
+            "grouped": "",
+            "overlay": ""
+          }
+        },
+        "viewMode": {
+          "label": "",
+          "description": "",
+          "option": {
+            "chart": "",
+            "events": "",
+            "topPages": "",
+            "topReferrers": ""
+          }
+        },
+        "eventNames": {
+          "label": "",
+          "description": "",
+          "placeholder": "",
+          "loading": "",
+          "noEvents": "",
+          "configureWebsiteFirst": ""
+        },
+        "topCount": {
+          "label": "",
+          "description": ""
+        }
+      },
+      "event": {
+        "occurrences": "",
+        "label": ""
+      },
+      "topPages": {
+        "direct": ""
+      },
+      "topReferrers": {
+        "direct": ""
+      },
+      "events": {
+        "selectPrompt": ""
+      },
+      "error": {
+        "noIntegration": "",
+        "noWebsite": "",
+        "noData": "",
+        "internalServerError": ""
+      }
+    },
+    "common": {
+      "location": {
+        "query": "City / Postal code",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "disabledTooltip": "Please enter a city or postal code",
+        "unknownLocation": "Unknown location",
+        "search": "Search",
+        "table": {
+          "header": {
+            "city": "City",
+            "country": "Country",
+            "coordinates": "Coordinates",
+            "population": "Population"
+          },
+          "action": {
+            "select": "Select {city}, {countryCode}"
+          },
+          "population": {
+            "fallback": "Unknown"
+          }
+        }
+      },
+      "integration": {
+        "noData": "No integration found",
+        "description": "Click <here></here> to create a new integration"
+      },
+      "app": {
+        "noData": "No app found",
+        "description": "Click <here></here> to create a new app",
+        "quickCreate": "Create app on the fly"
+      },
+      "error": {
+        "noIntegration": "No integration selected",
+        "noData": "No integration data available"
+      },
+      "option": {}
+    },
+    "video": {
+      "name": "Video Stream",
+      "description": "Embed a video stream or video from a camera or a website",
+      "option": {
+        "feedUrl": {
+          "label": "Feed URL"
+        },
+        "hasAutoPlay": {
+          "label": "Autoplay",
+          "description": "Autoplay only works when muted because of browser restrictions"
+        },
+        "isMuted": {
+          "label": "Muted"
+        },
+        "hasControls": {
+          "label": "Show controls"
+        }
+      },
+      "error": {
+        "noUrl": "No Video URL provided",
+        "forYoutubeUseIframe": "For YouTube videos use the iframe option"
+      }
+    },
+    "mediaServer": {
+      "name": "Current media server streams",
+      "description": "Show the current streams on your media servers",
+      "option": {
+        "showOnlyPlaying": {
+          "label": "Show only currently playing",
+          "description": "Disabling this will not work for Plex"
+        }
+      },
+      "items": {
+        "currentlyPlaying": "Currently playing",
+        "user": "User",
+        "name": "Name",
+        "id": "Id",
+        "metadata": {
+          "title": "Stats for nerds",
+          "video": {
+            "title": "Video",
+            "resolution": "Resolution"
+          },
+          "audio": {
+            "title": "Audio",
+            "channelCount": "Audio channels",
+            "codec": "Audio codec"
+          },
+          "transcoding": {
+            "title": "Transcoding",
+            "container": "Container",
+            "resolution": "Resolution",
+            "target": "Target codec"
+          }
+        }
+      }
+    },
+    "paperlessNgx": {
+      "name": "",
+      "description": "",
+      "documentsTotal": "",
+      "documentsInbox": "",
+      "correspondents": "",
+      "tags": "",
+      "documentTypes": "",
+      "inboxRatio": "",
+      "inbox": "",
+      "total": "",
+      "option": {
+        "showInboxRatio": {
+          "label": "",
+          "description": ""
+        },
+        "showInboxRing": {
+          "label": "",
+          "description": ""
+        },
+        "showDocumentsTotal": {
+          "label": "",
+          "description": ""
+        },
+        "showDocumentsInbox": {
+          "label": "",
+          "description": ""
+        },
+        "showCorrespondents": {
+          "label": "",
+          "description": ""
+        },
+        "showTags": {
+          "label": "",
+          "description": ""
+        },
+        "showDocumentTypes": {
+          "label": "",
+          "description": ""
+        }
+      },
+      "error": {
+        "internalServerError": ""
+      }
+    },
+    "immich-serverStats": {
+      "name": "Immich Server Stats",
+      "description": "Information about your Immich instance",
+      "option": {
+        "showUsers": {
+          "label": "Show users",
+          "description": "Show count of users on your instance"
+        },
+        "showPhotos": {
+          "label": "Show photos",
+          "description": "Show count of photos on your instance"
+        },
+        "showVideos": {
+          "label": "Show videos",
+          "description": "Show count of videos on your instance"
+        },
+        "showStorage": {
+          "label": "Show storage",
+          "description": "Show the total amount of storage used"
+        }
+      },
+      "users": "Users",
+      "photos": "Photos",
+      "videos": "Videos",
+      "storage": "Used Storage"
+    },
+    "immich-albumCarousel": {
+      "name": "Immich Album",
+      "option": {
+        "albumId": {
+          "label": "Album ID",
+          "description": "This is a unique ID which refers to your Immich album. You can find this id by opening an album and copying the unique string from the URL, for example 'a21aca09-9f05-47dc-b1a1-7b53c547226e'"
+        },
+        "rotationIntervalSeconds": {
+          "label": "Interval in seconds",
+          "description": "Rotate between pictures in the album every X seconds. Must be at least 1. Must be below 3600."
+        },
+        "showPhotoInfo": {
+          "label": "",
+          "description": ""
+        },
+        "randomizePhotos": {
+          "label": "",
+          "description": ""
+        }
+      },
+      "description": "",
+      "noAlbumSelected": "",
+      "noPhotos": ""
+    },
+    "downloads": {
+      "name": "",
+      "description": "",
+      "option": {
+        "columns": {
+          "label": ""
+        },
+        "enableRowSorting": {
+          "label": ""
+        },
+        "defaultSort": {
+          "label": ""
+        },
+        "descendingDefaultSort": {
+          "label": ""
+        },
+        "showCompletedUsenet": {
+          "label": ""
+        },
+        "showCompletedTorrent": {
+          "label": ""
+        },
+        "showCompletedHttp": {
+          "label": ""
+        },
+        "activeTorrentThreshold": {
+          "label": ""
+        },
+        "categoryFilter": {
+          "label": ""
+        },
+        "filterIsWhitelist": {
+          "label": ""
+        },
+        "applyFilterToRatio": {
+          "label": ""
+        },
+        "limitPerIntegration": {
+          "label": "",
+          "description": ""
+        }
+      },
+      "errors": {
+        "noColumns": "",
+        "noCommunications": ""
+      },
+      "items": {
+        "actions": {
+          "columnTitle": ""
+        },
+        "added": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        },
+        "category": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        },
+        "downSpeed": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        },
+        "index": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        },
+        "id": {
+          "columnTitle": ""
+        },
+        "integration": {
+          "columnTitle": ""
+        },
+        "name": {
+          "columnTitle": ""
+        },
+        "progress": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        },
+        "ratio": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        },
+        "received": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        },
+        "sent": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        },
+        "size": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        },
+        "state": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        },
+        "time": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        },
+        "type": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        },
+        "upSpeed": {
+          "columnTitle": "",
+          "detailsTitle": ""
+        }
+      },
+      "states": {
+        "downloading": "",
+        "queued": "",
+        "paused": "",
+        "completed": "",
+        "failed": "",
+        "processing": "",
+        "leeching": "",
+        "stalled": "",
+        "unknown": "",
+        "seeding": ""
+      },
+      "actions": {
+        "clients": {
+          "modalTitle": "",
+          "pause": "",
+          "resume": ""
+        },
+        "client": {
+          "pause": "",
+          "resume": ""
+        },
+        "item": {
+          "pause": "",
+          "resume": "",
+          "delete": {
+            "title": "",
+            "modalTitle": "",
+            "entry": "",
+            "entryAndFiles": ""
+          }
+        }
+      },
+      "globalRatio": ""
+    },
+    "mediaReleases": {
+      "name": "",
+      "description": "",
+      "option": {
+        "layout": {
+          "label": "",
+          "option": {
+            "backdrop": {
+              "label": ""
+            },
+            "poster": {
+              "label": ""
+            }
+          }
+        },
+        "showDescriptionTooltip": {
+          "label": ""
+        },
+        "showType": {
+          "label": ""
+        },
+        "showSource": {
+          "label": ""
+        }
+      },
+      "length": {
+        "duration": ""
+      }
+    },
+    "mediaRequests-requestList": {
+      "name": "",
+      "description": "",
+      "option": {
+        "linksTargetNewTab": {
+          "label": ""
+        }
+      },
+      "pending": {
+        "approve": "",
+        "approving": "",
+        "decline": ""
+      },
+      "availability": {
+        "unknown": "",
+        "pending": "",
+        "processing": "",
+        "requested": "",
+        "partiallyAvailable": "",
+        "available": "",
+        "blacklisted": "",
+        "deleted": ""
+      },
+      "status": {
+        "pending": "",
+        "approved": "",
+        "declined": "",
+        "failed": "",
+        "completed": ""
+      },
+      "toBeDetermined": ""
+    },
+    "mediaRequests-requestStats": {
+      "name": "",
+      "description": "",
+      "option": {},
+      "titles": {
+        "stats": {
+          "main": "",
+          "approved": "",
+          "pending": "",
+          "processing": "",
+          "declined": "",
+          "available": "",
+          "tv": "",
+          "movie": "",
+          "total": ""
+        },
+        "users": {
+          "main": "",
+          "requests": ""
+        }
+      }
+    },
+    "mediaTranscoding": {
+      "name": "",
+      "description": "",
+      "option": {
+        "defaultView": {
+          "label": ""
+        },
+        "queuePageSize": {
+          "label": ""
+        }
+      },
+      "tab": {
+        "workers": "",
+        "queue": "",
+        "statistics": ""
+      },
+      "currentIndex": "",
+      "healthCheck": {
+        "title": "",
+        "queued": "",
+        "status": {
+          "healthy": "",
+          "unhealthy": ""
+        }
+      },
+      "panel": {
+        "statistics": {
+          "empty": "",
+          "transcodes": "",
+          "transcodesCount": "",
+          "healthChecksCount": "",
+          "filesCount": "",
+          "savedSpace": "",
+          "healthChecks": "",
+          "videoCodecs": "",
+          "videoContainers": "",
+          "videoResolutions": ""
+        },
+        "workers": {
+          "empty": "",
+          "table": {
+            "file": "",
+            "eta": "",
+            "progress": "",
+            "transcode": "",
+            "healthCheck": ""
+          }
+        },
+        "queue": {
+          "empty": "",
+          "table": {
+            "file": "",
+            "size": "",
+            "transcode": "",
+            "healthCheck": ""
+          }
+        }
+      }
+    },
+    "rssFeed": {
+      "name": "",
+      "description": "",
+      "option": {
+        "feedUrls": {
+          "label": ""
+        },
+        "enableRtl": {
+          "label": ""
+        },
+        "textLinesClamp": {
+          "label": ""
+        },
+        "maximumAmountPosts": {
+          "label": ""
+        },
+        "hideDescription": {
+          "label": ""
+        },
+        "showPosterImage": {
+          "label": ""
+        }
+      }
+    },
+    "releases": {
+      "name": "",
+      "description": "",
+      "option": {
+        "newReleaseWithin": {
+          "label": "",
+          "description": ""
+        },
+        "staleReleaseWithin": {
+          "label": "",
+          "description": ""
+        },
+        "showOnlyHighlighted": {
+          "label": "",
+          "description": ""
+        },
+        "showDetails": {
+          "label": ""
+        },
+        "showOnlyIcon": {
+          "label": ""
+        },
+        "topReleases": {
+          "label": "",
+          "description": ""
+        },
+        "repositories": {
+          "label": "",
+          "addRepository": {
+            "label": ""
+          },
+          "importRepositories": {
+            "label": "",
+            "loading": "",
+            "noImagesFound": "",
+            "listFoundImages": "",
+            "listAlreadyImportedImages": "",
+            "allImagesAlreadyImported": "",
+            "onlyAdminCanImport": "",
+            "selectAll": "",
+            "deselectAll": ""
+          },
+          "provider": {
+            "label": ""
+          },
+          "providerUrl": {
+            "label": ""
+          },
+          "identifier": {
+            "label": "",
+            "placeholder": ""
+          },
+          "name": {
+            "label": ""
+          },
+          "versionFilter": {
+            "label": "",
+            "prefix": {
+              "label": ""
+            },
+            "precision": {
+              "label": "",
+              "options": {
+                "none": ""
+              }
+            },
+            "suffix": {
+              "label": ""
+            },
+            "regex": {
+              "label": ""
+            }
+          },
+          "edit": {
+            "label": ""
+          },
+          "editForm": {
+            "title": "",
+            "cancel": {
+              "label": ""
+            },
+            "confirm": {
+              "label": ""
+            }
+          },
+          "importForm": {
+            "title": ""
+          },
+          "example": {
+            "label": ""
+          },
+          "invalid": "",
+          "noProvider": {
+            "label": "",
+            "tooltip": ""
+          },
+          "tokens": {
+            "label": "",
+            "token": "",
+            "configured": "",
+            "notConfigured": "",
+            "save": ""
+          }
+        }
+      },
+      "not-found": "",
+      "pre-release": "",
+      "archived": "",
+      "forked": "",
+      "starsCount": "",
+      "forksCount": "",
+      "issuesCount": "",
+      "markViewed": "",
+      "openProjectPage": "",
+      "openReleasePage": "",
+      "releaseDescription": "",
+      "projectDescription": "",
+      "created": "",
+      "error": {
+        "label": "",
+        "messages": {
+          "invalidIdentifier": "",
+          "noMatchingVersion": "",
+          "noReleasesFound": "",
+          "noProviderSelected": "",
+          "noProviderResponse": "",
+          "unexpected": ""
+        }
+      }
+    },
+    "networkControllerSummary": {
+      "option": {},
+      "card": {
+        "vpn": {
+          "countConnected": ""
+        }
+      },
+      "error": {
+        "integrationsDisconnected": "",
+        "unknownContentOption": ""
+      },
+      "name": "",
+      "description": ""
+    },
+    "networkControllerStatus": {
+      "card": {
+        "variants": {
+          "wired": {
+            "name": ""
+          },
+          "wifi": {
+            "name": ""
+          }
+        },
+        "users": {
+          "label": ""
+        },
+        "guests": {
+          "label": ""
+        }
+      },
+      "option": {
+        "content": {
+          "option": {
+            "wifi": {
+              "label": ""
+            },
+            "wired": {
+              "label": ""
+            }
+          },
+          "label": ""
+        }
+      },
+      "error": {
+        "integrationsDisconnected": "",
+        "unknownContentOption": ""
+      },
+      "name": "",
+      "description": ""
+    },
+    "networkController": {
+      "error": {
+        "internalServerError": ""
+      }
+    },
+    "firewall": {
+      "name": "",
+      "description": "",
+      "tab": {
+        "system": "",
+        "interfaces": ""
+      },
+      "error": {
+        "internalServerError": ""
+      },
+      "option": {
+        "interfaces": ""
+      },
+      "widget": {
+        "fwname": "",
+        "version": "",
+        "versiontitle": "",
+        "cputitle": "",
+        "memorytitle": "",
+        "cpu": "",
+        "memory": "",
+        "interfaces": {
+          "name": "",
+          "trans": "",
+          "recv": "",
+          "title": ""
+        }
+      }
+    },
+    "notifications": {
+      "name": "",
+      "description": "",
+      "noItems": "",
+      "option": {}
+    },
+    "speedtestTracker": {
+      "name": "",
+      "description": "",
+      "option": {
+        "showLatestResult": {
+          "label": ""
+        },
+        "showStats": {
+          "label": ""
+        },
+        "showRecentResults": {
+          "label": ""
+        },
+        "showPingGraph": {
+          "label": ""
+        }
+      },
+      "latestResult": "",
+      "averages": "",
+      "tests": "",
+      "recentResults": "",
+      "recentResultsSpeed": "",
+      "recentResultsPing": "",
+      "download": "",
+      "upload": "",
+      "ping": "",
+      "status": "",
+      "avgDownload": "",
+      "avgUpload": "",
+      "avgPing": "",
+      "healthy": "",
+      "unhealthy": "",
+      "ok": "",
+      "fail": "",
+      "noSectionsEnabled": "",
+      "error": {
+        "internalServerError": ""
+      }
+    },
+    "uptimeKuma": {
+      "name": "",
+      "description": "",
+      "option": {
+        "showAverageUptime": {
+          "label": "",
+          "description": ""
+        },
+        "showUptimeRing": {
+          "label": "",
+          "description": ""
+        },
+        "showTotalMonitors": {
+          "label": "",
+          "description": ""
+        },
+        "showUpCount": {
+          "label": "",
+          "description": ""
+        },
+        "showDownCount": {
+          "label": "",
+          "description": ""
+        },
+        "showPausedCount": {
+          "label": "",
+          "description": ""
+        }
+      },
+      "averageUptime": "",
+      "stats": {
+        "totalMonitors": "",
+        "upCount": "",
+        "downCount": "",
+        "pausedCount": ""
+      },
+      "error": {
+        "internalServerError": ""
+      }
+    },
+    "audioStats": {
+      "name": "",
+      "description": "",
+      "option": {
+        "showArtists": {
+          "label": "",
+          "description": ""
+        },
+        "showAlbums": {
+          "label": "",
+          "description": ""
+        },
+        "showSongs": {
+          "label": "",
+          "description": ""
+        },
+        "showNowPlaying": {
+          "label": "",
+          "description": ""
+        },
+        "showNowPlayingList": {
+          "label": "",
+          "description": ""
+        },
+        "maxNowPlayingItems": {
+          "label": "",
+          "description": ""
+        },
+        "showLibraryCount": {
+          "label": "",
+          "description": ""
+        },
+        "showAudiobooks": {
+          "label": "",
+          "description": ""
+        },
+        "showPodcasts": {
+          "label": "",
+          "description": ""
+        },
+        "showListeningTime": {
+          "label": "",
+          "description": ""
+        },
+        "showActiveSessions": {
+          "label": "",
+          "description": ""
+        },
+        "compactMode": {
+          "label": "",
+          "description": ""
+        }
+      },
+      "artists": "",
+      "albums": "",
+      "songs": "",
+      "libraryCount": "",
+      "audiobooks": "",
+      "podcasts": "",
+      "listeningTime": "",
+      "activeSessions": "",
+      "nowPlaying": "",
+      "nowPlayingCount": "",
+      "error": {
+        "internalServerError": ""
+      }
+    },
+    "systemResources": {
+      "name": "",
+      "description": "",
+      "option": {
+        "hasShadow": {
+          "label": ""
+        },
+        "visibleCharts": {
+          "label": "",
+          "description": "",
+          "option": {
+            "cpu": "",
+            "memory": "",
+            "gpu": "",
+            "network": ""
+          }
+        },
+        "labelDisplayMode": {
+          "label": "",
+          "option": {
+            "textWithIcon": "",
+            "text": "",
+            "icon": "",
+            "hidden": ""
+          }
+        }
+      },
+      "card": {
+        "cpu": "",
+        "memory": "",
+        "gpu": "",
+        "network": "",
+        "up": "",
+        "down": ""
+      }
+    },
+    "systemDisks": {
+      "name": "",
+      "description": "",
+      "option": {
+        "showTemperatureIfAvailable": {
+          "label": ""
+        },
+        "displayMode": {
+          "label": "",
+          "option": {
+            "percentage": {
+              "label": ""
+            },
+            "absolute": {
+              "label": ""
+            },
+            "free": {
+              "label": ""
+            }
+          }
+        },
+        "showBackgroundBar": {
+          "label": ""
+        },
+        "visibleStorageVolumes": {
+          "label": "",
+          "description": "",
+          "placeholder": ""
+        }
+      },
+      "status": {
+        "unhealthy": ""
+      }
+    },
+    "customApi": {
+      "name": "",
+      "description": "",
+      "option": {
+        "definitionId": {
+          "label": ""
+        },
+        "refreshInterval": {
+          "label": "",
+          "description": ""
+        }
+      },
+      "noDefinition": "",
+      "definitionNotFound": "",
+      "noDisplayOutput": "",
+      "executeConfirm": "",
+      "executing": "",
+      "executeSuccess": "",
+      "executeFailed": ""
+    },
+    "beszelSystemTable": {
+      "name": "",
+      "description": "",
+      "option": {
+        "statusFilter": {
+          "label": ""
+        },
+        "sortBy": {
+          "label": ""
+        },
+        "sortDirection": {
+          "label": ""
+        },
+        "showCpu": {
+          "label": ""
+        },
+        "showMemory": {
+          "label": ""
+        },
+        "showDisk": {
+          "label": ""
+        },
+        "showGpu": {
+          "label": ""
+        },
+        "showLoadAvg": {
+          "label": ""
+        },
+        "showNet": {
+          "label": ""
+        },
+        "showTemp": {
+          "label": ""
+        },
+        "showBattery": {
+          "label": ""
+        },
+        "showServices": {
+          "label": ""
+        },
+        "showUptime": {
+          "label": ""
+        },
+        "showAgent": {
+          "label": ""
+        }
+      },
+      "noRecords": "",
+      "error": {
+        "internalServerError": ""
+      },
+      "column": {
+        "system": "",
+        "cpu": "",
+        "memory": "",
+        "disk": "",
+        "gpu": "",
+        "loadAvg": "",
+        "net": "",
+        "temp": "",
+        "battery": "",
+        "services": "",
+        "uptime": "",
+        "agent": ""
+      }
+    },
+    "beszelSystemGrid": {
+      "name": "",
+      "description": "",
+      "option": {
+        "statusFilter": {
+          "label": ""
+        },
+        "showCpu": {
+          "label": ""
+        },
+        "showMemory": {
+          "label": ""
+        },
+        "showDisk": {
+          "label": ""
+        },
+        "showGpu": {
+          "label": ""
+        },
+        "showLoadAvg": {
+          "label": ""
+        },
+        "showNet": {
+          "label": ""
+        },
+        "showTemp": {
+          "label": ""
+        },
+        "showBattery": {
+          "label": ""
+        },
+        "showServices": {
+          "label": ""
+        },
+        "showUptime": {
+          "label": ""
+        },
+        "showAgent": {
+          "label": ""
+        }
+      },
+      "error": {
+        "internalServerError": ""
+      },
+      "empty": {
+        "noSystems": ""
+      },
+      "metric": {
+        "cpu": "",
+        "memory": "",
+        "disk": "",
+        "gpu": "",
+        "loadAvg": "",
+        "net": "",
+        "temp": "",
+        "battery": "",
+        "services": "",
+        "uptime": "",
+        "agent": ""
+      }
+    },
+    "beszelAlerts": {
+      "name": "",
+      "description": "",
+      "option": {
+        "showHistory": {
+          "label": ""
+        },
+        "maxHistoryItems": {
+          "label": ""
+        }
+      },
+      "empty": "",
+      "error": {
+        "internalServerError": ""
+      },
+      "history": "",
+      "resolved": "",
+      "status": {
+        "triggered": "",
+        "ok": ""
+      }
+    },
+    "beszelSystemStats": {
+      "name": "",
+      "description": "",
+      "option": {
+        "systemId": {
+          "label": "",
+          "description": ""
+        },
+        "timePeriod": {
+          "label": ""
+        },
+        "showCpu": {
+          "label": ""
+        },
+        "showMemory": {
+          "label": ""
+        },
+        "showDisk": {
+          "label": ""
+        },
+        "showDiskIO": {
+          "label": ""
+        },
+        "showNetwork": {
+          "label": ""
+        },
+        "showDockerCpu": {
+          "label": ""
+        },
+        "showDockerMemory": {
+          "label": ""
+        },
+        "showDockerNetwork": {
+          "label": ""
+        }
+      },
+      "selectSystem": "",
+      "empty": {
+        "noSystems": ""
+      },
+      "error": {
+        "internalServerError": "",
+        "liveConnectionFailed": "",
+        "switchToHistorical": "",
+        "systemNotFound": ""
+      },
+      "chart": {
+        "cpu": {
+          "title": "",
+          "subtitle": "",
+          "series": ""
+        },
+        "memory": {
+          "title": "",
+          "subtitle": "",
+          "series": "",
+          "cache": ""
+        },
+        "disk": {
+          "title": "",
+          "subtitle": "",
+          "series": ""
+        },
+        "diskIO": {
+          "title": "",
+          "subtitle": "",
+          "read": "",
+          "write": ""
+        },
+        "network": {
+          "title": "",
+          "subtitle": "",
+          "sent": "",
+          "recv": ""
+        },
+        "dockerCpu": {
+          "title": "",
+          "subtitle": ""
+        },
+        "dockerMemory": {
+          "title": "",
+          "subtitle": ""
+        },
+        "dockerNetwork": {
+          "title": "",
+          "subtitle": ""
+        }
+      }
+    }
+  },
+  "widgetPreview": {
+    "toggle": {
+      "enabled": "",
+      "disabled": ""
+    },
+    "dimensions": {
+      "title": ""
+    }
+  },
+  "board": {
+    "action": {
+      "duplicate": {
+        "title": "",
+        "message": "",
+        "notification": {
+          "success": {
+            "title": "",
+            "message": ""
+          },
+          "error": {
+            "title": "",
+            "message": ""
+          }
+        }
+      },
+      "edit": {
+        "notification": {
+          "success": {
+            "title": "",
+            "message": ""
+          },
+          "error": {
+            "title": "",
+            "message": ""
+          }
+        },
+        "confirmLeave": {
+          "title": "",
+          "message": ""
+        }
+      },
+      "oldImport": {
+        "label": "",
+        "notification": {
+          "success": {
+            "title": "",
+            "message": ""
+          },
+          "error": {
+            "title": "",
+            "message": ""
+          }
+        },
+        "form": {
+          "file": {
+            "label": "",
+            "invalidError": ""
+          },
+          "apps": {
+            "label": "",
+            "avoidDuplicates": {
+              "label": "",
+              "description": ""
+            },
+            "onlyImportApps": {
+              "label": "",
+              "description": ""
+            }
+          },
+          "name": {
+            "label": ""
+          },
+          "screenSize": {
+            "label": "",
+            "description": "",
+            "option": {
+              "sm": "",
+              "md": "",
+              "lg": ""
+            }
+          },
+          "sidebarBehavior": {
+            "label": "",
+            "description": "",
+            "option": {
+              "lastSection": {
+                "label": "",
+                "description": ""
+              },
+              "removeItems": {
+                "label": "",
+                "description": ""
+              }
+            }
+          }
+        }
+      },
+      "quickCreateApp": {
+        "modal": {
+          "title": "",
+          "createAndUse": ""
+        }
+      }
+    },
+    "field": {
+      "pageTitle": {
+        "label": ""
+      },
+      "metaTitle": {
+        "label": ""
+      },
+      "logoImageUrl": {
+        "label": ""
+      },
+      "faviconImageUrl": {
+        "label": ""
+      },
+      "backgroundImageUrl": {
+        "label": "",
+        "placeholder": "",
+        "group": {
+          "your": "",
+          "other": ""
+        }
+      },
+      "backgroundImageAttachment": {
+        "label": "",
+        "option": {
+          "fixed": {
+            "label": "",
+            "description": ""
+          },
+          "scroll": {
+            "label": "",
+            "description": ""
+          }
+        }
+      },
+      "backgroundImageRepeat": {
+        "label": "",
+        "option": {
+          "repeat": {
+            "label": "",
+            "description": ""
+          },
+          "no-repeat": {
+            "label": "",
+            "description": ""
+          },
+          "repeat-x": {
+            "label": "",
+            "description": ""
+          },
+          "repeat-y": {
+            "label": "",
+            "description": ""
+          }
+        }
+      },
+      "backgroundImageSize": {
+        "label": "",
+        "option": {
+          "cover": {
+            "label": "",
+            "description": ""
+          },
+          "contain": {
+            "label": "",
+            "description": ""
+          }
+        }
+      },
+      "primaryColor": {
+        "label": "Primary colour"
+      },
+      "secondaryColor": {
+        "label": "Secondary colour"
+      },
+      "opacity": {
+        "label": ""
+      },
+      "iconColor": {
+        "label": "Icon colour"
+      },
+      "clearColor": {
+        "label": ""
+      },
+      "customCss": {
+        "label": "",
+        "description": "",
+        "customClassesAlert": {
+          "title": "",
+          "description": ""
+        }
+      },
+      "disableStatus": {
+        "label": "",
+        "description": ""
+      },
+      "columnCount": {
+        "label": ""
+      },
+      "itemRadius": {
+        "label": "",
+        "description": "",
+        "option": {
+          "xs": "",
+          "sm": "",
+          "md": "",
+          "lg": "",
+          "xl": ""
+        }
+      },
+      "name": {
+        "label": ""
+      },
+      "isPublic": {
+        "label": "",
+        "description": ""
+      }
+    },
+    "content": {
+      "metaTitle": ""
+    },
+    "setting": {
+      "title": "",
+      "section": {
+        "general": {
+          "title": "",
+          "unrecognizedLink": ""
+        },
+        "layout": {
+          "title": "",
+          "responsive": {
+            "title": "",
+            "action": {
+              "add": ""
+            }
+          }
+        },
+        "background": {
+          "title": ""
+        },
+        "appearance": {
+          "title": ""
+        },
+        "customCss": {
+          "title": ""
+        },
+        "behavior": {
+          "title": ""
+        },
+        "access": {
+          "title": "",
+          "permission": {
+            "item": {
+              "view": {
+                "label": ""
+              },
+              "modify": {
+                "label": ""
+              },
+              "full": {
+                "label": ""
+              }
+            }
+          }
+        },
+        "dangerZone": {
+          "title": "",
+          "action": {
+            "rename": {
+              "label": "",
+              "description": "",
+              "button": "",
+              "modal": {
+                "title": ""
+              }
+            },
+            "visibility": {
+              "label": "",
+              "description": {
+                "public": "",
+                "private": ""
+              },
+              "button": {
+                "public": "",
+                "private": ""
+              },
+              "confirm": {
+                "public": {
+                  "title": "",
+                  "description": ""
+                },
+                "private": {
+                  "title": "",
+                  "description": ""
+                }
+              }
+            },
+            "delete": {
+              "label": "",
+              "description": "",
+              "button": "",
+              "confirm": {
+                "title": "",
+                "description": ""
+              }
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "noBoard": {
+        "title": "",
+        "description": "",
+        "link": "",
+        "notice": ""
+      },
+      "notFound": {
+        "title": "",
+        "description": "",
+        "link": "",
+        "notice": ""
+      },
+      "homeBoard": {
+        "title": "",
+        "admin": {
+          "description": "",
+          "link": "",
+          "notice": ""
+        },
+        "user": {
+          "description": "",
+          "link": "",
+          "notice": ""
+        },
+        "anonymous": {
+          "description": "",
+          "link": "",
+          "notice": ""
+        }
+      }
+    }
+  },
+  "layout": {
+    "field": {
+      "name": {
+        "label": ""
+      },
+      "columnCount": {
+        "label": ""
+      },
+      "breakpoint": {
+        "label": "",
+        "description": ""
+      }
+    }
+  },
+  "management": {
+    "metaTitle": "",
+    "title": {
+      "morning": "",
+      "afternoon": "",
+      "evening": ""
+    },
+    "notFound": {
+      "title": "",
+      "text": ""
+    },
+    "error": {
+      "title": "",
+      "text": "",
+      "digest": ""
+    },
+    "navbar": {
+      "items": {
+        "home": "",
+        "boards": "",
+        "apps": "",
+        "integrations": "",
+        "customWidgets": "",
+        "searchEngies": "",
+        "medias": "",
+        "users": {
+          "label": "",
+          "items": {
+            "manage": "",
+            "invites": "",
+            "groups": ""
+          }
+        },
+        "tools": {
+          "label": "",
+          "items": {
+            "docker": "",
+            "kubernetes": "",
+            "logs": "",
+            "api": "",
+            "certificates": "",
+            "tasks": "",
+            "backup": ""
+          }
+        },
+        "settings": "",
+        "help": {
+          "label": "",
+          "items": {
+            "documentation": "",
+            "submitIssue": "",
+            "discord": "",
+            "sourceCode": ""
+          }
+        },
+        "about": ""
+      }
+    },
+    "page": {
+      "home": {
+        "statistic": {
+          "board": "",
+          "user": "",
+          "invite": "",
+          "integration": "",
+          "app": "",
+          "group": "",
+          "searchEngine": "",
+          "media": ""
+        },
+        "statisticLabel": {
+          "boards": "",
+          "resources": "",
+          "authentication": "",
+          "authorization": ""
+        },
+        "heroBanner": {
+          "title": "",
+          "subtitle": ""
+        }
+      },
+      "board": {
+        "title": "",
+        "action": {
+          "new": {
+            "label": ""
+          },
+          "open": {
+            "label": ""
+          },
+          "settings": {
+            "label": ""
+          },
+          "setHomeBoard": {
+            "label": "",
+            "badge": {
+              "label": "",
+              "tooltip": ""
+            }
+          },
+          "setMobileHomeBoard": {
+            "label": "",
+            "badge": {
+              "label": "",
+              "tooltip": ""
+            }
+          },
+          "duplicate": {
+            "label": ""
+          },
+          "delete": {
+            "label": "",
+            "confirm": {
+              "title": "",
+              "description": ""
+            }
+          }
+        },
+        "visibility": {
+          "public": "",
+          "private": ""
+        },
+        "noResults": {
+          "title": ""
+        },
+        "modal": {
+          "createBoard": {
+            "field": {
+              "name": {
+                "label": ""
+              }
+            }
+          }
+        }
+      },
+      "media": {
+        "includeFromAllUsers": ""
+      },
+      "user": {
+        "back": "",
+        "fieldsDisabledExternalProvider": "",
+        "setting": {
+          "general": {
+            "title": "",
+            "item": {
+              "language": "",
+              "board": {
+                "title": "",
+                "type": {
+                  "general": "",
+                  "mobile": ""
+                }
+              },
+              "search": "",
+              "firstDayOfWeek": "",
+              "accessibility": "",
+              "onboardingTours": {
+                "title": "",
+                "description": "",
+                "reset": "",
+                "resetSuccess": {
+                  "title": "",
+                  "message": ""
+                },
+                "status": {
+                  "completed": "",
+                  "notStarted": ""
+                },
+                "name": {
+                  "management": "",
+                  "dashboard": ""
+                }
+              }
+            }
+          },
+          "security": {
+            "title": ""
+          },
+          "board": {
+            "title": ""
+          }
+        },
+        "list": {
+          "metaTitle": "",
+          "title": ""
+        },
+        "edit": {
+          "metaTitle": ""
+        },
+        "create": {
+          "metaTitle": "",
+          "title": "",
+          "step": {
+            "personalInformation": {
+              "label": ""
+            },
+            "security": {
+              "label": ""
+            },
+            "groups": {
+              "label": "",
+              "title": "",
+              "description": ""
+            },
+            "review": {
+              "label": ""
+            },
+            "completed": {
+              "title": ""
+            },
+            "error": {
+              "title": ""
+            }
+          },
+          "action": {
+            "createAnother": "",
+            "back": ""
+          }
+        },
+        "invite": {
+          "title": "",
+          "action": {
+            "new": {
+              "title": "",
+              "description": ""
+            },
+            "copy": {
+              "title": "",
+              "description": "",
+              "link": "",
+              "button": ""
+            },
+            "delete": {
+              "title": "",
+              "description": ""
+            }
+          },
+          "field": {
+            "id": {
+              "label": ""
+            },
+            "creator": {
+              "label": ""
+            },
+            "expirationDate": {
+              "label": ""
+            },
+            "token": {
+              "label": ""
+            }
+          }
+        }
+      },
+      "group": {
+        "back": "",
+        "setting": {
+          "general": {
+            "title": "",
+            "owner": "",
+            "ownerOfGroup": "",
+            "ownerOfGroupDeleted": ""
+          },
+          "setting": {
+            "title": "",
+            "alert": "",
+            "board": {
+              "title": ""
+            }
+          },
+          "members": {
+            "title": "",
+            "search": "",
+            "notFound": ""
+          },
+          "permissions": {
+            "title": "",
+            "form": {
+              "unsavedChanges": ""
+            }
+          }
+        }
+      },
+      "settings": {
+        "title": "",
+        "notification": {
+          "success": {
+            "message": ""
+          },
+          "error": {
+            "message": ""
+          }
+        },
+        "section": {
+          "analytics": {
+            "title": "",
+            "general": {
+              "title": "",
+              "text": ""
+            }
+          },
+          "crawlingAndIndexing": {
+            "title": "",
+            "warning": "",
+            "noIndex": {
+              "title": "",
+              "text": ""
+            },
+            "noFollow": {
+              "title": "",
+              "text": ""
+            },
+            "noTranslate": {
+              "title": "",
+              "text": ""
+            },
+            "noSiteLinksSearchBox": {
+              "title": "",
+              "text": ""
+            }
+          },
+          "board": {
+            "title": "",
+            "homeBoard": {
+              "label": "",
+              "mobileLabel": "",
+              "description": ""
+            },
+            "status": {
+              "title": "",
+              "enableStatusByDefault": {
+                "label": "",
+                "description": ""
+              },
+              "forceDisableStatus": {
+                "label": "",
+                "description": ""
+              }
+            }
+          },
+          "user": {
+            "title": "",
+            "enableGravatar": {
+              "label": "",
+              "description": ""
+            }
+          },
+          "search": {
+            "title": "",
+            "defaultSearchEngine": {
+              "label": "",
+              "description": ""
+            }
+          },
+          "appearance": {
+            "title": "",
+            "defaultColorScheme": {
+              "label": "Default colour scheme",
+              "options": {
+                "auto": "",
+                "light": "",
+                "dark": ""
+              }
+            }
+          },
+          "culture": {
+            "title": "",
+            "defaultLocale": {
+              "label": ""
+            }
+          }
+        }
+      },
+      "tool": {
+        "tasks": {
+          "title": "",
+          "status": {
+            "idle": "",
+            "running": "",
+            "error": "",
+            "disabled": ""
+          },
+          "job": {
+            "iconsUpdater": {
+              "label": ""
+            },
+            "analytics": {
+              "label": ""
+            },
+            "ping": {
+              "label": ""
+            }
+          },
+          "interval": {
+            "seconds": "",
+            "minutes": "",
+            "hours": "",
+            "midnight": "",
+            "weeklyMonday": "",
+            "update": {
+              "success": {
+                "message": ""
+              },
+              "error": {
+                "message": ""
+              }
+            }
+          },
+          "settings": {
+            "title": ""
+          },
+          "field": {
+            "name": {
+              "label": ""
+            },
+            "interval": {
+              "label": ""
+            },
+            "lastExecution": {
+              "label": ""
+            },
+            "actions": {
+              "label": ""
+            }
+          },
+          "table": {
+            "search": ""
+          },
+          "action": {
+            "refresh": {
+              "label": ""
+            }
+          },
+          "refresh": {
+            "success": {
+              "message": ""
+            },
+            "error": {
+              "message": ""
+            }
+          },
+          "trigger": {
+            "success": {
+              "message": ""
+            },
+            "error": {
+              "message": ""
+            }
+          },
+          "enable": {
+            "success": {
+              "message": ""
+            }
+          },
+          "disable": {
+            "success": {
+              "message": ""
+            }
+          },
+          "toggle": {
+            "error": {
+              "message": ""
+            }
+          }
+        },
+        "api": {
+          "title": "",
+          "modal": {
+            "createApiToken": {
+              "title": "",
+              "description": "",
+              "button": ""
+            }
+          },
+          "tab": {
+            "documentation": {
+              "label": ""
+            },
+            "apiKey": {
+              "label": "",
+              "title": "",
+              "button": {
+                "createApiToken": ""
+              },
+              "modal": {
+                "delete": {
+                  "title": "",
+                  "text": ""
+                }
+              },
+              "table": {
+                "header": {
+                  "id": "",
+                  "createdBy": "",
+                  "actions": ""
+                }
+              }
+            },
+            "mcp": {
+              "label": "",
+              "title": "",
+              "subtitle": "",
+              "description": "",
+              "noApiKey": "",
+              "createApiKeyButton": "",
+              "endpoint": {
+                "title": ""
+              },
+              "authentication": {
+                "title": "",
+                "intro": "",
+                "apiKey": {
+                  "title": "",
+                  "description": ""
+                },
+                "oauth": {
+                  "title": "",
+                  "description": "",
+                  "hint": ""
+                },
+                "permissions": ""
+              },
+              "clientConfig": {
+                "title": "",
+                "streamableHttp": {
+                  "recommended": "",
+                  "title": "",
+                  "worksWith": "",
+                  "addToConfig": "",
+                  "cursor": "",
+                  "claudeDesktop": "",
+                  "claudeCode": "",
+                  "vsCodeCopilot": "",
+                  "replaceHint": ""
+                },
+                "stdio": {
+                  "title": "",
+                  "description": ""
+                }
+              },
+              "testConnection": {
+                "title": "",
+                "description": "",
+                "hint": ""
+              },
+              "availableTools": {
+                "title": "",
+                "description": "",
+                "columnType": "",
+                "columnName": "",
+                "columnDescription": ""
+              },
+              "troubleshooting": {
+                "title": "",
+                "missingHeader": {
+                  "title": "",
+                  "description": ""
+                },
+                "invalidFormat": {
+                  "title": "",
+                  "description": ""
+                },
+                "invalidKey": {
+                  "title": "",
+                  "description": ""
+                },
+                "connectionRefused": {
+                  "title": "",
+                  "description": ""
+                },
+                "toolsNotAppearing": {
+                  "title": "",
+                  "description": ""
+                }
+              },
+              "copy": "",
+              "oneClick": {
+                "title": "",
+                "subtitle": "",
+                "vsCode": "",
+                "cursor": "",
+                "copyUrl": "",
+                "copied": "",
+                "copyHint": "",
+                "manualConfig": ""
+              }
+            }
+          }
+        },
+        "backup": {
+          "title": "",
+          "metaTitle": "",
+          "export": {
+            "title": "",
+            "description": "",
+            "button": "",
+            "error": "",
+            "confirm": {
+              "title": "",
+              "warningTitle": "",
+              "warningBody": "",
+              "typePrompt": "",
+              "submit": "",
+              "cancel": ""
+            }
+          },
+          "import": {
+            "title": "",
+            "description": "",
+            "warning": "",
+            "dropzone": {
+              "title": "",
+              "description": ""
+            },
+            "changeFile": "",
+            "button": "",
+            "success": {
+              "title": "",
+              "message": ""
+            },
+            "error": ""
+          },
+          "preview": {
+            "title": "",
+            "exported": "",
+            "loading": "",
+            "errorTitle": "",
+            "entity": "",
+            "count": "",
+            "boards": "",
+            "entities": {
+              "board": "",
+              "user": "",
+              "app": "",
+              "integration": "",
+              "item": "",
+              "media": "",
+              "search_engine": ""
+            },
+            "analyzeError": "",
+            "invalidMissingMetadata": "",
+            "invalidMissingDb": ""
+          },
+          "restore": {
+            "dropzone": {
+              "title": "",
+              "description": ""
+            },
+            "analyzing": "",
+            "changeFile": "",
+            "continueToRestore": "",
+            "tryAgain": "",
+            "analysisError": "",
+            "preview": {
+              "title": "",
+              "exported": "",
+              "entity": "",
+              "count": "",
+              "boards": "",
+              "entities": {
+                "board": "",
+                "user": "",
+                "app": "",
+                "integration": "",
+                "item": "",
+                "media": "",
+                "search_engine": ""
+              },
+              "migrationsApplied": "",
+              "migrationsAppliedPlural": "",
+              "migrationsOlderVersion": "",
+              "migrationsOlderVersionPlural": "",
+              "migrationsUpToDate": "",
+              "upToDate": "",
+              "migrationsPending": ""
+            },
+            "migration": {
+              "title": "",
+              "migrationLabel": ""
+            },
+            "confirm": {
+              "title": "",
+              "warningTitle": "",
+              "warningBody": "",
+              "typePrompt": "",
+              "cancel": "",
+              "submit": ""
+            },
+            "progress": {
+              "title": "",
+              "extracting": "",
+              "migrating": "",
+              "encrypting": "",
+              "swapping": "",
+              "restarting": ""
+            },
+            "complete": {
+              "title": "",
+              "message": ""
+            },
+            "failed": {
+              "title": ""
+            },
+            "invalidMissingMetadata": "",
+            "invalidMissingDb": "",
+            "analyzeError": ""
+          }
+        }
+      },
+      "about": {
+        "version": "",
+        "text": "",
+        "accordion": {
+          "contributors": {
+            "title": "",
+            "subtitle": ""
+          },
+          "translators": {
+            "title": "",
+            "subtitle": ""
+          },
+          "sponsors": {
+            "title": "",
+            "subtitle": ""
+          },
+          "libraries": {
+            "title": "",
+            "subtitle": ""
+          },
+          "hotkeys": {
+            "title": "",
+            "subtitle": "",
+            "field": {
+              "shortcut": "",
+              "action": ""
+            },
+            "action": {
+              "toggleBoardEdit": "",
+              "toggleColorScheme": "",
+              "saveNotebook": "",
+              "openSpotlight": ""
+            },
+            "note": ""
+          }
+        }
+      }
+    }
+  },
+  "docker": {
+    "title": "",
+    "table": {
+      "updated": "",
+      "search": "",
+      "selected": "",
+      "footer": "",
+      "totalCpu": "",
+      "totalMemory": ""
+    },
+    "field": {
+      "name": {
+        "label": ""
+      },
+      "state": {
+        "label": "",
+        "option": {
+          "created": "",
+          "running": "",
+          "paused": "",
+          "restarting": "",
+          "exited": "",
+          "removing": "",
+          "dead": ""
+        }
+      },
+      "stats": {
+        "cpu": {
+          "label": ""
+        },
+        "memory": {
+          "label": ""
+        }
+      },
+      "containerImage": {
+        "label": ""
+      },
+      "ports": {
+        "label": ""
+      },
+      "host": {
+        "label": ""
+      }
+    },
+    "action": {
+      "title": "",
+      "logs": {
+        "label": "",
+        "page": {
+          "title": ""
+        }
+      },
+      "start": {
+        "label": "",
+        "notification": {
+          "success": {
+            "title": "",
+            "message": ""
+          },
+          "error": {
+            "title": "",
+            "message": ""
+          }
+        }
+      },
+      "stop": {
+        "label": "",
+        "notification": {
+          "success": {
+            "title": "",
+            "message": ""
+          },
+          "error": {
+            "title": "",
+            "message": ""
+          }
+        }
+      },
+      "restart": {
+        "label": "",
+        "notification": {
+          "success": {
+            "title": "",
+            "message": ""
+          },
+          "error": {
+            "title": "",
+            "message": ""
+          }
+        }
+      },
+      "remove": {
+        "label": "",
+        "notification": {
+          "success": {
+            "title": "",
+            "message": ""
+          },
+          "error": {
+            "title": "",
+            "message": ""
+          }
+        }
+      },
+      "refresh": {
+        "label": "",
+        "notification": {
+          "success": {
+            "title": "",
+            "message": ""
+          },
+          "error": {
+            "title": "",
+            "message": ""
+          }
+        }
+      },
+      "addToMuninn": {
+        "label": "",
+        "notification": {
+          "success": {
+            "title": "",
+            "message": ""
+          },
+          "error": {
+            "title": "",
+            "message": ""
+          }
+        },
+        "modal": {
+          "title": ""
+        }
+      }
+    },
+    "error": {
+      "internalServerError": "",
+      "noColumns": ""
+    }
+  },
+  "kubernetes": {
+    "cluster": {
+      "title": "",
+      "label": "",
+      "providers": "",
+      "version": "",
+      "architecture": "",
+      "capacity": {
+        "title": "",
+        "resource": {
+          "reserved": "",
+          "used": ""
+        }
+      },
+      "resources": {
+        "title": "",
+        "nodes": "",
+        "namespaces": "",
+        "ingresses": "",
+        "services": "",
+        "pods": "",
+        "configmaps": "",
+        "secrets": "",
+        "volumes": ""
+      }
+    },
+    "nodes": {
+      "label": "",
+      "field": {
+        "name": {
+          "label": ""
+        },
+        "state": {
+          "label": "",
+          "option": {
+            "ready": "",
+            "NotReady": ""
+          }
+        },
+        "cpu": {
+          "label": ""
+        },
+        "memory": {
+          "label": ""
+        },
+        "pods": {
+          "label": ""
+        },
+        "operatingSystem": {
+          "label": ""
+        },
+        "architecture": {
+          "label": ""
+        },
+        "kubernetesVersion": {
+          "label": ""
+        },
+        "creationTimestamp": {
+          "label": ""
+        }
+      },
+      "table": {
+        "search": ""
+      }
+    },
+    "namespaces": {
+      "label": "",
+      "field": {
+        "name": {
+          "label": ""
+        },
+        "state": {
+          "label": "",
+          "option": {
+            "active": "",
+            "terminating": ""
+          }
+        },
+        "creationTimestamp": {
+          "label": ""
+        }
+      },
+      "table": {
+        "search": ""
+      }
+    },
+    "ingresses": {
+      "label": "",
+      "field": {
+        "name": {
+          "label": ""
+        },
+        "namespace": {
+          "label": ""
+        },
+        "className": {
+          "label": ""
+        },
+        "rulesAndPaths": {
+          "label": ""
+        },
+        "creationTimestamp": {
+          "label": ""
+        }
+      },
+      "table": {
+        "search": ""
+      }
+    },
+    "services": {
+      "label": "",
+      "field": {
+        "name": {
+          "label": ""
+        },
+        "namespace": {
+          "label": ""
+        },
+        "type": {
+          "label": ""
+        },
+        "ports": {
+          "label": ""
+        },
+        "targetPorts": {
+          "label": ""
+        },
+        "clusterIP": {
+          "label": ""
+        },
+        "creationTimestamp": {
+          "label": ""
+        }
+      },
+      "table": {
+        "search": ""
+      }
+    },
+    "pods": {
+      "label": "",
+      "field": {
+        "name": {
+          "label": ""
+        },
+        "namespace": {
+          "label": ""
+        },
+        "image": {
+          "label": ""
+        },
+        "applicationType": {
+          "label": ""
+        },
+        "status": {
+          "label": ""
+        },
+        "creationTimestamp": {
+          "label": ""
+        }
+      },
+      "table": {
+        "search": ""
+      }
+    },
+    "secrets": {
+      "label": "",
+      "field": {
+        "name": {
+          "label": ""
+        },
+        "namespace": {
+          "label": ""
+        },
+        "type": {
+          "label": ""
+        },
+        "creationTimestamp": {
+          "label": ""
+        }
+      },
+      "table": {
+        "search": ""
+      }
+    },
+    "configmaps": {
+      "label": "",
+      "field": {
+        "name": {
+          "label": ""
+        },
+        "namespace": {
+          "label": ""
+        },
+        "creationTimestamp": {
+          "label": ""
+        }
+      },
+      "table": {
+        "search": ""
+      }
+    },
+    "volumes": {
+      "label": "",
+      "field": {
+        "name": {
+          "label": ""
+        },
+        "namespace": {
+          "label": ""
+        },
+        "accessModes": {
+          "label": ""
+        },
+        "storage": {
+          "label": ""
+        },
+        "storageClassName": {
+          "label": ""
+        },
+        "volumeMode": {
+          "label": ""
+        },
+        "volumeName": {
+          "label": ""
+        },
+        "status": {
+          "label": ""
+        },
+        "creationTimestamp": {
+          "label": ""
+        }
+      },
+      "table": {
+        "search": ""
+      }
+    },
+    "error": {
+      "internalServerError": ""
+    }
+  },
+  "permission": {
+    "title": "",
+    "userSelect": {
+      "title": ""
+    },
+    "groupSelect": {
+      "title": ""
+    },
+    "tab": {
+      "user": "",
+      "group": "",
+      "inherited": ""
+    },
+    "field": {
+      "user": {
+        "label": ""
+      },
+      "group": {
+        "label": ""
+      },
+      "permission": {
+        "label": ""
+      }
+    },
+    "action": {
+      "saveUser": "",
+      "saveGroup": ""
+    }
+  },
+  "navigationStructure": {
+    "manage": {
+      "label": "",
+      "boards": {
+        "label": ""
+      },
+      "integrations": {
+        "label": "",
+        "edit": {
+          "label": ""
+        },
+        "new": {
+          "label": ""
+        }
+      },
+      "search-engines": {
+        "label": "",
+        "new": {
+          "label": ""
+        },
+        "edit": {
+          "label": ""
+        }
+      },
+      "medias": {
+        "label": ""
+      },
+      "apps": {
+        "label": "",
+        "new": {
+          "label": ""
+        },
+        "edit": {
+          "label": ""
+        }
+      },
+      "custom-widgets": {
+        "label": "",
+        "new": {
+          "label": ""
+        },
+        "edit": {
+          "label": "",
+          "flow": {
+            "label": ""
+          }
+        }
+      },
+      "users": {
+        "label": "",
+        "create": {
+          "label": ""
+        },
+        "general": "",
+        "security": "",
+        "board": "",
+        "groups": {
+          "label": ""
+        },
+        "invites": {
+          "label": ""
+        }
+      },
+      "tools": {
+        "label": "",
+        "tasks": {
+          "label": ""
+        },
+        "docker": {
+          "label": "",
+          "logs": {
+            "label": ""
+          }
+        },
+        "kubernetes": {
+          "label": "",
+          "nodes": {
+            "label": ""
+          },
+          "namespaces": {
+            "label": ""
+          },
+          "ingresses": {
+            "label": ""
+          },
+          "services": {
+            "label": ""
+          },
+          "pods": {
+            "label": ""
+          },
+          "configmaps": {
+            "label": ""
+          },
+          "secrets": {
+            "label": ""
+          },
+          "volumes": {
+            "label": ""
+          }
+        },
+        "logs": {
+          "label": ""
+        },
+        "certificates": {
+          "label": "",
+          "hostnames": {
+            "label": ""
+          }
+        }
+      },
+      "settings": {
+        "label": ""
+      },
+      "about": {
+        "label": ""
+      }
+    }
+  },
+  "search": {
+    "placeholder": "",
+    "nothingFound": "",
+    "error": {
+      "fetch": ""
+    },
+    "mode": {
+      "appIntegrationBoard": {
+        "help": "",
+        "group": {
+          "app": {
+            "title": "",
+            "children": {
+              "action": {
+                "open": {
+                  "label": ""
+                },
+                "edit": {
+                  "label": ""
+                }
+              },
+              "detail": {
+                "title": ""
+              }
+            }
+          },
+          "board": {
+            "title": "",
+            "children": {
+              "action": {
+                "open": {
+                  "label": ""
+                },
+                "homeBoard": {
+                  "label": ""
+                },
+                "mobileBoard": {
+                  "label": ""
+                },
+                "settings": {
+                  "label": ""
+                }
+              },
+              "detail": {
+                "title": ""
+              }
+            }
+          },
+          "integration": {
+            "title": ""
+          }
+        }
+      },
+      "command": {
+        "help": "",
+        "group": {
+          "localCommand": {
+            "title": ""
+          },
+          "globalCommand": {
+            "title": "",
+            "option": {
+              "colorScheme": {
+                "auto": "",
+                "light": "",
+                "dark": ""
+              },
+              "language": {
+                "label": "",
+                "children": {
+                  "detail": {
+                    "title": ""
+                  }
+                }
+              },
+              "newBoard": {
+                "label": ""
+              },
+              "importBoard": {
+                "label": ""
+              },
+              "newApp": {
+                "label": ""
+              },
+              "newIntegration": {
+                "label": "Create a new integration",
+                "children": {
+                  "detail": {
+                    "title": "Select the integration type you want to create"
+                  }
+                }
+              },
+              "newUser": {
+                "label": "Create a new user"
+              },
+              "newInvite": {
+                "label": "Create a new invite"
+              },
+              "newGroup": {
+                "label": "Create a new group"
+              }
+            }
+          },
+          "preferences": {
+            "title": "",
+            "children": {
+              "detail": {
+                "title": "",
+                "backHint": "",
+                "backAction": ""
+              }
+            },
+            "notification": {
+              "error": {
+                "message": ""
+              }
+            },
+            "option": {
+              "preferences": {
+                "label": ""
+              },
+              "boolean": {
+                "enabled": "",
+                "disabled": ""
+              },
+              "board": {
+                "none": "",
+                "unavailable": ""
+              },
+              "searchEngine": {
+                "none": "",
+                "unavailable": ""
+              },
+              "colorScheme": {
+                "label": "",
+                "children": {
+                  "detail": {
+                    "title": "Select your colour scheme"
+                  }
+                }
+              },
+              "locale": {
+                "label": "Language",
+                "children": {
+                  "detail": {
+                    "title": "Select your preferred language"
+                  }
+                }
+              },
+              "defaultSearchEngineId": {
+                "label": "Default search engine",
+                "children": {
+                  "detail": {
+                    "title": "Select your default search engine"
+                  }
+                }
+              },
+              "openSearchInNewTab": {
+                "label": "Open search results in new tab",
+                "children": {
+                  "detail": {
+                    "title": "Open search results in new tab"
+                  }
+                }
+              },
+              "ddgBangs": {
+                "label": "Enable DuckDuckGo bangs",
+                "children": {
+                  "detail": {
+                    "title": "Enable DuckDuckGo bangs"
+                  }
+                }
+              },
+              "firstDayOfWeek": {
+                "label": "First day of the week",
+                "children": {
+                  "detail": {
+                    "title": "Select the first day of the week"
+                  }
+                }
+              },
+              "homeBoardId": {
+                "label": "Home board",
+                "children": {
+                  "detail": {
+                    "title": "Select your home board"
+                  }
+                }
+              },
+              "mobileHomeBoardId": {
+                "label": "Mobile home board",
+                "children": {
+                  "detail": {
+                    "title": "Select your mobile home board"
+                  }
+                }
+              },
+              "pingIconsEnabled": {
+                "label": "Use icons for pings",
+                "children": {
+                  "detail": {
+                    "title": "Use icons for pings"
+                  }
+                }
+              },
+              "fullPreferencesPage": {
+                "label": ""
+              }
+            }
+          }
+        }
+      },
+      "media": {
+        "help": "",
+        "requestMovie": "",
+        "requestSeries": "",
+        "openIn": "",
+        "group": {
+          "title": ""
+        },
+        "action": {
+          "search": {
+            "label": "",
+            "description": "",
+            "disabled": {
+              "noIntegration": "",
+              "scoped": ""
+            }
+          }
+        },
+        "availability": {
+          "available": "",
+          "partiallyAvailable": "",
+          "processing": "",
+          "requested": "",
+          "pending": ""
+        }
+      },
+      "external": {
+        "help": "",
+        "group": {
+          "searchEngine": {
+            "title": "",
+            "tipDdgBangs": "",
+            "bang": {
+              "searchWithQuery": "",
+              "pressEnterToOpen": "",
+              "engineSelected": "",
+              "typeQueryToContinue": "",
+              "emptyBangHint": ""
+            },
+            "children": {
+              "action": {
+                "search": {
+                  "label": ""
+                }
+              },
+              "detail": {
+                "title": ""
+              },
+              "searchResults": {
+                "title": ""
+              }
+            },
+            "option": {
+              "google": {
+                "name": "",
+                "description": "Search the web with Google"
+              },
+              "bing": {
+                "name": "Bing",
+                "description": "Search the web with Bing"
+              },
+              "duckduckgo": {
+                "name": "DuckDuckGo",
+                "description": "Search the web with DuckDuckGo"
+              },
+              "torrent": {
+                "name": "Torrents",
+                "description": "Search for torrents on torrentdownloads.pro"
+              },
+              "youTube": {
+                "name": "YouTube",
+                "description": "Search for videos on YouTube"
+              }
+            }
+          }
+        }
+      },
+      "help": {
+        "group": {
+          "mode": {
+            "title": "Modes"
+          },
+          "help": {
+            "title": "Help",
+            "option": {
+              "documentation": {
+                "label": "Documentation"
+              },
+              "submitIssue": {
+                "label": "Submit an issue"
+              },
+              "discord": {
+                "label": "Community Discord"
+              }
+            }
+          }
+        }
+      },
+      "home": {
+        "group": {
+          "search": {
+            "title": "Search",
+            "option": {
+              "other": {
+                "label": "Search with another search engine"
+              },
+              "no-default": {
+                "label": "No default search engine",
+                "description": "Set a default search engine in preferences"
+              },
+              "search": {
+                "label": "Search for \"{query}\" with {name}"
+              },
+              "from-integration": {
+                "description": "Start typing to search"
+              }
+            }
+          },
+          "local": {
+            "title": "Local results"
+          }
+        }
+      },
+      "page": {
+        "help": "Search for pages",
+        "group": {
+          "page": {
+            "title": "Pages",
+            "option": {
+              "manageHome": {
+                "label": "Manage home page"
+              },
+              "manageBoard": {
+                "label": "Manage boards"
+              },
+              "manageApp": {
+                "label": "Manage apps"
+              },
+              "manageIntegration": {
+                "label": "Manage integrations"
+              },
+              "manageSearchEngine": {
+                "label": "Manage search engines"
+              },
+              "manageMedia": {
+                "label": "Manage medias"
+              },
+              "manageUser": {
+                "label": "Manage users"
+              },
+              "manageInvite": {
+                "label": "Manage invites"
+              },
+              "manageGroup": {
+                "label": "Manage groups"
+              },
+              "manageDocker": {
+                "label": "Manage docker"
+              },
+              "manageApi": {
+                "label": "Swagger API"
+              },
+              "manageLog": {
+                "label": "View logs"
+              },
+              "manageTask": {
+                "label": "Manage tasks"
+              },
+              "manageSettings": {
+                "label": "Global settings"
+              },
+              "about": {
+                "label": "About"
+              },
+              "homeBoard": {
+                "label": "Home board"
+              },
+              "preferences": {
+                "label": "Your preferences"
+              }
+            }
+          }
+        }
+      },
+      "userGroup": {
+        "help": "Search for users or groups",
+        "group": {
+          "user": {
+            "title": "Users",
+            "children": {
+              "action": {
+                "detail": {
+                  "label": "Show user details"
+                }
+              },
+              "detail": {
+                "title": "Select an action for the user"
+              }
+            }
+          },
+          "group": {
+            "title": "Groups",
+            "children": {
+              "action": {
+                "detail": {
+                  "label": "Show group details"
+                },
+                "manageMember": {
+                  "label": "Manage members"
+                },
+                "managePermission": {
+                  "label": "Manage permissions"
+                }
+              },
+              "detail": {
+                "title": "Select an action for the group"
+              }
+            }
+          }
+        }
+      }
+    },
+    "engine": {
+      "search": "Find a search engine",
+      "field": {
+        "name": {
+          "label": "Name"
+        },
+        "short": {
+          "label": "Short"
+        },
+        "urlTemplate": {
+          "label": "URL search template"
+        },
+        "description": {
+          "label": "Description"
+        }
+      },
+      "page": {
+        "list": {
+          "title": "Search engines",
+          "noResults": {
+            "title": "There are no search engines yet",
+            "action": "Create your first search engine"
+          },
+          "interactive": "Interactive, uses an integration"
+        },
+        "create": {
+          "title": "New search engine",
+          "notification": {
+            "success": {
+              "title": "Search engine created",
+              "message": "The search engine was created successfully"
+            },
+            "error": {
+              "title": "Search engine not created",
+              "message": "The search engine could not be created"
+            }
+          }
+        },
+        "edit": {
+          "title": "Edit search engine",
+          "notification": {
+            "success": {
+              "title": "Changes applied successfully",
+              "message": "The search engine was saved successfully"
+            },
+            "error": {
+              "title": "Unable to apply changes",
+              "message": "The search engine could not be saved"
+            }
+          },
+          "configControl": "Configuration",
+          "searchEngineType": {
+            "generic": "Generic",
+            "fromIntegration": "From integration"
+          }
+        },
+        "delete": {
+          "title": "Delete search engine",
+          "message": "Are you sure you want to delete the search engine {name}?",
+          "notification": {
+            "success": {
+              "title": "Search engine deleted",
+              "message": "The search engine was deleted successfully"
+            },
+            "error": {
+              "title": "Search engine not deleted",
+              "message": "The search engine could not be deleted"
+            }
+          }
+        }
+      },
+      "media": {
+        "request": {
+          "modal": {
+            "title": "Request \"{name}\"",
+            "table": {
+              "header": {
+                "season": "Season",
+                "episodes": "Episodes",
+                "status": "Status"
+              },
+              "status": {
+                "requested": "Requested"
+              }
+            },
+            "button": {
+              "send": "Send request"
+            }
+          }
+        }
+      }
+    }
+  },
+  "certificate": {
+    "field": {
+      "hostname": {
+        "label": "Hostname"
+      },
+      "subject": {
+        "label": "Subject"
+      },
+      "issuer": {
+        "label": "Issuer"
+      },
+      "validFrom": {
+        "label": "Valid from"
+      },
+      "validTo": {
+        "label": "Valid to"
+      },
+      "serialNumber": {
+        "label": "Serial number"
+      },
+      "fingerprint": {
+        "label": "Fingerprint"
+      }
+    },
+    "page": {
+      "list": {
+        "title": "Trusted certificates",
+        "description": "Used by Muninn to request data from integrations.",
+        "noResults": {
+          "title": "There are no certificates yet"
+        },
+        "invalid": {
+          "title": "Invalid certificate",
+          "description": "Failed to parse certificate"
+        },
+        "expires": "Expires {when}",
+        "toHostnames": "Trusted hostnames"
+      },
+      "hostnames": {
+        "title": "Trusted certificate hostnames",
+        "description": "Some certificates do not allow the specific domain Muninn uses to request them, because of this all trusted hostnames with their certificate thumbprints are used to bypass these restrictions.",
+        "noResults": {
+          "title": "There are no hostnames yet"
+        },
+        "toCertificates": "Certificates"
+      }
+    },
+    "action": {
+      "create": {
+        "label": "Add certificate",
+        "notification": {
+          "success": {
+            "title": "Certificate added",
+            "message": "The certificate was added successfully"
+          },
+          "error": {
+            "title": "Failed to add certificate",
+            "message": "The certificate could not be added"
+          }
+        }
+      },
+      "remove": {
+        "label": "Remove certificate",
+        "confirm": "Are you sure you want to remove the certificate?",
+        "notification": {
+          "success": {
+            "title": "Certificate removed",
+            "message": "The certificate was removed successfully"
+          },
+          "error": {
+            "title": "Certificate not removed",
+            "message": "The certificate could not be removed"
+          }
+        }
+      },
+      "removeHostname": {
+        "label": "Remove trusted hostname",
+        "confirm": "Are you sure you want to remove this trusted hostname? This can cause some integrations to stop working.",
+        "notification": {
+          "success": {
+            "title": "Hostname removed",
+            "message": "The hostname was removed successfully"
+          },
+          "error": {
+            "title": "Hostname not removed",
+            "message": "The hostname could not be removed"
+          }
+        }
+      }
+    }
+  },
+  "log": {
+    "level": {
+      "option": {
+        "debug": "Debug",
+        "info": "Info",
+        "warn": "Warn",
+        "error": "Error"
+      }
+    }
+  },
+  "onboardingTour": {
+    "learnMore": "Read the docs",
+    "next": "Next",
+    "prev": "Back",
+    "done": "Done",
+    "skip": "Skip tour",
+    "manage": {
+      "welcome": {
+        "title": "Welcome to Muninn!",
+        "description": "This is your control center. From here you manage boards, apps, integrations, users, and server settings. Let's take a tour of each section."
+      },
+      "boardsList": {
+        "title": "Your Boards",
+        "description": "Here are all your dashboards. Each board has its own layout, background, and access settings. You can see who created each one and whether it's public or private."
+      },
+      "boardsCreate": {
+        "title": "Create a Board",
+        "description": "Click here to create a new dashboard or import one from a previous Muninn installation. Each board gets its own URL you can share."
+      },
+      "appsList": {
+        "title": "Your Apps",
+        "description": "These are all the apps you've added — links to your self-hosted services. Each app has an icon, optional health check, and a status badge on the dashboard."
+      },
+      "appsCreate": {
+        "title": "Add an App",
+        "description": "Register a new service here. Give it a name, URL, and icon — it will appear as a tile on your boards with live status monitoring."
+      },
+      "integrationsList": {
+        "title": "Your Integrations",
+        "description": "These are the services connected to Muninn — Sonarr, Radarr, Plex, Jellyfin, and 50+ more. All credentials are encrypted at rest."
+      },
+      "integrationsCreate": {
+        "title": "Add an Integration",
+        "description": "Connect a new service here. Pick the type, enter the URL and API key — Muninn validates the connection before saving."
+      },
+      "usersList": {
+        "title": "Your Users",
+        "description": "See everyone who has access. Organise users into groups and control who can view or edit each board."
+      },
+      "usersCreate": {
+        "title": "Create a User",
+        "description": "Add a new user account here. You can also use invite links for easy onboarding. That's the tour — you're all set!"
+      }
+    },
+    "board": {
+      "welcome": {
+        "title": "This is your board",
+        "description": "A drag-and-drop dashboard where you arrange apps and widgets. Press Ctrl+K anytime to search for apps, boards, and actions."
+      },
+      "editMode": {
+        "title": "Edit Mode",
+        "description": "Click here to enter edit mode. You can then add widgets, apps, and sections — drag to reposition, resize with the corner handle. Click again to save your changes."
+      },
+      "settings": {
+        "title": "Board Settings",
+        "description": "Change this board's name, columns, background, colours, and who can access it. Each board can be public or private."
+      },
+      "switcher": {
+        "title": "Switch Boards",
+        "description": "Jump between boards. Create separate dashboards for different purposes — media, networking, per-user, or anything you like."
+      },
+      "userMenu": {
+        "title": "Your Profile",
+        "description": "Change your colour scheme, language, home board, and preferences. You can also jump to the management area from here."
+      }
+    }
+  }
+}
