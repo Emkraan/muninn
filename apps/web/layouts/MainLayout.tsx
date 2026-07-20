@@ -70,6 +70,27 @@ export default function MainLayout({ children }: Props) {
           {children}
         </div>
       </div>
+      {/* Mandatory Emkraan brand tag (web-ui-standard). UI-only; does not affect
+          commit authorship. */}
+      <a
+        className="emkraan-tag"
+        href="https://github.com/Emkraan/muninn"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Built by Emkraan"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="emkraan-mark"
+          src="/brand/emkraan.png"
+          alt=""
+          width={18}
+          height={18}
+        />
+        <span className="emkraan-text">
+          Built by <b>Emkraan</b>
+        </span>
+      </a>
     </DragNDrop>
   );
 }
