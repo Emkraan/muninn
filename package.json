@@ -27,11 +27,11 @@
   },
   "devDependencies": {
     "dotenv-cli": "^8.0.0",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "concurrently": "^9.1.2",
-    "patch-package": "^8.0.0"
+    "patch-package": "^8.0.1"
   },
   "resolutions": {
     "react": "19.1.0",

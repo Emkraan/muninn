@@ -9,7 +9,7 @@
     "@linkwarden/types": "*",
     "next": "15.5.18",
     "next-i18next": "^15.3.0",
-    "react-hot-toast": "^2.4.1"
+    "react-hot-toast": "^2.6.0"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.51.15",
