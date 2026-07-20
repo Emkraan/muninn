@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { IBM_Plex_Mono, Inter, Sora } from "next/font/google";
 
 import "@gfazioli/mantine-onboarding-tour/styles.css";
 import "@homarr/notifications/styles.css";
@@ -41,6 +41,19 @@ import { composeWrappers } from "./compose";
 const fontSans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+});
+
+// Emkraan Cobalt display + mono faces (self-hosted via next/font).
+const fontDisplay = Sora({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+});
+
+const fontMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
 });
 
 // eslint-disable-next-line no-restricted-syntax
@@ -134,7 +147,7 @@ export default async function Layout(props: {
       dir={direction}
       data-mantine-color-scheme={colorScheme}
       style={{
-        backgroundColor: colorScheme === "dark" ? "#242424" : colorScheme === "auto" ? undefined : "#fff",
+        backgroundColor: colorScheme === "dark" ? "#0B1220" : colorScheme === "auto" ? undefined : "#fff",
       }}
       suppressHydrationWarning
     >
@@ -142,7 +155,29 @@ export default async function Layout(props: {
         <SearchEngineOptimization />
         <CrowdinLiveTranslation locale={locale} />
       </head>
-      <body className={[fontSans.className, fontSans.variable].join(" ")} suppressHydrationWarning>
+      <body
+        className={[fontSans.className, fontSans.variable, fontDisplay.variable, fontMono.variable].join(" ")}
+        suppressHydrationWarning
+      >
+        {/* Emkraan live animated background (Cobalt). Fixed behind all content;
+            painted at z-index:-1 above the html canvas. See styles.css .muninn-bg. */}
+        <div className="muninn-bg" aria-hidden="true">
+          <span className="muninn-blob b1" />
+          <span className="muninn-blob b2" />
+          <span className="muninn-blob b3" />
+          <span className="muninn-blob b4" />
+        </div>
+        <a
+          className="emkraan-tag"
+          href="https://github.com/Emkraan/muninn"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Built by Emkraan"
+        >
+          <span className="emkraan-tag-text">
+            Built by <b>Emkraan</b>
+          </span>
+        </a>
         <Analytics enabled={serverSettings.analytics.enableGeneral} />
         <StackedProvider>
           <Notifications pauseResetOnHover="notification" />
