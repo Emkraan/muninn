@@ -47,7 +47,7 @@
     "clsx": "^2.1.1",
     "colorjs.io": "^0.5.2",
     "csstype": "^3.1.2",
-    "dompurify": "^3.2.4",
+    "dompurify": "^3.4.11",
     "eslint-config-next": "13.4.9",
     "formidable": "^3.5.1",
     "fuse.js": "^7.0.0",
