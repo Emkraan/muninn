@@ -47,21 +47,21 @@ export default function WidgetTile({
   const healthy = status?.ok;
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-neutral-content bg-base-200 p-3 shadow-sm">
-      <div className="flex items-center justify-between gap-2">
+    <div className="flex flex-col gap-2.5 rounded-2xl border border-base-content/10 bg-base-200 p-4 shadow-sm transition-colors hover:border-base-content/20">
+      <div className="flex items-center justify-between gap-2 border-b border-base-content/10 pb-2.5">
         <div className="flex items-center gap-2 min-w-0">
           <span
             className={clsx(
               "inline-block h-2.5 w-2.5 rounded-full shrink-0",
               isLoading
-                ? "bg-neutral-content animate-pulse"
+                ? "bg-base-content/30 animate-pulse"
                 : healthy
-                  ? "bg-success"
-                  : "bg-error"
+                  ? "bg-success ring-2 ring-success/30"
+                  : "bg-error ring-2 ring-error/30"
             )}
             title={healthy ? "OK" : "Problem"}
           />
-          <p className="font-semibold truncate">
+          <p className="font-semibold text-base-content truncate">
             {status?.title || widgetType}
           </p>
         </div>
@@ -87,22 +87,25 @@ export default function WidgetTile({
       )}
 
       {status?.summary && (
-        <p className="text-sm text-neutral">{status.summary}</p>
+        <p className="text-sm text-base-content/70">{status.summary}</p>
       )}
 
       {status?.metrics && status.metrics.length > 0 && (
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           {status.metrics.map((m, i) => (
-            <div key={i} className="flex flex-col">
+            <div
+              key={i}
+              className="flex flex-col rounded-lg bg-base-300/60 px-3 py-1.5 min-w-[64px]"
+            >
               <span className="text-lg font-bold tabular-nums leading-tight">
                 {m.value}
                 {m.unit ? (
-                  <span className="text-xs font-normal text-neutral ml-0.5">
+                  <span className="text-xs font-normal text-base-content/50 ml-0.5">
                     {m.unit}
                   </span>
                 ) : null}
               </span>
-              <span className="text-[11px] uppercase tracking-wide text-neutral">
+              <span className="text-[10px] font-medium uppercase tracking-wider text-base-content/50">
                 {m.label}
               </span>
             </div>
@@ -115,7 +118,9 @@ export default function WidgetTile({
           {status.items.slice(0, 6).map((it, i) => (
             <li key={i} className="flex flex-col gap-0.5">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs truncate">{it.title}</span>
+                <span className="text-xs text-base-content/85 truncate">
+                  {it.title}
+                </span>
                 {it.badge && (
                   <span className="badge badge-sm badge-ghost shrink-0">
                     {it.badge}
@@ -130,7 +135,7 @@ export default function WidgetTile({
                 />
               )}
               {it.subtitle && (
-                <span className="text-[11px] text-neutral truncate">
+                <span className="text-[11px] text-base-content/50 truncate">
                   {it.subtitle}
                 </span>
               )}

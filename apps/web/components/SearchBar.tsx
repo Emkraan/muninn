@@ -147,7 +147,7 @@ export default function SearchBar({ placeholder }: Props) {
             <div className="flex justify-end">
               <Button asChild variant="ghost" size="sm" className="text-xs">
                 <Link
-                  href="https://docs.linkwarden.app/Usage/advanced-search"
+                  href="https://github.com/Emkraan/muninn#advanced-search"
                   target="_blank"
                   className="flex items-center gap-1"
                 >

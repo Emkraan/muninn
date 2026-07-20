@@ -32,8 +32,11 @@ module.exports = {
           "secondary-content": "#F7F9FB",
           accent: "#2486B9",
           "accent-content": "#F7F9FB",
-          neutral: "#1C1F25",
-          "neutral-content": "#262A31",
+          // Cobalt: neutral == legible muted text (used app-wide as text-neutral);
+          // neutral-content == visible hairline border (used as border-neutral-content).
+          // The upstream near-black values (#1C1F25 / #262A31) made both invisible.
+          neutral: "#7C879A",
+          "neutral-content": "#263049",
           "base-100": "#0B1220",
           "base-200": "#131B2E",
           "base-300": "#182238",

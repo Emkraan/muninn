@@ -22,7 +22,7 @@ export default function Announcement({ toggleAnnouncementBar }: Props) {
               values={{ version: announcementId }}
               components={[
                 <Link
-                  href={`https://linkwarden.app/blog/releases/${announcementId}`}
+                  href={`https://github.com/Emkraan/muninn/releases/tag/${announcementId}`}
                   target="_blank"
                   className="underline decoration-dotted underline-offset-4 hover:text-primary duration-100"
                   key={0}
@@ -34,7 +34,7 @@ export default function Announcement({ toggleAnnouncementBar }: Props) {
               i18nKey={announcementMessage}
               components={[
                 <Link
-                  href={`https://linkwarden.app/blog`}
+                  href={`https://github.com/Emkraan/muninn/releases`}
                   target="_blank"
                   className="underline decoration-dotted underline-offset-4 hover:text-primary duration-100"
                   key={0}

@@ -2,7 +2,6 @@ import Navbar from "@/components/Navbar";
 import Announcement from "@/components/Announcement";
 import Sidebar from "@/components/Sidebar";
 import { ReactNode, useEffect, useState } from "react";
-import getLatestVersion from "@/lib/client/getLatestVersion";
 import DragNDrop from "@/components/DragNDrop";
 import { LinkIncludingShortenedCollectionAndTags } from "@linkwarden/types/global";
 
@@ -14,16 +13,15 @@ export default function MainLayout({ children }: Props) {
   const showAnnouncementBar = localStorage.getItem("showAnnouncementBar");
   const sidebarState = localStorage.getItem("sidebarIsCollapsed");
 
+  // Muninn does not phone home for an upstream release feed; the banner only
+  // shows if the user re-enables it. Defaults OFF (was ON via an upstream
+  // version check that leaked Linkwarden's version + blog URL).
   const [showAnnouncement, setShowAnnouncement] = useState(
-    showAnnouncementBar ? showAnnouncementBar === "true" : true
+    showAnnouncementBar === "true"
   );
   const [sidebarIsCollapsed, setSidebarIsCollapsed] = useState(
     sidebarState ? sidebarState === "true" : false
   );
-
-  useEffect(() => {
-    getLatestVersion(setShowAnnouncement);
-  }, []);
 
   useEffect(() => {
     localStorage.setItem(

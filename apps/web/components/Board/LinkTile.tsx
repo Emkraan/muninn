@@ -30,38 +30,44 @@ function faviconFor(url?: string): string | null {
 export default function LinkTile({ link, onDelete, editable }: Props) {
   const favicon = faviconFor(link.url);
   const label = link.name || link.url || "Untitled";
+  const [imgFailed, setImgFailed] = React.useState(false);
 
   return (
-    <div className="group relative">
+    <div className="group/tile relative">
       <a
         href={link.url || "#"}
         target="_blank"
         rel="noreferrer"
-        className="flex items-center gap-3 rounded-xl border border-neutral-content bg-base-200 p-3 shadow-sm transition-transform hover:-translate-y-0.5 hover:border-primary"
+        className="board-tile flex items-center gap-3.5 p-3.5"
       >
         <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-base-300"
+          className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-base-300 text-xl ring-1 ring-base-content/10"
           style={link.color ? { color: link.color } : undefined}
         >
-          {favicon ? (
+          {favicon && !imgFailed ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={favicon}
               alt=""
-              width={20}
-              height={20}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).style.display = "none";
-              }}
+              width={28}
+              height={28}
+              className="rounded-md"
+              onError={() => setImgFailed(true)}
             />
+          ) : link.icon ? (
+            <i className={link.icon} />
           ) : (
-            <i className={link.icon || "bi-link-45deg"} />
+            <span className="font-semibold text-base-content/70">
+              {label.charAt(0).toUpperCase()}
+            </span>
           )}
         </div>
         <div className="min-w-0">
-          <p className="font-medium truncate">{label}</p>
+          <p className="font-semibold text-base-content truncate leading-tight">
+            {label}
+          </p>
           {link.collection?.name && (
-            <p className="text-[11px] text-neutral truncate">
+            <p className="text-[11px] font-medium text-base-content/55 truncate">
               {link.collection.name}
             </p>
           )}
@@ -70,7 +76,7 @@ export default function LinkTile({ link, onDelete, editable }: Props) {
       {editable && onDelete && (
         <button
           onClick={onDelete}
-          className="btn btn-ghost btn-xs absolute right-1 top-1 opacity-0 group-hover:opacity-100"
+          className="btn btn-ghost btn-xs absolute right-1.5 top-1.5 opacity-0 transition-opacity group-hover/tile:opacity-100"
           aria-label="Remove link"
         >
           <i className="bi-x-lg" />

@@ -18,6 +18,14 @@ export default function Document() {
         />
       </Head>
       <body>
+        {/* Emkraan live animated background: slow-drifting cobalt blobs behind
+            the whole app. Styles + reduced-motion in globals.css (.bg-blobs). */}
+        <div className="bg-blobs" aria-hidden="true">
+          <span className="blob b1" />
+          <span className="blob b2" />
+          <span className="blob b3" />
+          <span className="blob b4" />
+        </div>
         <Main />
         <NextScript />
       </body>
