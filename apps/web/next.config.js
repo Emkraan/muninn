@@ -16,7 +16,7 @@ const nextConfig = {
   },
   transpilePackages: ["@linkwarden/prisma"],
   env: {
-    version,
+    version: process.env.MUNINN_VERSION || version,
   },
   webpack(config) {
     config.resolve.fallback = {

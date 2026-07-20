@@ -106,9 +106,9 @@ export default function Sidebar({
               src={"/icon.png"}
               width={640}
               height={136}
-              alt="Linkwarden Icon"
+              alt="Muninn"
               className="h-8 w-auto cursor-pointer"
-              onClick={() => router.push("/dashboard")}
+              onClick={() => router.push("/board")}
               priority
             />
           ) : user?.theme === "light" ? (
@@ -116,9 +116,9 @@ export default function Sidebar({
               src={"/linkwarden_light.png"}
               width={640}
               height={136}
-              alt="Linkwarden"
+              alt="Muninn"
               className="h-9 w-auto cursor-pointer"
-              onClick={() => router.push("/dashboard")}
+              onClick={() => router.push("/board")}
               priority
             />
           ) : (
@@ -126,9 +126,9 @@ export default function Sidebar({
               src={"/linkwarden_dark.png"}
               width={640}
               height={136}
-              alt="Linkwarden"
+              alt="Muninn"
               className="h-9 w-auto cursor-pointer"
-              onClick={() => router.push("/dashboard")}
+              onClick={() => router.push("/board")}
               priority
             />
           )}

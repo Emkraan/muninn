@@ -33,7 +33,7 @@ const InstallApp = (props: Props) => {
               <a
                 className="underline"
                 target="_blank"
-                href="https://docs.linkwarden.app/getting-started/pwa-installation"
+                href="https://github.com/Emkraan/muninn#install-as-an-app"
                 key={0}
               />,
             ]}

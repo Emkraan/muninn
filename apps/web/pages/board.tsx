@@ -93,7 +93,9 @@ const Board: NextPageWithLayout = () => {
       <div className="p-6">
         <PageHeader icon="bi-grid-1x2" title={t("board")} description="" />
         <div className="mt-8 flex flex-col items-center gap-3 text-center">
-          <p className="text-neutral">{"You don't have a board yet."}</p>
+          <p className="text-base-content/60">
+            {"You don't have a board yet."}
+          </p>
           <Button onClick={handleCreateBoard} disabled={createBoard.isPending}>
             <i className="bi-plus-lg mr-1" /> Create your first board
           </Button>
@@ -141,19 +143,21 @@ const Board: NextPageWithLayout = () => {
       </div>
 
       {sections.length === 0 && (
-        <p className="text-neutral">
+        <p className="text-base-content/60">
           This board is empty.{" "}
           {editing ? "Add a section to get started." : "Enable Edit to add sections."}
         </p>
       )}
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-8">
         {sections.map((section: any) => (
           <div key={section.id} className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral">
+            <div className="flex items-center gap-3">
+              <h2 className="board-section-title">
+                <span className="inline-block h-3.5 w-1 rounded-full bg-primary" />
                 {section.name}
               </h2>
+              <span className="h-px flex-1 bg-base-content/10" />
               {editing && (
                 <div className="flex items-center gap-2">
                   <AddWidgetInline
@@ -175,7 +179,7 @@ const Board: NextPageWithLayout = () => {
                 </div>
               )}
             </div>
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(min(240px,100%),1fr))] gap-3">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))] gap-4">
               {section.items.map((item: any) =>
                 item.kind === "widget" ? (
                   <WidgetTile

@@ -340,3 +340,116 @@ textarea:focus-visible,
   color: #f7f9fb;
   font-weight: 600;
 }
+
+/* ============================================================================
+   Live animated background (Emkraan web-ui-standard). Four slow-drifting,
+   blurred cobalt blobs fixed behind the whole app; GPU-composited, pointer
+   inert. The app shell (#__next) is lifted to z-index:1 so content paints
+   above the blobs, and the main board area is transparent so they show
+   through behind the floating tiles (the Homarr-style live board look).
+   Blob markup lives in _document.tsx, before <Main/>.
+   ============================================================================ */
+.bg-blobs {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+.bg-blobs .blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(72px);
+  will-change: transform;
+}
+.bg-blobs .b1 {
+  width: 46vw;
+  height: 46vw;
+  left: -10vw;
+  top: -14vh;
+  background: radial-gradient(circle, rgba(36, 134, 185, 0.2), rgba(0, 0, 0, 0) 66%);
+  animation: drift1 15s ease-in-out infinite alternate;
+}
+.bg-blobs .b2 {
+  width: 40vw;
+  height: 40vw;
+  right: -8vw;
+  top: 2vh;
+  background: radial-gradient(circle, rgba(74, 159, 224, 0.16), rgba(0, 0, 0, 0) 66%);
+  animation: drift2 13s ease-in-out infinite alternate;
+}
+.bg-blobs .b3 {
+  width: 52vw;
+  height: 52vw;
+  left: 6vw;
+  bottom: -24vh;
+  background: radial-gradient(circle, rgba(27, 111, 184, 0.18), rgba(0, 0, 0, 0) 66%);
+  animation: drift3 18s ease-in-out infinite alternate;
+}
+.bg-blobs .b4 {
+  width: 34vw;
+  height: 34vw;
+  right: 4vw;
+  bottom: -10vh;
+  background: radial-gradient(circle, rgba(52, 199, 89, 0.11), rgba(0, 0, 0, 0) 66%);
+  animation: drift4 16s ease-in-out infinite alternate;
+}
+
+@keyframes drift1 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(26vw, 20vh, 0) scale(1.28); }
+}
+@keyframes drift2 {
+  0% { transform: translate3d(0, 0, 0) scale(1.15); }
+  100% { transform: translate3d(-24vw, 26vh, 0) scale(0.82); }
+}
+@keyframes drift3 {
+  0% { transform: translate3d(0, 0, 0) scale(0.9); }
+  100% { transform: translate3d(22vw, -24vh, 0) scale(1.3); }
+}
+@keyframes drift4 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(-26vw, -18vh, 0) scale(1.35); }
+}
+
+/* Lift the app shell above the fixed blobs; keep it transparent so they show. */
+#__next {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+}
+
+/* Emkraan animated blobs freeze for reduced-motion users (mandatory). */
+@media (prefers-reduced-motion: reduce) {
+  .bg-blobs .blob {
+    animation: none !important;
+  }
+}
+
+/* ============================================================================
+   Homarr-style board surfaces. Shared so LinkTile + WidgetTile stay identical
+   and the hover lift/glow is centralized. Clear panel two steps above canvas,
+   hairline border, hover lift + accent glow.
+   ============================================================================ */
+@layer components {
+  .board-tile {
+    @apply rounded-2xl border border-base-content/10 bg-base-200 shadow-sm;
+    @apply transition-all duration-150;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .board-tile:hover {
+      @apply -translate-y-1 border-primary/60 bg-base-300 shadow-lg shadow-primary/10;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .board-tile,
+    .board-tile:hover {
+      transition: none;
+      transform: none;
+    }
+  }
+  .board-section-title {
+    @apply flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-base-content/60;
+  }
+}
