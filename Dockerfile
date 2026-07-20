@@ -1,95 +1,89 @@
-# ==============================================================================
-# Stage 1: Monolith Builder
-# ==============================================================================
-FROM docker.io/rust:1.96-bullseye AS monolith-builder
-RUN set -eux && cargo install --locked monolith
+# syntax=docker/dockerfile:1.25
 
-# ==============================================================================
-# Stage 2: App Builder (Where the heavy building happens)
-# ==============================================================================
-FROM node:22.23-bullseye-slim AS app-builder
+FROM node:24.18.0-alpine AS base
 
-ENV YARN_HTTP_TIMEOUT=10000000
-ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-ENV PRISMA_HIDE_UPDATE_MESSAGE=1
-# The web postinstall runs `playwright install`; skip it here since the browser
-# is installed in the final stage. Avoids downloading a browser we then discard.
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-WORKDIR /data
+FROM base AS builder
+WORKDIR /app
+RUN apk add --no-cache libc6-compat curl bash && apk update
 
-RUN corepack enable
+RUN corepack enable pnpm
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY patches ./patches
+# Workaround for pnpm/pnpm#5268: pnpm fetch crashes when patchedDependencies
+# are configured with nodeLinker: hoisted. The applyPatchToDir function tries
+# to chdir into node_modules/<pkg> which doesn't exist during fetch (only the
+# content-addressable store is populated). By temporarily switching to the
+# isolated linker, patches apply inside the virtual store (node_modules/.pnpm/...)
+# which IS created by pnpm fetch. The original hoisted linker is restored
+# before the install step so the final node_modules layout stays flat.
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm config set store-dir /pnpm/store && \
+    sed -i 's/nodeLinker: hoisted/nodeLinker: isolated/' pnpm-workspace.yaml && \
+    pnpm fetch && \
+    sed -i 's/nodeLinker: isolated/nodeLinker: hoisted/' pnpm-workspace.yaml
 
-# Copy only structure first for optimized caching
-COPY package.json yarn.lock .yarnrc.yml ./
-COPY apps/web/package.json ./apps/web/
-COPY apps/worker/package.json ./apps/worker/
-COPY packages/filesystem/package.json ./packages/filesystem/
-COPY packages/lib/package.json ./packages/lib/
-COPY packages/prisma/package.json ./packages/prisma/
-COPY packages/router/package.json ./packages/router/
-COPY packages/types/package.json ./packages/types/
-
-# Install everything needed to build
-RUN --mount=type=cache,sharing=locked,target=/root/.yarn/berry/cache \
-    yarn workspaces focus muninn @linkwarden/web @linkwarden/worker
-
-# Copy source and build
 COPY . .
-RUN yarn prisma:generate && \
-    yarn web:build
+# Follow the pnpm fetch pattern from https://pnpm.io/cli/fetch
+# --frozen-lockfile is omitted as recommended by the pnpm fetch docs
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install --recursive
 
-# Clean up dev dependencies right here before copying to the final stage
-RUN yarn workspaces focus --production muninn @linkwarden/web @linkwarden/worker && \
-    rm -rf apps/web/.next/cache && \
-    yarn cache clean
+ARG SKIP_ENV_VALIDATION='true'
+ARG CI='true'
+ARG DISABLE_REDIS_LOGS='true'
+ARG TARGETPLATFORM
 
-# ==============================================================================
-# Stage 3: Final Runtime (This stage will be ~400MB total)
-# ==============================================================================
-FROM node:22.23-bullseye-slim AS main-app
-ENV NODE_ENV=production
-ENV PRISMA_HIDE_UPDATE_MESSAGE=1
-# Version surfaced at /api/v1/health and the UI footer (baked by CI from VERSION).
-ARG APP_VERSION=0.1.0
-ENV MUNINN_VERSION=$APP_VERSION
-# Stable, copyable browser location shared by install and runtime
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-ARG DEBIAN_FRONTEND=noninteractive
-WORKDIR /data
+RUN --mount=type=secret,id=TURBO_API,env=TURBO_API \
+    --mount=type=secret,id=TURBO_TEAM,env=TURBO_TEAM \
+    --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN \
+    --mount=type=secret,id=TURBO_REMOTE_CACHE_SIGNATURE_KEY,env=TURBO_REMOTE_CACHE_SIGNATURE_KEY \
+    TURBO_PLATFORM="${TARGETPLATFORM:-linux/amd64}" pnpm build
 
-# Copy the Rust monolith binary
-COPY --from=monolith-builder /usr/local/cargo/bin/monolith /usr/local/bin/monolith
+FROM base AS runner
+WORKDIR /app
 
-# Install minimal runtime system utilities
-# procps provides `ps`, which concurrently -k needs to manage child processes
-RUN set -eux && \
-    apt-get update && \
-    apt-get install -yqq --no-install-recommends curl ca-certificates openssl procps && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# gettext is required for envsubst, openssl for generating AUTH_SECRET, su-exec for running application as non-root
+RUN apk add --no-cache redis nginx bash gettext su-exec openssl
+RUN mkdir /appdata
+VOLUME /appdata
 
-# Copy ONLY the clean production assets from Stage 2
-COPY --from=app-builder /data/node_modules ./node_modules
-COPY --from=app-builder /data/package.json ./package.json
-COPY --from=app-builder /data/apps/web ./apps/web
-COPY --from=app-builder /data/apps/worker ./apps/worker
-COPY --from=app-builder /data/packages ./packages
+# Enable homarr cli
+COPY --from=builder /app/packages/cli/cli.cjs /app/apps/cli/cli.cjs
+RUN echo $'#!/bin/bash\ncd /app/apps/cli && node ./cli.cjs "$@"' > /usr/bin/homarr
+RUN chmod +x /usr/bin/homarr
 
-# Install only the Chromium headless shell (Playwright's smallest browser) plus
-# the shared libraries it needs at runtime. Full Chromium is not required.
-RUN set -eux && \
-    export PATH=/data/node_modules/.bin:$PATH && \
-    apt-get update && \
-    playwright install --with-deps chromium-headless-shell && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Don't run production as root
+RUN mkdir -p /var/cache/nginx && \
+    mkdir -p /var/log/nginx && \
+    mkdir -p /var/lib/nginx && \
+    touch /run/nginx/nginx.pid && \
+    mkdir -p /etc/nginx/templates /etc/nginx/ssl/certs
 
-HEALTHCHECK --interval=30s \
-            --timeout=5s \
-            --start-period=10s \
-            --retries=3 \
-            CMD [ "/usr/bin/curl", "--silent", "--fail", "http://127.0.0.1:3000/" ]
+COPY --from=builder /app/apps/nextjs/next.config.ts .
+COPY --from=builder /app/apps/nextjs/package.json .
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 
-EXPOSE 3000
+COPY --from=builder /app/node_modules/better-sqlite3/build/Release/better_sqlite3.node /app/build/better_sqlite3.node
 
-CMD ["sh", "-c", "export PATH=/data/node_modules/.bin:$PATH && prisma migrate deploy --schema=/data/packages/prisma/schema.prisma && exec concurrently -k -n web,worker \"cd /data/apps/web && exec next start\" \"cd /data/apps/worker && exec tsx worker.ts\""]
+COPY --from=builder /app/packages/db/migrations ./db/migrations
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder /app/apps/nextjs/.next/standalone ./
+COPY --from=builder /app/apps/nextjs/.next/static ./apps/nextjs/.next/static
+COPY --from=builder /app/apps/nextjs/public ./apps/nextjs/public
+COPY scripts/run.sh ./run.sh
+COPY --chmod=755 scripts/entrypoint.sh ./entrypoint.sh
+COPY packages/redis/redis.conf /app/redis.conf
+COPY nginx.conf /etc/nginx/templates/nginx.conf
+
+
+ENV DB_URL='/appdata/db/db.sqlite'
+ENV DB_DIALECT='sqlite'
+ENV DB_DRIVER='better-sqlite3'
+ENV AUTH_PROVIDERS='credentials'
+ENV REDIS_IS_EXTERNAL='false'
+ENV NODE_ENV='production'
+
+ENTRYPOINT [ "/app/entrypoint.sh" ]
+CMD ["sh", "run.sh"]

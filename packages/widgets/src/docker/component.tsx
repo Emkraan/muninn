@@ -1,0 +1,318 @@
+"use client";
+
+import { useMemo } from "react";
+import { ActionIcon, Avatar, Badge, Center, Group, Stack, Text, Tooltip } from "@mantine/core";
+import type { IconProps } from "@tabler/icons-react";
+import { IconBrandDocker, IconPlayerPlay, IconPlayerStop, IconRefresh, IconRotateClockwise } from "@tabler/icons-react";
+import type { MRT_ColumnDef, MRT_VisibilityState } from "mantine-react-table";
+import { MantineReactTable } from "mantine-react-table";
+
+import type { RouterOutputs } from "@homarr/api";
+import { clientApi } from "@homarr/api/client";
+import { formatBytes, useTimeAgo } from "@homarr/common";
+import type { ContainerState } from "@homarr/docker";
+import { containerStateColorMap, cpuUsageColor, memoryUsageColor, safeValue } from "@homarr/docker/shared";
+import { showErrorNotification, showSuccessNotification } from "@homarr/notifications";
+import { useScopedI18n } from "@homarr/translation/client";
+import { useTranslatedMantineReactTable } from "@homarr/ui/hooks";
+
+import type { WidgetComponentProps } from "../definition";
+
+const ContainerStateBadge = ({ state }: { state: ContainerState }) => {
+  const t = useScopedI18n("docker.field.state.option");
+
+  return (
+    <Badge size="xs" radius="sm" variant="light" color={containerStateColorMap[state]}>
+      {t(state)}
+    </Badge>
+  );
+};
+
+const actionIconIconStyle: IconProps["style"] = {
+  height: "var(--ai-icon-size)",
+  width: "var(--ai-icon-size)",
+};
+
+const createColumns = (
+  t: ReturnType<typeof useScopedI18n<"docker">>,
+): MRT_ColumnDef<RouterOutputs["docker"]["getContainers"]["containers"][number]>[] => [
+  {
+    id: "name",
+    accessorKey: "name",
+    header: t("field.name.label"),
+    Cell({ renderedCellValue, row }) {
+      return (
+        <Group gap="xs" wrap="nowrap">
+          <Avatar variant="outline" size={20} src={row.original.iconUrl} />
+          <Text p="0.5" size="sm" style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+            {renderedCellValue}
+          </Text>
+        </Group>
+      );
+    },
+  },
+  {
+    id: "state",
+    accessorKey: "state",
+    size: 100,
+    header: t("field.state.label"),
+    Cell({ row }) {
+      return <ContainerStateBadge state={row.original.state} />;
+    },
+  },
+  {
+    id: "host",
+    accessorKey: "host",
+    size: 100,
+    header: t("field.host.label"),
+    Cell({ row }) {
+      return (
+        <Text size="xs" truncate="end">
+          {row.original.host}
+        </Text>
+      );
+    },
+  },
+  {
+    id: "cpuUsage",
+    sortingFn: (rowA, rowB) => {
+      const cpuUsageA = safeValue(rowA.original.cpuUsage);
+      const cpuUsageB = safeValue(rowB.original.cpuUsage);
+
+      return cpuUsageA - cpuUsageB;
+    },
+    accessorKey: "cpuUsage",
+    size: 80,
+    header: t("field.stats.cpu.label"),
+    Cell({ row }) {
+      const cpuUsage = safeValue(row.original.cpuUsage);
+
+      return (
+        <Text size="xs" c={cpuUsageColor(cpuUsage, row.original.state)}>
+          {cpuUsage.toFixed(2)}%
+        </Text>
+      );
+    },
+  },
+  {
+    id: "memoryUsage",
+    sortingFn: (rowA, rowB) => {
+      const memoryUsageA = safeValue(rowA.original.memoryUsage);
+      const memoryUsageB = safeValue(rowB.original.memoryUsage);
+
+      return memoryUsageA - memoryUsageB;
+    },
+    accessorKey: "memoryUsage",
+    size: 80,
+    header: t("field.stats.memory.label"),
+    Cell({ row }) {
+      const bytesUsage = safeValue(row.original.memoryUsage);
+
+      return (
+        <Text size="xs" c={memoryUsageColor(bytesUsage, row.original.state)}>
+          {formatBytes(bytesUsage)}
+        </Text>
+      );
+    },
+  },
+  {
+    id: "actions",
+    accessorKey: "actions",
+    size: 80,
+    header: t("action.title"),
+    enableSorting: false,
+    Cell({ row }) {
+      const utils = clientApi.useUtils();
+      // eslint-disable-next-line no-restricted-syntax
+      const onSettled = async () => {
+        await utils.docker.getContainers.invalidate();
+      };
+      const { mutateAsync: startContainer } = clientApi.docker.startAll.useMutation({ onSettled });
+      const { mutateAsync: stopContainer } = clientApi.docker.stopAll.useMutation({ onSettled });
+      const { mutateAsync: restartContainer } = clientApi.docker.restartAll.useMutation({ onSettled });
+
+      const handleActionAsync = async (action: "start" | "stop" | "restart") => {
+        const mutation = action === "start" ? startContainer : action === "stop" ? stopContainer : restartContainer;
+
+        await mutation(
+          { ids: [row.original.id] },
+          {
+            onSuccess() {
+              showSuccessNotification({
+                title: t(`action.${action}.notification.success.title`),
+                message: t(`action.${action}.notification.success.message`),
+              });
+            },
+            onError() {
+              showErrorNotification({
+                title: t(`action.${action}.notification.error.title`),
+                message: t(`action.${action}.notification.error.message`),
+              });
+            },
+          },
+        );
+      };
+
+      return (
+        <Group wrap="nowrap" gap="xs">
+          <Tooltip label={row.original.state === "running" ? t("action.stop.label") : t("action.start.label")}>
+            <ActionIcon
+              variant="subtle"
+              size="xs"
+              radius="100%"
+              onClick={() => handleActionAsync(row.original.state === "running" ? "stop" : "start")}
+            >
+              {row.original.state === "running" ? (
+                <IconPlayerStop style={actionIconIconStyle} />
+              ) : (
+                <IconPlayerPlay style={actionIconIconStyle} />
+              )}
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label={t("action.restart.label")}>
+            <ActionIcon variant="subtle" size="xs" radius="100%" onClick={() => handleActionAsync("restart")}>
+              <IconRotateClockwise style={actionIconIconStyle} />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
+      );
+    },
+  },
+];
+
+export default function DockerWidget({ options, width, isEditMode }: WidgetComponentProps<"dockerContainers">) {
+  const t = useScopedI18n("docker");
+  const isTiny = width <= 256;
+
+  const { data, refetch, isFetching } = clientApi.docker.getContainers.useQuery();
+  const containers = data?.containers ?? [];
+  const timestamp = useMemo(() => data?.timestamp ?? new Date(), [data?.timestamp]);
+  const relativeTime = useTimeAgo(timestamp);
+
+  const totalContainers = containers.length;
+
+  const totals = useMemo(() => {
+    return containers.reduce(
+      (acc, container) => {
+        acc.cpu += safeValue(container.cpuUsage);
+        acc.memory += safeValue(container.memoryUsage);
+        return acc;
+      },
+      { cpu: 0, memory: 0 },
+    );
+  }, [containers]);
+
+  const columns = useMemo(() => createColumns(t), [t]);
+
+  const columnVisibility: MRT_VisibilityState = {
+    name: options.columns.includes("name"),
+    state: options.columns.includes("state"),
+    host: options.columns.includes("host"),
+    cpuUsage: options.columns.includes("cpuUsage"),
+    memoryUsage: options.columns.includes("memoryUsage"),
+    actions: options.columns.includes("actions"),
+  };
+
+  const table = useTranslatedMantineReactTable({
+    columns,
+    data: containers,
+    enablePagination: false,
+    enableTopToolbar: false,
+    enableBottomToolbar: false,
+    enableColumnActions: false,
+    enableSorting: options.enableRowSorting && !isEditMode,
+    enableStickyHeader: false,
+    enableColumnOrdering: false,
+    enableRowSelection: false,
+    enableFullScreenToggle: false,
+    enableGlobalFilter: false,
+    enableDensityToggle: false,
+    enableFilters: false,
+    enableHiding: false,
+    initialState: {
+      sorting: [{ id: options.defaultSort, desc: options.descendingDefaultSort }],
+      density: "xs",
+    },
+    state: {
+      columnVisibility,
+    },
+    mantinePaperProps: {
+      flex: 1,
+      withBorder: false,
+      shadow: undefined,
+    },
+    mantineTableProps: {
+      className: "docker-widget-table",
+      style: {
+        tableLayout: "fixed",
+      },
+    },
+    mantineTableHeadProps: {
+      fz: "xs",
+    },
+    mantineTableHeadCellProps: {
+      p: 4,
+    },
+    mantineTableBodyCellProps: {
+      p: 4,
+    },
+    mantineTableContainerProps: {
+      style: {
+        height: "100%",
+      },
+    },
+  });
+
+  if (options.columns.length === 0)
+    return (
+      <Center h="100%">
+        <Text>{t("error.noColumns")}</Text>
+      </Center>
+    );
+
+  return (
+    <Stack gap={0} h="100%" display="flex">
+      <MantineReactTable table={table} />
+
+      {!isTiny && (
+        <Group
+          justify="space-between"
+          style={{
+            borderTop: "0.0625rem solid var(--border-color)",
+          }}
+          p={4}
+        >
+          <Group gap={4} wrap="nowrap">
+            <IconBrandDocker size={20} style={{ flexShrink: 0 }} />
+            <Text size="sm" truncate="end">
+              {t("table.footer", { count: totalContainers.toString() })}
+            </Text>
+          </Group>
+
+          <Group gap="sm" wrap="wrap" justify="flex-end" style={{ flex: 1, minWidth: 0 }}>
+            <Text size="sm" style={{ whiteSpace: "nowrap" }}>
+              {t("table.totalCpu", { cpu: totals.cpu.toFixed(2) })}
+            </Text>
+
+            <Text size="sm" style={{ whiteSpace: "nowrap" }}>
+              {t("table.totalMemory", { memory: formatBytes(totals.memory) })}
+            </Text>
+
+            <Tooltip label={t("table.refresh.lastUpdated", { when: relativeTime })}>
+              <ActionIcon
+                size="sm"
+                variant="transparent"
+                c="var(--mantine-color-text)"
+                loading={isFetching}
+                onClick={() => void refetch()}
+                aria-label={t("table.refresh.lastUpdated", { when: relativeTime })}
+              >
+                <IconRefresh style={actionIconIconStyle} />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
+        </Group>
+      )}
+    </Stack>
+  );
+}
