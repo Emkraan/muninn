@@ -93,7 +93,7 @@ const Board: NextPageWithLayout = () => {
       <div className="p-6">
         <PageHeader icon="bi-grid-1x2" title={t("board")} description="" />
         <div className="mt-8 flex flex-col items-center gap-3 text-center">
-          <p className="text-neutral">You don't have a board yet.</p>
+          <p className="text-neutral">{"You don't have a board yet."}</p>
           <Button onClick={handleCreateBoard} disabled={createBoard.isPending}>
             <i className="bi-plus-lg mr-1" /> Create your first board
           </Button>
