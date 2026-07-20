@@ -344,15 +344,18 @@ textarea:focus-visible,
 /* ============================================================================
    Live animated background (Emkraan web-ui-standard). Four slow-drifting,
    blurred cobalt blobs fixed behind the whole app; GPU-composited, pointer
-   inert. The app shell (#__next) is lifted to z-index:1 so content paints
-   above the blobs, and the main board area is transparent so they show
-   through behind the floating tiles (the Homarr-style live board look).
-   Blob markup lives in _document.tsx, before <Main/>.
+   inert. Painted at z-index:-1: above the html canvas (#0B1220) but behind
+   all app content (body + #__next are transparent, so the blobs show through
+   behind the floating tiles -- the Homarr-style live board look). Using a
+   NEGATIVE z-index instead of lifting #__next above the blobs deliberately
+   avoids creating a stacking context on the app shell, which would otherwise
+   bury body-portaled overlays that carry no explicit z-index (e.g. the mobile
+   vaul Drawer.Overlay scrim). Blob markup lives in _document.tsx, before <Main/>.
    ============================================================================ */
 .bg-blobs {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
   overflow: hidden;
   pointer-events: none;
   contain: strict;
@@ -411,13 +414,6 @@ textarea:focus-visible,
 @keyframes drift4 {
   0% { transform: translate3d(0, 0, 0) scale(1); }
   100% { transform: translate3d(-26vw, -18vh, 0) scale(1.35); }
-}
-
-/* Lift the app shell above the fixed blobs; keep it transparent so they show. */
-#__next {
-  position: relative;
-  z-index: 1;
-  min-height: 100%;
 }
 
 /* Emkraan animated blobs freeze for reduced-motion users (mandatory). */

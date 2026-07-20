@@ -30,7 +30,7 @@ export default async function health(
   return res.status(ok ? 200 : 503).json({
     ok,
     service: "muninn",
-    version: process.env.MUNINN_VERSION || "0.1.3",
+    version: process.env.MUNINN_VERSION || "0.1.4",
     subsystems,
     timestamp: new Date().toISOString(),
   });

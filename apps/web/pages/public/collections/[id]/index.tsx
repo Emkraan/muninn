@@ -110,10 +110,10 @@ export default function PublicCollections() {
       >
         {collection && (
           <Head>
-            <title>{collection.name} | Linkwarden</title>
+            <title>{collection.name} | Muninn</title>
             <meta
               property="og:title"
-              content={`${collection.name} | Linkwarden`}
+              content={`${collection.name} | Muninn`}
               key="title"
             />
           </Head>
@@ -190,7 +190,7 @@ export default function PublicCollections() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <Link href="https://linkwarden.app/" target="_blank">
+                    <Link href="https://github.com/Emkraan/muninn" target="_blank">
                       <Image
                         src={`/icon.png`}
                         width={551}
