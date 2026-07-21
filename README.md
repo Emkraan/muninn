@@ -13,8 +13,9 @@ first-party standard.
 
 ## What Muninn adds on top of Homarr
 
-- **Cobalt UI** — the Emkraan dark, logo-blue design system with a live animated
-  background.
+- **Cobalt UI** — a dark, logo-blue design system with a live animated
+  background and a redesigned sign-in screen (glowing logo badge + an ambient
+  animated raven, reduced-motion aware).
 - **Strict per-user RBAC** — boards, apps, and integrations are private to their
   owner by default; an admin selectively grants access to specific users or
   groups. (Upstream Homarr shows every app to every logged-in user.)
