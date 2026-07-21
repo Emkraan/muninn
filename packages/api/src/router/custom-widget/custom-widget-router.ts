@@ -40,9 +40,9 @@ function getImportJsonSchema() {
   if (!_importJsonSchema) {
     _importJsonSchema = {
       ...z.toJSONSchema(customWidgetImportSchema),
-      title: "Homarr Custom Widget",
+      title: "Muninn Custom Widget",
       description:
-        "Schema for importing/exporting custom widget definitions in Homarr. " +
+        "Schema for importing/exporting custom widget definitions in Muninn. " +
         "All jsonPath fields use JSONPath syntax (e.g. $.data.count, $.items[0].name). " +
         "The displayConfig must match the chosen displayType. " +
         "Secrets (API keys, passwords) are not included in exports and must be configured separately after import.",

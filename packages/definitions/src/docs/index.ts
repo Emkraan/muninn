@@ -1,6 +1,6 @@
 import type { HomarrDocumentationPath } from "./homarr-docs-sitemap";
 
-const documentationBaseUrl = "https://homarr.dev";
+const documentationBaseUrl = "https://github.com/Emkraan/muninn";
 
 // Please use the method so the path can be checked!
 export const createDocumentationLink = (

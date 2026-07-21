@@ -1,7 +1,7 @@
 import { Alert, Anchor, Text } from "@mantine/core";
 import { IconFlask } from "@tabler/icons-react";
 
-const FEEDBACK_URL = "https://github.com/homarr-labs/homarr/discussions/categories/custom-widgets";
+const FEEDBACK_URL = "https://github.com/Emkraan/muninn/issues";
 
 export function CustomWidgetBetaBanner() {
   return (

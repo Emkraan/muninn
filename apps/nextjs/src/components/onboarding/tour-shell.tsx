@@ -144,7 +144,7 @@ export const TourShell = ({ steps, started, onEnd, stepRoutes, position, childre
           </Group>
           {stepIndexFromController(controller) === 0 && (
             <Center py="xs">
-              <Image src={homarrLogoPath} alt="Homarr" w={64} h={64} fit="contain" />
+              <Image src={homarrLogoPath} alt="Muninn" w={64} h={64} fit="contain" />
             </Center>
           )}
         </>

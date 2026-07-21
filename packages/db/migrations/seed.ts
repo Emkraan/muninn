@@ -222,10 +222,10 @@ const seedDefaultSearchEnginesAsync = async (db: Database) => {
     },
     {
       id: homarrId,
-      name: "Homarr Docs",
-      iconUrl: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/homarr.svg",
+      name: "Muninn Docs",
+      iconUrl: "/icon.png",
       short: "docs",
-      description: "Search the Homarr documentation",
+      description: "Search the Muninn documentation",
       urlTemplate: createDocumentationLink("/search", undefined, { q: "%s" }),
       type: "generic" as const,
       integrationId: null,
@@ -235,14 +235,14 @@ const seedDefaultSearchEnginesAsync = async (db: Database) => {
   await db.insert(searchEngines).values(defaultSearchEngines);
   console.log(`Created ${defaultSearchEngines.length} default search engines through seeding process`);
 
-  // Set Homarr docs as the default search engine in server settings
+  // Set Muninn docs as the default search engine in server settings
   const searchSettings = await getServerSettingByKeyAsync(db, "search");
 
   await updateServerSettingByKeyAsync(db, "search", {
     ...searchSettings,
     defaultSearchEngineId: homarrId,
   });
-  console.log("Set Homarr docs as the default search engine");
+  console.log("Set Muninn docs as the default search engine");
 };
 
 const seedServerSettingsAsync = async (db: Database) => {

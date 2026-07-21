@@ -88,23 +88,13 @@ export const hiddenFromOnboarding = new Set<IntegrationKind>(["mock"]);
 
 export const defaultBookmarkApps = [
   {
-    name: "Homarr Docs",
+    name: "Muninn Docs",
     href: createDocumentationLink("/docs/getting-started"),
-    iconUrl: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/homarr.svg",
+    iconUrl: "/icon.png",
   },
   {
-    name: "Homarr GitHub",
-    href: "https://github.com/homarr-labs/homarr",
+    name: "Muninn GitHub",
+    href: "https://github.com/Emkraan/muninn",
     iconUrl: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons@master/svg/github.svg",
-  },
-  {
-    name: "Help Translate",
-    href: createDocumentationLink("/docs/community/translations"),
-    iconUrl: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/homarr.svg",
-  },
-  {
-    name: "Support Homarr",
-    href: "https://opencollective.com/homarr",
-    iconUrl: "https://cdn.jsdelivr.net/gh/loganmarchione/homelab-svg-assets@latest/assets/opencollective.svg",
   },
 ];

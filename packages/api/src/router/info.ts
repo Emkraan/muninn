@@ -11,7 +11,7 @@ export const infoRouter = createTRPCRouter({
       openapi: { method: "GET", path: "/api/info", tags: ["info"] },
       mcp: {
         enabled: true,
-        description: "Get Homarr server version information",
+        description: "Get Muninn server version information",
       },
     })
     .query(() => {
