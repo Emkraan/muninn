@@ -27,20 +27,6 @@ export const localeConfigurations = {
       return import("dayjs/locale/zh-cn").then((module) => module.default);
     },
   },
-  cr: {
-    name: "Crowdin",
-    translatedName: "Live translation",
-    icon: {
-      type: "custom" as const,
-      url: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/crowdin.svg",
-    },
-    importMrtLocalization() {
-      return import("mantine-react-table/locales/en/index.esm.mjs").then((module) => module.MRT_Localization_EN);
-    },
-    importDayJsLocale() {
-      return import("dayjs/locale/en-gb").then((module) => module.default);
-    },
-  },
   cs: {
     name: "Čeština",
     translatedName: "Czech",

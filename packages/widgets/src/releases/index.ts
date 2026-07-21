@@ -47,9 +47,9 @@ export const { definition, componentLoader } = createWidgetDefinition("releases"
           {
             id: createId(),
             provider: "github" as const,
-            identifier: "homarr-labs/homarr",
-            name: "Homarr",
-            iconUrl: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/homarr.png",
+            identifier: "Emkraan/muninn",
+            name: "Muninn",
+            iconUrl: "/icon.png",
             versionFilter: { prefix: "v", precision: 3 },
           },
         ],

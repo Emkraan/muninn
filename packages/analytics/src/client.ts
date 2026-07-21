@@ -1,23 +1,25 @@
-import { PostHog } from "posthog-node";
+// Emkraan: Muninn does NOT send usage analytics to Homarr's telemetry host
+// (upstream pointed PostHog at hog.homarr.dev). getPostHogClient returns a
+// no-op stub so the analytics cron and trackEvent run but never transmit
+// anything off-box. If first-party telemetry is ever wanted, point this at an
+// Emkraan-owned endpoint - never Homarr's.
+interface NoopAnalyticsClient {
+  capture: (payload: { distinctId: string; event: string; properties?: Record<string, unknown> }) => void;
+  flush: () => Promise<void>;
+  shutdown: () => Promise<void>;
+}
 
-export const POSTHOG_API_KEY = "phc_vYBmGWNbRshvfeC7EHfeSmUm2pD2Neg5nGqzJuGvS8Hs";
-export const POSTHOG_HOST = "https://hog.homarr.dev";
+let instance: NoopAnalyticsClient | undefined;
 
-let instance: PostHog | undefined;
-
-export const getPostHogClient = (): PostHog => {
-  instance ??= new PostHog(POSTHOG_API_KEY, {
-    host: POSTHOG_HOST,
-    flushAt: 10,
-    flushInterval: 30_000,
-  });
+export const getPostHogClient = (): NoopAnalyticsClient => {
+  instance ??= {
+    capture: () => undefined,
+    flush: async () => undefined,
+    shutdown: async () => undefined,
+  };
   return instance;
 };
 
-export const trackEvent = (instanceId: string, event: string, properties?: Record<string, unknown>) => {
-  getPostHogClient().capture({
-    distinctId: instanceId,
-    event,
-    properties,
-  });
+export const trackEvent = (_instanceId: string, _event: string, _properties?: Record<string, unknown>) => {
+  // no-op: Muninn does not phone home
 };

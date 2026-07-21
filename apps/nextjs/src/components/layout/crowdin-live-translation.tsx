@@ -1,17 +1,8 @@
-import Script from "next/script";
-
 import type { SupportedLanguage } from "@homarr/translation";
 
-export const CrowdinLiveTranslation = (props: { locale: SupportedLanguage }) => {
-  if (props.locale !== "cr") return null;
-
-  return (
-    <>
-      <Script type="text/javascript" src="//cdn.crowdin.com/jipt/jipt.js"></Script>
-
-      <Script type="text/javascript" id="crowdin-configuration">
-        {`var _jipt = []; _jipt.push(['project', 'homarr_labs']);`}
-      </Script>
-    </>
-  );
+// Emkraan: the upstream Crowdin in-context (JIPT) live-translation script was
+// bound to Homarr's Crowdin project (homarr_labs). Muninn has no Crowdin
+// project, so this is a no-op.
+export const CrowdinLiveTranslation = (_props: { locale: SupportedLanguage }) => {
+  return null;
 };

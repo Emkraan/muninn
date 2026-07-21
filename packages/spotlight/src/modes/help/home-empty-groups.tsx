@@ -1,7 +1,6 @@
 import { Group, Kbd, Text } from "@mantine/core";
 import {
   IconBook2,
-  IconBrandDiscord,
   IconBrandGithub,
   IconLayoutDashboard,
   IconSearch,
@@ -113,14 +112,9 @@ export const useHomeEmptyGroups = () => {
             label: t("documentation.label"),
           },
           {
-            href: "https://github.com/homarr-labs/homarr/issues/new/choose",
+            href: "https://github.com/Emkraan/muninn/issues/new/choose",
             icon: IconBrandGithub,
             label: t("submitIssue.label"),
-          },
-          {
-            href: "https://discord.com/invite/aCsmEV5RgA",
-            icon: IconBrandDiscord,
-            label: t("discord.label"),
           },
         ];
       },

@@ -1,24 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-
-const POSTHOG_KEY = "phc_vYBmGWNbRshvfeC7EHfeSmUm2pD2Neg5nGqzJuGvS8Hs";
-const POSTHOG_HOST = "https://hog.homarr.dev";
-
-export const Analytics = ({ enabled }: { enabled: boolean }) => {
-  useEffect(() => {
-    if (!enabled) return;
-
-    void import("posthog-js").then(({ default: posthog }) => {
-      posthog.init(POSTHOG_KEY, {
-        api_host: POSTHOG_HOST,
-        capture_pageview: false,
-        capture_pageleave: false,
-        autocapture: false,
-        persistence: "memory",
-      });
-    });
-  }, [enabled]);
-
+// Emkraan: Muninn does not phone home. Upstream Homarr initialised PostHog
+// against Homarr's own telemetry host (hog.homarr.dev); we deliberately do not
+// ship any client analytics. Kept as a no-op so the layout call site is stable.
+export const Analytics = (_props: { enabled: boolean }) => {
   return null;
 };

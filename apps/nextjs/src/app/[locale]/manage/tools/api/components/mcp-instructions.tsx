@@ -68,7 +68,7 @@ export function McpInstructions({ baseUrl, hasApiKeys, toolGroups }: McpInstruct
   const streamableHttpConfig = JSON.stringify(
     {
       mcpServers: {
-        homarr: {
+        muninn: {
           url: mcpUrl,
           headers: {
             ApiKey: "<your-api-key>",
@@ -83,7 +83,7 @@ export function McpInstructions({ baseUrl, hasApiKeys, toolGroups }: McpInstruct
   const stdioConfig = JSON.stringify(
     {
       mcpServers: {
-        homarr: {
+        muninn: {
           command: "npx",
           args: ["-y", "mcp-remote", mcpUrl, "--header", "ApiKey:<your-api-key>"],
         },
@@ -227,7 +227,7 @@ export function McpInstructions({ baseUrl, hasApiKeys, toolGroups }: McpInstruct
                     {t("clientConfig.streamableHttp.claudeCode", {
                       name: "Claude Code",
                       file: ".claude/mcp.json",
-                      command: "claude mcp add homarr",
+                      command: "claude mcp add muninn",
                     })}
                   </ListItem>
                   <ListItem>
