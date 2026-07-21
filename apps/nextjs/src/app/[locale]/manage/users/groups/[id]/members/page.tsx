@@ -5,11 +5,8 @@ import { IconExclamationCircle } from "@tabler/icons-react";
 import type { RouterOutputs } from "@homarr/api";
 import { api } from "@homarr/api/server";
 import { auth } from "@homarr/auth/next";
-import {
-  getGroupMemberManagementType,
-  getLocallyManageableProviders,
-  isGroupMembershipManagedLocally,
-} from "@homarr/auth/server";
+import { resolveGroupMemberManagementAsync } from "@homarr/auth/server";
+import { db } from "@homarr/db";
 import { everyoneGroup } from "@homarr/definitions";
 import { getI18n, getScopedI18n } from "@homarr/translation/server";
 import { Link, SearchInput, UserAvatar } from "@homarr/ui";
@@ -47,9 +44,11 @@ export default async function GroupsDetailPage(props: GroupsDetailPageProps) {
   );
 
   // "local" = every enabled provider managed locally, "external" = none, "mixed" = some.
-  const managementType = getGroupMemberManagementType();
+  // DB-aware: OIDC providers are DB-gated and each carries its own
+  // groupsLocalManagement flag (resolved server-side per provider).
+  const { type: managementType, manageableProviders: allowedProviders } =
+    await resolveGroupMemberManagementAsync(db);
   const canManageMembers = managementType !== "external";
-  const allowedProviders = getLocallyManageableProviders();
 
   return (
     <Stack>
@@ -100,7 +99,7 @@ interface RowProps {
 }
 
 const Row = ({ member, groupId, disabled }: RowProps) => {
-  const canBeRemoved = isGroupMembershipManagedLocally(member.provider);
+  const canBeRemoved = member.canManageMembershipLocally;
 
   return (
     <TableTr>

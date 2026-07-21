@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
+import { oidcProviders } from "@homarr/db/schema";
+import { createDb } from "@homarr/db/test";
 import type { SupportedAuthProvider } from "@homarr/definitions";
 
 import * as env from "../../env";
@@ -8,6 +10,7 @@ import {
   getGroupMemberManagementType,
   getLocallyManageableProviders,
   isGroupMembershipManagedLocally,
+  isGroupMembershipManagedLocallyForUserAsync,
 } from "../check-provider";
 
 const mockEnv = (providers: SupportedAuthProvider[], oidcLocalManagement = false) => {
@@ -38,6 +41,31 @@ describe("isGroupMembershipManagedLocally", () => {
   test("ldap is never managed locally", () => {
     mockEnv(["ldap"]);
     expect(isGroupMembershipManagedLocally("ldap")).toBe(false);
+  });
+});
+
+describe("isGroupMembershipManagedLocallyForUserAsync (per-provider, DB)", () => {
+  test("uses the namespaced provider's own groupsLocalManagement flag over the env default", async () => {
+    // env default false, but the DB provider "entra" enables local management.
+    mockEnv(["credentials"], false);
+    const db = createDb();
+    await db.insert(oidcProviders).values({
+      id: "1",
+      key: "entra",
+      displayName: "Entra",
+      providerType: "microsoft",
+      clientId: "client-id",
+      clientSecret: "aa.bb",
+      groupsLocalManagement: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    expect(await isGroupMembershipManagedLocallyForUserAsync(db, "oidc-entra")).toBe(true);
+    expect(await isGroupMembershipManagedLocallyForUserAsync(db, "credentials")).toBe(true);
+    expect(await isGroupMembershipManagedLocallyForUserAsync(db, "ldap")).toBe(false);
+    // Unknown key falls back to the env default (false here).
+    expect(await isGroupMembershipManagedLocallyForUserAsync(db, "oidc-missing")).toBe(false);
   });
 });
 

@@ -1,7 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
 
-import { canManageGroupMembersLocally, isGroupMembershipManagedLocally } from "@homarr/auth/server";
+import {
+  canManageGroupMembersLocallyAsync,
+  getGroupMembershipManagedLocallyByUserAsync,
+  isGroupMembershipManagedLocallyForUserAsync,
+} from "@homarr/auth/server";
 import { createId } from "@homarr/common";
 import type { Database } from "@homarr/db";
 import { and, eq, handleTransactionsAsync, like, not } from "@homarr/db";
@@ -124,9 +128,17 @@ export const groupRouter = createTRPCRouter({
         });
       }
 
+      const members = group.members.map((member) => member.user);
+      // Per-user, DB-aware editability so the members UI matches the sign-in
+      // group sync (the specific OIDC provider's groupsLocalManagement flag).
+      const managedLocallyByUser = await getGroupMembershipManagedLocallyByUserAsync(ctx.db, members);
+
       return {
         ...group,
-        members: group.members.map((member) => member.user),
+        members: members.map((member) => ({
+          ...member,
+          canManageMembershipLocally: managedLocallyByUser.get(member.id) ?? false,
+        })),
         permissions: group.permissions.map((permission) => permission.permission),
       };
     }),
@@ -315,7 +327,7 @@ export const groupRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       await throwIfGroupNotFoundAsync(ctx.db, input.groupId);
       await throwIfGroupNameIsReservedAsync(ctx.db, input.groupId);
-      throwIfGroupMembersCannotBeManagedLocally();
+      await throwIfGroupMembersCannotBeManagedLocallyAsync(ctx.db);
 
       const user = await ctx.db.query.users.findFirst({
         where: eq(users.id, input.userId),
@@ -328,7 +340,7 @@ export const groupRouter = createTRPCRouter({
         });
       }
 
-      if (!isGroupMembershipManagedLocally(user.provider)) {
+      if (!(await isGroupMembershipManagedLocallyForUserAsync(ctx.db, user.provider))) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "User's provider is not managed locally",
@@ -346,7 +358,7 @@ export const groupRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       await throwIfGroupNotFoundAsync(ctx.db, input.groupId);
       await throwIfGroupNameIsReservedAsync(ctx.db, input.groupId);
-      throwIfGroupMembersCannotBeManagedLocally();
+      await throwIfGroupMembersCannotBeManagedLocallyAsync(ctx.db);
 
       await ctx.db
         .delete(groupMembers)
@@ -378,8 +390,8 @@ const throwIfGroupNameIsReservedAsync = async (db: Database, id: string) => {
   }
 };
 
-const throwIfGroupMembersCannotBeManagedLocally = () => {
-  if (!canManageGroupMembersLocally()) {
+const throwIfGroupMembersCannotBeManagedLocallyAsync = async (db: Database) => {
+  if (!(await canManageGroupMembersLocallyAsync(db))) {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Group members cannot be managed locally",
