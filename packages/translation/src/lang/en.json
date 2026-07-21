@@ -7,7 +7,7 @@
         "description": "To get started, please select how you want to set up your Muninn instance.",
         "action": {
           "scratch": "Start from scratch",
-          "importOldmarr": "Import from Homarr (pre-1.0)",
+          "importOldmarr": "Import from a pre-1.0 config",
           "restoreSqlite": "Restore from SQLite backup",
           "restoreSqliteDescription": "Upload a full SQLite database backup from a previous Muninn instance. This will restore all boards, users, apps, integrations, and settings.",
           "backToOptions": "← Back to setup options"
@@ -5185,7 +5185,7 @@
       },
       "about": {
         "version": "Version {version}",
-        "text": "Muninn is Emkraan's first-party homelab launcher - one live dashboard for your whole fleet, with per-user access control, multi-provider single sign-on, and a documented API, in the Emkraan Cobalt design.",
+        "text": "Muninn is a self-hosted homelab launcher - one live dashboard for your whole fleet, with per-user access control, multi-provider single sign-on, and a documented API, in the Cobalt design.",
         "accordion": {
           "contributors": {
             "title": "Built on Homarr",

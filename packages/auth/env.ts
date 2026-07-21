@@ -33,7 +33,7 @@ export const env = createEnv({
       .min(1)
       .regex(/^[a-zA-Z0-9-_]+$/, "AUTH_COOKIE_PREFIX must only contain letters, numbers, hyphens and underscores")
       .default("homarr"),
-    // Emkraan multi-OIDC (P4): identity providers are configured in the DB and
+    // Multi-provider OIDC: identity providers are configured in the DB and
     // managed at /manage/authentication, so the env-based single-provider config
     // is retired. These vars stay defined (optional, with defaults) only so the
     // few remaining fallbacks - name-attribute override, global groups-local-

@@ -4,7 +4,7 @@ import { and, eq, like } from "../..";
 import type { Database } from "../..";
 import { accounts, users } from "../../schema";
 
-// Emkraan multi-OIDC (P4). users.provider previously collapsed every DB OIDC
+// Multi-provider OIDC. users.provider previously collapsed every DB OIDC
 // provider to the literal "oidc", which let the adapter's getUserByEmail match
 // users across different IdPs (cross-IdP lockout, or takeover with dangerous
 // email linking). Providers now namespace to "oidc-<key>". Re-key each legacy

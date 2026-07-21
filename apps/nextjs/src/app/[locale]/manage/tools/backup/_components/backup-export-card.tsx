@@ -30,7 +30,7 @@ export const BackupExportCard = () => {
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const filename =
-        response.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ?? "homarr-backup.zip";
+        response.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ?? "muninn-backup.zip";
 
       const a = document.createElement("a");
       a.href = url;

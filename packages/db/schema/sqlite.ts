@@ -37,7 +37,7 @@ import type {
 
 export * from "@homarr/core/infrastructure/certificates/hostnames/db/sqlite";
 
-// Emkraan multi-OIDC provider store (P4). Client secret is stored encrypted
+// Multi-provider OIDC provider store. Client secret is stored encrypted
 // (encryptSecret/decryptSecret, SECRET_ENCRYPTION_KEY) as `${hex}.${hex}`,
 // same as integrationSecret.value. Each row builds one NextAuth OIDC provider
 // with id `oidc-${key}` and callback /api/auth/callback/oidc-${key}.

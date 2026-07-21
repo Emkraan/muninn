@@ -55,7 +55,7 @@ const customBlob = customType<{ data: Buffer }>({
 
 export * from "@homarr/core/infrastructure/certificates/hostnames/db/mysql";
 
-// Emkraan multi-OIDC provider store (P4). See sqlite schema for notes.
+// Multi-provider OIDC provider store. See sqlite schema for notes.
 export const oidcProviders = mysqlTable("oidcProvider", {
   id: varchar({ length: 64 }).notNull().primaryKey(),
   key: varchar({ length: 64 }).notNull().unique(),

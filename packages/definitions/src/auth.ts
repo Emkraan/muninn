@@ -1,7 +1,7 @@
 export const supportedAuthProviders = ["credentials", "oidc", "ldap"] as const;
 export type SupportedAuthProvider = (typeof supportedAuthProviders)[number];
 
-// Emkraan multi-OIDC (P4): the instance-level provider key stored in
+// Multi-provider OIDC: the instance-level provider key stored in
 // users.provider. credentials/ldap keep their class name; each DB OIDC provider
 // namespaces to `oidc-<key>` (identical to its NextAuth id and accounts.provider)
 // so distinct IdPs never collide in the adapter's getUserByEmail. This is a
@@ -9,7 +9,7 @@ export type SupportedAuthProvider = (typeof supportedAuthProviders)[number];
 // used for AUTH_PROVIDERS parsing and enablement checks.
 export type AuthProviderKey = SupportedAuthProvider | `oidc-${string}`;
 
-// Emkraan multi-OIDC (P4): the provider "type" of a DB-configured OIDC/OAuth2
+// Multi-provider OIDC: the provider "type" of a DB-configured OIDC/OAuth2
 // provider. A type selects preset endpoints/scopes; "oidc" is a generic OIDC
 // discovery provider and "oauth2" is fully-manual OAuth2. Distinct from
 // AuthProviderKey (the per-instance login identity) - many rows can share a

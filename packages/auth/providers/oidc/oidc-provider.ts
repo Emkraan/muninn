@@ -38,7 +38,7 @@ export const extractProfileName = (profile: Profile) => {
   return profile[env.AUTH_OIDC_NAME_ATTRIBUTE_OVERWRITE as keyof typeof profile] as string;
 };
 
-// --- Emkraan multi-OIDC (P4): build a NextAuth provider from a DB row -------
+// --- Multi-provider OIDC: build a NextAuth provider from a DB row -------
 
 export const buildProfileName = (row: OidcProviderRow, profile: Profile): string | undefined => {
   const claim = row.nameClaim ?? row.usernameClaim;

@@ -25,6 +25,8 @@ import { SpotlightProvider } from "@homarr/spotlight";
 import type { SupportedLanguage } from "@homarr/translation";
 import { isLocaleRTL, isLocaleSupported } from "@homarr/translation";
 
+import { env as appEnv } from "~/env";
+
 import { Analytics } from "~/components/layout/analytics";
 import { CrowdinLiveTranslation } from "~/components/layout/crowdin-live-translation";
 
@@ -43,7 +45,7 @@ const fontSans = Inter({
   variable: "--font-sans",
 });
 
-// Emkraan Cobalt display + mono faces (self-hosted via next/font).
+// Cobalt display + mono faces (self-hosted via next/font).
 const fontDisplay = Sora({
   subsets: ["latin"],
   weight: ["600", "700"],
@@ -67,6 +69,7 @@ export const generateMetadata = async (): Promise<Metadata> => ({
       "A self-hosted dashboard and app launcher for your entire homelab. Integrates with 50+ services, real-time widgets, per-user access control.",
     url: "https://github.com/Emkraan/muninn",
     siteName: "Muninn",
+    images: [{ url: "/logo/logo.png", width: 512, height: 512, alt: "Muninn" }],
   },
   icons: {
     icon: "/logo/logo.png",
@@ -83,7 +86,7 @@ export const generateMetadata = async (): Promise<Metadata> => ({
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B1220" },
   ],
 };
 
@@ -161,7 +164,7 @@ export default async function Layout(props: {
         className={[fontSans.className, fontSans.variable, fontDisplay.variable, fontMono.variable].join(" ")}
         suppressHydrationWarning
       >
-        {/* Emkraan live animated background (Cobalt). Fixed behind all content;
+        {/* Live animated background (Cobalt). Fixed behind all content;
             painted at z-index:-1 above the html canvas. See styles.css .muninn-bg. */}
         <div className="muninn-bg" aria-hidden="true">
           <span className="muninn-blob b1" />
@@ -169,17 +172,19 @@ export default async function Layout(props: {
           <span className="muninn-blob b3" />
           <span className="muninn-blob b4" />
         </div>
-        <a
-          className="emkraan-tag"
-          href="https://github.com/Emkraan/muninn"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Built by Emkraan"
-        >
-          <span className="emkraan-tag-text">
-            Built by <b>Emkraan</b>
-          </span>
-        </a>
+        {appEnv.BRAND_ATTRIBUTION && (
+          <a
+            className="brand-tag"
+            href="https://github.com/Emkraan/muninn"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Built by ${appEnv.BRAND_ATTRIBUTION}`}
+          >
+            <span className="brand-tag-text">
+              Built by <b>{appEnv.BRAND_ATTRIBUTION}</b>
+            </span>
+          </a>
+        )}
         <Analytics enabled={serverSettings.analytics.enableGeneral} />
         <StackedProvider>
           <Notifications pauseResetOnHover="notification" />

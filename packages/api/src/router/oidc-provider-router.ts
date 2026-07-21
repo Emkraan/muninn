@@ -11,7 +11,7 @@ import { createTRPCRouter, permissionRequiredProcedure } from "../trpc";
 
 // Sentinel returned to the client instead of the real secret, and accepted back
 // on save to mean "leave the stored secret unchanged" (so it is never round-tripped).
-const SECRET_SENTINEL = "__emkraan_secret_unchanged__";
+const SECRET_SENTINEL = "__secret_unchanged__";
 
 const upsertSchema = z.object({
   id: z.string().optional(),

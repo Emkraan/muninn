@@ -16,8 +16,6 @@ import { useScopedI18n } from "@homarr/translation/client";
 import { sanitizeRedirectionUrl } from "@homarr/validation/redirection-url";
 import { userSignInSchema } from "@homarr/validation/user";
 
-type Provider = "credentials" | "ldap" | "oidc";
-
 interface OidcProviderButton {
   id: string;
   displayName: string;
@@ -218,7 +216,7 @@ const PasswordForgottenCollapse = ({ username }: PasswordForgottenCollapseProps)
           <Stack gap="xs">
             <Text size="sm">{tForgotPassword("description")}</Text>
 
-            <Code>homarr reset-password -u {commandUsername}</Code>
+            <Code>muninn reset-password -u {commandUsername}</Code>
           </Stack>
         </Card>
       </Collapse>
