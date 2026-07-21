@@ -222,7 +222,7 @@ const mcpHandler = createMcpHandler(
     capabilities: { tools: {} },
     instructions: SERVER_INSTRUCTIONS,
     serverInfo: {
-      name: "homarr",
+      name: "muninn",
       version: getPackageVersion(),
     },
   },

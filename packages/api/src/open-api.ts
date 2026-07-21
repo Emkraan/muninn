@@ -21,15 +21,15 @@ export const openApiRouter = createTRPCRouter({
 
 export const openApiDocument = (base: string) =>
   generateOpenApiDocument(openApiRouter, {
-    title: "Homarr API documentation",
+    title: "Muninn API documentation",
     version: "1.1.0",
     baseUrl: base,
-    docsUrl: "https://homarr.dev",
+    docsUrl: "https://github.com/Emkraan/muninn",
     securitySchemes: {
       apikey: {
         type: "apiKey",
         name: API_KEY_HEADER_NAME,
-        description: "API key which can be obtained in the Homarr administration dashboard",
+        description: "API key which can be obtained in the Muninn administration dashboard",
         in: "header",
       },
     },
