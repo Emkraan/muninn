@@ -53,9 +53,10 @@ export const buildProfileName = (row: OidcProviderRow, profile: Profile): string
 /**
  * Build one NextAuth provider from a stored oidcProvider row. Each provider gets
  * a distinct id `oidc-${key}` (so NextAuth dispatches /callback/oidc-${key}
- * natively) but authenticates users as provider "oidc" (collapse, not widen -
- * distinct IdPs are separated by the accounts table). Client secret is
- * decrypted from the stored ciphertext.
+ * natively) and authenticates users under the namespaced users.provider
+ * `oidc-${key}` - identical to the accounts.provider - so the adapter's
+ * getUserByEmail scopes to a single IdP and cannot collide across providers.
+ * Client secret is decrypted from the stored ciphertext.
  */
 export const buildOidcProviderFromDb = (
   row: OidcProviderRow,

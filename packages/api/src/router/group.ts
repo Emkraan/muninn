@@ -360,6 +360,20 @@ export const groupRouter = createTRPCRouter({
       await throwIfGroupNameIsReservedAsync(ctx.db, input.groupId);
       await throwIfGroupMembersCannotBeManagedLocallyAsync(ctx.db);
 
+      // Symmetric with addMember: a member whose provider is externally managed
+      // (IdP-synced) must not be removed locally - the sync owns that membership.
+      // Guarded on existence (a deleted user's membership is already FK-cascaded,
+      // so a missing user is a harmless no-op delete).
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.id, input.userId),
+      });
+      if (user && !(await isGroupMembershipManagedLocallyForUserAsync(ctx.db, user.provider))) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "User's provider is not managed locally",
+        });
+      }
+
       await ctx.db
         .delete(groupMembers)
         .where(and(eq(groupMembers.groupId, input.groupId), eq(groupMembers.userId, input.userId)));

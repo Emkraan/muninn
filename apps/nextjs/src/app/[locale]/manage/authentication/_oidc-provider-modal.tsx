@@ -54,7 +54,7 @@ const formSchema = z.object({
   key: z
     .string()
     .min(1)
-    .max(64)
+    .max(59)
     .regex(/^[a-z0-9-]+$/, "Lowercase slug only (a-z, 0-9, hyphen)"),
   displayName: z.string().min(1),
   providerType: z.enum(oidcProviderTypes),

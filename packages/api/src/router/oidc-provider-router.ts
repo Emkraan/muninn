@@ -18,7 +18,9 @@ const upsertSchema = z.object({
   key: z
     .string()
     .min(1)
-    .max(64)
+    // Max 59 so the derived login identity "oidc-<key>" (NextAuth id ==
+    // accounts.provider == users.provider) always fits the varchar(64) columns.
+    .max(59)
     .regex(/^[a-z0-9-]+$/, "Key must be a lowercase slug (a-z, 0-9, hyphen)"),
   displayName: z.string().min(1),
   providerType: z.enum(oidcProviderTypes),
