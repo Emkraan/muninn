@@ -18,9 +18,12 @@ first-party standard.
 - **Strict per-user RBAC** — boards, apps, and integrations are private to their
   owner by default; an admin selectively grants access to specific users or
   groups. (Upstream Homarr shows every app to every logged-in user.)
-- **Multi-provider OIDC** — add and manage multiple identity providers from an
-  admin UI (Microsoft/Entra, Google, GitHub, Okta, Keycloak, Authentik, generic
-  OIDC), with provider profile-picture pull.
+- **Multi-provider OIDC** — add and manage any number of identity providers from
+  the admin UI at **Manage -> Authentication** (Microsoft/Entra, Google, GitHub,
+  Okta, Keycloak, Authentik, generic OIDC, or manual OAuth2). Providers are
+  stored in the database and apply on the next sign-in with no restart, each with
+  its own claim and group-to-role mapping and provider profile-picture pull. This
+  replaces Homarr's single env-configured OIDC provider.
 - **Documented REST API + console** — a served OpenAPI spec, an in-app API
   reference, scoped API keys, and an MCP endpoint.
 

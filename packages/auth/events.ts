@@ -8,13 +8,17 @@ import type { Database } from "@homarr/db";
 import { groupMembers, groups, users } from "@homarr/db/schema";
 import { colorSchemeCookieKey, everyoneGroup } from "@homarr/definitions";
 
-import { env } from "./env";
-import { extractProfileName } from "./providers/oidc/oidc-provider";
+import { buildProfileName, extractProfileName } from "./providers/oidc/oidc-provider";
+import { getOidcGroupConfigAsync, getOidcProviderRowByKeyAsync } from "./providers/oidc/load-db-providers";
 
 const logger = createLogger({ module: "authEvents" });
 
+// NextAuth ids for DB OIDC providers are "oidc-<key>"; recover the key.
+const oidcKeyFromProvider = (provider: string | undefined): string | null =>
+  provider?.startsWith("oidc-") ? provider.slice("oidc-".length) : null;
+
 export const createSignInEventHandler = (db: Database): Exclude<NextAuthConfig["events"], undefined>["signIn"] => {
-  return async ({ user, profile }) => {
+  return async ({ user, profile, account }) => {
     logger.debug(`SignIn EventHandler for user: ${JSON.stringify(user)} . profile: ${JSON.stringify(profile)}`);
     if (!user.id) throw new Error("User ID is missing");
 
@@ -29,10 +33,15 @@ export const createSignInEventHandler = (db: Database): Exclude<NextAuthConfig["
 
     if (!dbUser) throw new Error("User not found");
 
-    const groupsKey = env.AUTH_OIDC_GROUPS_ATTRIBUTE;
+    // Group sync config now comes from the DB provider store (per provider),
+    // replacing the retired AUTH_OIDC_* env vars.
+    const oidcKey = oidcKeyFromProvider(account?.provider);
+    const groupConfig = oidcKey ? await getOidcGroupConfigAsync(db, oidcKey) : null;
+    const groupsKey = groupConfig?.groupsClaim ?? "groups";
     // Groups from oidc provider are provided from the profile, it's not typed.
     if (
-      !env.AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT &&
+      groupConfig &&
+      !groupConfig.groupsLocalManagement &&
       profile &&
       groupsKey in profile &&
       Array.isArray(profile[groupsKey])
@@ -58,12 +67,20 @@ export const createSignInEventHandler = (db: Database): Exclude<NextAuthConfig["
     }
 
     if (profile) {
-      const profileUsername = extractProfileName(profile);
-      if (!profileUsername) {
-        throw new Error(`OIDC provider did not return a name properties='${Object.keys(profile).join(",")}'`);
-      }
+      // Resolve the display name and picture through the SAME per-provider path
+      // used at account creation (buildProfileName / pictureClaim over the DB
+      // provider row), so a login never overwrites the stored value with one
+      // computed from a different (global/env) rule. Fall back to the env-based
+      // extractProfileName / profile.picture only when the provider row cannot
+      // be resolved (e.g. non-DB / legacy flows). Never throw: sub is always
+      // present (account creation already required it), so a name resolves.
+      const providerRow = oidcKey ? await getOidcProviderRowByKeyAsync(db, oidcKey) : null;
+      const profileUsername =
+        (providerRow ? buildProfileName(providerRow, profile) : extractProfileName(profile)) ??
+        profile.email ??
+        profile.sub;
 
-      if (dbUser.name !== profileUsername) {
+      if (profileUsername && dbUser.name !== profileUsername) {
         await db.update(users).set({ name: profileUsername }).where(eq(users.id, user.id));
         logger.info("Username for user of oidc provider has changed.", {
           userId: user.id,
@@ -72,12 +89,11 @@ export const createSignInEventHandler = (db: Database): Exclude<NextAuthConfig["
         });
       }
 
-      if (
-        typeof profile.picture === "string" &&
-        dbUser.image !== profile.picture &&
-        !dbUser.image?.startsWith("data:")
-      ) {
-        await db.update(users).set({ image: profile.picture }).where(eq(users.id, user.id));
+      const pictureValue: unknown = providerRow?.pictureClaim
+        ? profile[providerRow.pictureClaim as keyof typeof profile]
+        : profile.picture;
+      if (typeof pictureValue === "string" && dbUser.image !== pictureValue && !dbUser.image?.startsWith("data:")) {
+        await db.update(users).set({ image: pictureValue }).where(eq(users.id, user.id));
         logger.info("Profile picture for user of oidc provider has changed.", {
           userId: user.id,
         });

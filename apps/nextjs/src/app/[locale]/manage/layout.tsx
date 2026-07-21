@@ -21,6 +21,7 @@ import {
   IconPointerFilled,
   IconSearch,
   IconSettingsFilled,
+  IconShieldLockFilled,
   IconUserFilled,
   IconUsers,
   IconUsersGroup,
@@ -119,6 +120,12 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
           href: "/manage/users/groups",
         },
       ],
+    },
+    {
+      label: "Authentication",
+      icon: IconShieldLockFilled,
+      href: "/manage/authentication",
+      hidden: !session?.user.permissions.includes("admin"),
     },
     {
       label: t("items.tools.label"),

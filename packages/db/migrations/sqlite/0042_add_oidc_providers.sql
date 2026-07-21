@@ -1,0 +1,33 @@
+CREATE TABLE `oidcProvider` (
+	`id` text PRIMARY KEY NOT NULL,
+	`key` text NOT NULL,
+	`display_name` text NOT NULL,
+	`provider_type` text NOT NULL,
+	`enabled` integer DEFAULT true NOT NULL,
+	`show_on_login` integer DEFAULT true NOT NULL,
+	`is_default` integer DEFAULT false NOT NULL,
+	`client_id` text NOT NULL,
+	`client_secret` text NOT NULL,
+	`issuer` text,
+	`discovery_url` text,
+	`tenant` text,
+	`authorization_url` text,
+	`token_url` text,
+	`userinfo_url` text,
+	`scopes` text,
+	`token_endpoint_auth_method` text DEFAULT 'client_secret_basic' NOT NULL,
+	`allow_dangerous_email_account_linking` integer DEFAULT false NOT NULL,
+	`force_userinfo` integer DEFAULT false NOT NULL,
+	`name_claim` text,
+	`email_claim` text,
+	`picture_claim` text,
+	`username_claim` text,
+	`groups_claim` text,
+	`allowed_groups` text,
+	`admin_groups` text,
+	`groups_local_management` integer DEFAULT false NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `oidcProvider_key_unique` ON `oidcProvider` (`key`);

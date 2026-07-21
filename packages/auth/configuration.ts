@@ -1,11 +1,13 @@
 import type { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
 import { cookies } from "next/headers";
+import type { OAuth2Config, OIDCConfig } from "@auth/core/providers";
+import type { Profile } from "@auth/core/types";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 import { createLogger } from "@homarr/core/infrastructure/logs";
 import { db } from "@homarr/db";
-import type { SupportedAuthProvider } from "@homarr/definitions";
+import type { AuthProviderKey } from "@homarr/definitions";
 
 import { createAdapter } from "./adapter";
 import { createSessionCallback } from "./callbacks";
@@ -14,7 +16,7 @@ import { createSignInEventHandler } from "./events";
 import { createCredentialsConfiguration, createLdapConfiguration } from "./providers/credentials/credentials-provider";
 import { EmptyNextAuthProvider } from "./providers/empty/empty-provider";
 import { filterProviders } from "./providers/filter-providers";
-import { OidcProvider } from "./providers/oidc/oidc-provider";
+import { getOidcGroupConfigAsync } from "./providers/oidc/load-db-providers";
 import { createRedirectUri } from "./redirect";
 import { expireDateAfter, generateSessionToken, sessionTokenCookieName } from "./session";
 
@@ -40,9 +42,13 @@ const createCookies = (useSecureCookies: boolean) => {
 
 // See why it's unknown in the [...nextauth]/route.ts file
 export const createConfiguration = (
-  provider: SupportedAuthProvider | "unknown",
+  provider: AuthProviderKey | "unknown",
   headers: ReadonlyHeaders | null,
   useSecureCookies: boolean,
+  // Emkraan multi-OIDC (P4): DB-built OIDC/OAuth2 providers, injected by
+  // createHandlersAsync. Already gated by `enabled` in the DB, so they bypass
+  // the env-driven filterProviders (which only gates credentials/ldap).
+  oidcProviders: (OIDCConfig<Profile> | OAuth2Config<Profile>)[] = [],
 ) => {
   const adapter = createAdapter(db, provider);
   return NextAuth({
@@ -61,16 +67,45 @@ export const createConfiguration = (
     trustHost: true,
     cookies: createCookies(useSecureCookies),
     adapter,
-    providers: filterProviders([
-      Credentials(createCredentialsConfiguration(db)),
-      Credentials(createLdapConfiguration(db)),
-      EmptyNextAuthProvider(),
-      OidcProvider(headers),
-    ]),
+    providers: [
+      ...filterProviders([
+        Credentials(createCredentialsConfiguration(db)),
+        Credentials(createLdapConfiguration(db)),
+        EmptyNextAuthProvider(),
+      ]),
+      ...oidcProviders,
+    ],
     callbacks: {
       session: createSessionCallback(db),
       // eslint-disable-next-line no-restricted-syntax
-      signIn: async ({ user }) => {
+      signIn: async ({ user, account, profile }) => {
+        // Emkraan multi-OIDC (P4): enforce the per-provider "allowed groups"
+        // gate. DB OIDC providers dispatch as account.provider "oidc-<key>";
+        // recover the key, load its group config, and deny sign-in when
+        // allowedGroups is non-empty and the profile's groups claim does not
+        // intersect it. Fail closed: a missing/empty/non-array claim => deny.
+        // This is the only hook that can deny (the signIn EVENT runs after auth
+        // and cannot block). Providers that leave allowedGroups empty are
+        // unaffected, as are credentials/ldap.
+        if (account?.provider.startsWith("oidc-")) {
+          const oidcKey = account.provider.slice("oidc-".length);
+          const groupConfig = await getOidcGroupConfigAsync(db, oidcKey);
+          if (groupConfig && groupConfig.allowedGroups.length > 0) {
+            const claimValue = profile?.[groupConfig.groupsClaim];
+            const userGroups = Array.isArray(claimValue)
+              ? claimValue.filter((group): group is string => typeof group === "string")
+              : [];
+            const isAllowed = userGroups.some((group) => groupConfig.allowedGroups.includes(group));
+            if (!isAllowed) {
+              logger.warn("OIDC sign-in denied: user is not a member of any allowed group.", {
+                provider: account.provider,
+                userId: user.id,
+              });
+              return false;
+            }
+          }
+        }
+
         /**
          * For credentials provider only jwt is supported by default
          * so we have to create the session and set the cookie manually.

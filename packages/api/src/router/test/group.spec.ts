@@ -195,8 +195,10 @@ describe("byId should return group by id including members and permissions", () 
     expect(result.members.length).toBe(1);
 
     const userKeys = Object.keys(result.members[0] ?? {});
-    expect(userKeys.length).toBe(5);
-    expect(["id", "name", "email", "image", "provider"].some((key) => userKeys.includes(key)));
+    expect(userKeys.length).toBe(6);
+    expect(
+      ["id", "name", "email", "image", "provider", "canManageMembershipLocally"].some((key) => userKeys.includes(key)),
+    );
     expect(result.permissions.length).toBe(1);
     expect(result.permissions[0]).toBe("admin");
   });

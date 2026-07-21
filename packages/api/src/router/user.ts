@@ -7,7 +7,7 @@ import { comparePasswordsAsync, hashPasswordAsync } from "@homarr/auth";
 import { createId } from "@homarr/common";
 import { createLogger } from "@homarr/core/infrastructure/logs";
 import type { Database } from "@homarr/db";
-import { and, eq, handleTransactionsAsync, inArray, like } from "@homarr/db";
+import { and, eq, handleTransactionsAsync, inArray, like, or } from "@homarr/db";
 import { getMaxGroupPositionAsync } from "@homarr/db/queries";
 import { boards, groupMembers, groupPermissions, groups, invites, users } from "@homarr/db/schema";
 import { selectUserSchema } from "@homarr/db/validationSchemas";
@@ -285,7 +285,18 @@ export const userRouter = createTRPCRouter({
           image: true,
           email: true,
         },
-        where: input?.providers ? inArray(users.provider, input.providers) : undefined,
+        where: (() => {
+          // users.provider namespaces DB OIDC providers to "oidc-<key>", so a
+          // request to filter by the "oidc" class must match every "oidc-%"
+          // (plus any legacy exact "oidc"), not just the literal.
+          const requested = input?.providers;
+          if (!requested || requested.length === 0) return undefined;
+          const exact = requested.filter((provider) => provider !== "oidc");
+          const exactClause = exact.length > 0 ? inArray(users.provider, exact) : undefined;
+          const oidcClause = requested.includes("oidc") ? like(users.provider, "oidc%") : undefined;
+          if (exactClause && oidcClause) return or(exactClause, oidcClause);
+          return exactClause ?? oidcClause;
+        })(),
       });
     }),
   search: permissionRequiredProcedure
