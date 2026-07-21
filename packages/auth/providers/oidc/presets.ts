@@ -1,8 +1,8 @@
 import type { OidcProviderType } from "@homarr/definitions";
 
-// Emkraan multi-OIDC (P4): per-type presets, ported from snagarr's resolve().
-// Presets only fill fields the admin left empty; admin-supplied values always
-// win. "oidc" is generic OIDC discovery; "oauth2"/"github" are OAuth2 flows.
+// Per-type OIDC/OAuth2 presets. Presets only fill fields the admin left empty;
+// admin-supplied values always win. "oidc" is generic OIDC discovery;
+// "oauth2"/"github" are OAuth2 flows.
 
 export interface ResolvedOidcConfig {
   flow: "oidc" | "oauth2";
@@ -56,6 +56,10 @@ export function resolveOidcConfig(input: PresetInput): ResolvedOidcConfig {
   switch (input.providerType) {
     case "microsoft":
       resolved.discoveryUrl ??= `https://login.microsoftonline.com/${input.tenant ?? "common"}/v2.0/.well-known/openid-configuration`;
+      // Explicit issuer so it matches the token `iss` (a specific-tenant GUID
+      // yields a tenant-scoped issuer; "common"/"organizations" cannot be
+      // validated against a single issuer and should use a concrete tenant).
+      resolved.issuer ??= `https://login.microsoftonline.com/${input.tenant ?? "common"}/v2.0`;
       // User.Read makes the returned access token a Graph token (for the photo fetch).
       resolved.scopes = adminScopes ?? ["openid", "profile", "email", "User.Read"];
       resolved.usernameClaim ??= "preferred_username";
@@ -63,6 +67,7 @@ export function resolveOidcConfig(input: PresetInput): ResolvedOidcConfig {
       break;
     case "google":
       resolved.discoveryUrl ??= "https://accounts.google.com/.well-known/openid-configuration";
+      resolved.issuer ??= "https://accounts.google.com";
       break;
     case "github":
       resolved.authorizationUrl ??= "https://github.com/login/oauth/authorize";

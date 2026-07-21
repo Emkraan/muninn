@@ -104,6 +104,16 @@ export const buildOidcProviderFromDb = (
     } satisfies OAuth2Config<Profile>;
   }
 
+  // @auth/core's assertConfig requires an `issuer` even when discovery
+  // (`wellKnown`) is used - a provider with wellKnown but no issuer throws
+  // InvalidEndpoints and 500s the ENTIRE /api/auth/* surface (breaking every
+  // sign-in AND sign-out). Always supply an issuer: prefer the resolved one,
+  // else derive it from the discovery URL. Keep wellKnown so discovery still
+  // drives the endpoints.
+  const wellKnown = resolved.discoveryUrl;
+  const issuer =
+    resolved.issuer ?? (wellKnown ? wellKnown.replace(/\/\.well-known\/openid-configuration\/?$/, "") : undefined);
+
   return {
     id,
     name: row.displayName,
@@ -114,7 +124,8 @@ export const buildOidcProviderFromDb = (
       token_endpoint_auth_method:
         row.tokenEndpointAuthMethod as (typeof env)["AUTH_OIDC_TOKEN_ENDPOINT_AUTH_METHOD"],
     },
-    ...(resolved.discoveryUrl ? { wellKnown: resolved.discoveryUrl } : { issuer: resolved.issuer }),
+    ...(issuer ? { issuer } : {}),
+    ...(wellKnown ? { wellKnown } : {}),
     allowDangerousEmailAccountLinking: row.allowDangerousEmailAccountLinking,
     authorization: { params: { scope, redirect_uri: redirectUri } },
     token: { conform: conformTokenResponse },
