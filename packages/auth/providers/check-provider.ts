@@ -1,4 +1,4 @@
-import type { SupportedAuthProvider } from "@homarr/definitions";
+import type { AuthProviderKey, SupportedAuthProvider } from "@homarr/definitions";
 import { supportedAuthProviders } from "@homarr/definitions";
 
 import { env } from "../env";
@@ -14,18 +14,20 @@ export const isProviderEnabled = (provider: SupportedAuthProvider) => {
 /**
  * Whether a single provider's group memberships are managed locally (manually via UI/API).
  * True for credentials users, and for oidc users when AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT is enabled.
+ *
+ * NOTE: This is the coarse env-based check. DB OIDC providers namespace to
+ * "oidc-<key>" and carry their own per-provider groupsLocalManagement flag; the
+ * authoritative per-user check is isGroupMembershipManagedLocallyForUserAsync
+ * below. This sync form is kept for the enabled-provider-class helpers and any
+ * legacy env-provider account (id "oidc").
  */
-export const isGroupMembershipManagedLocally = (provider: SupportedAuthProvider): boolean => {
-  switch (provider) {
-    case "credentials":
-      return true;
-    case "oidc":
-      return env.AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT;
-    default:
-      // ldap + any provider added later: externally managed (synced, not editable
-      // here) until explicitly given a case above. New providers safe-by-default.
-      return false;
-  }
+export const isGroupMembershipManagedLocally = (provider: AuthProviderKey): boolean => {
+  if (provider === "credentials") return true;
+  // "oidc" (legacy env provider) or any namespaced DB provider "oidc-<key>".
+  if (provider === "oidc" || provider.startsWith("oidc-")) return env.AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT;
+  // ldap + any provider added later: externally managed (synced, not editable
+  // here) until explicitly handled. New providers safe-by-default.
+  return false;
 };
 
 export const getEnabledProviders = (): SupportedAuthProvider[] => supportedAuthProviders.filter(isProviderEnabled);

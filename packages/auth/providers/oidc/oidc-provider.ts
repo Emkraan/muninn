@@ -79,7 +79,10 @@ export const buildOidcProviderFromDb = (
       name,
       email: email ?? null,
       image: typeof picture === "string" ? picture : null,
-      provider: "oidc" as const,
+      // Namespace the stored users.provider per IdP ("oidc-<key>", identical to
+      // this provider's NextAuth id + accounts.provider) so the adapter's
+      // getUserByEmail scopes to one IdP and cannot collide across providers.
+      provider: id,
     };
   };
 

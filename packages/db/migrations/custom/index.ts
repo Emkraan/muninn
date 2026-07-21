@@ -3,10 +3,12 @@ import { migrateReleaseWidgetProviderToOptionsAsync } from "./0000_release_widge
 import { migrateOpnsenseCredentialsAsync } from "./0001_opnsense_credentials";
 import { migrateAppWidgetShowDescriptionTooltipToDisplayModeAsync } from "./0002_app_widget_show_description_tooltip_to_display_mode";
 import { migrateWidgetOnlyIntegrationsToOptionsAsync } from "./0003_remove_widget_only_integrations";
+import { migrateOidcUserProviderNamespaceAsync } from "./0004_namespace_oidc_user_provider";
 
 export const applyCustomMigrationsAsync = async (db: Database) => {
   await migrateReleaseWidgetProviderToOptionsAsync(db);
   await migrateOpnsenseCredentialsAsync(db);
   await migrateAppWidgetShowDescriptionTooltipToDisplayModeAsync(db);
   await migrateWidgetOnlyIntegrationsToOptionsAsync(db);
+  await migrateOidcUserProviderNamespaceAsync(db);
 };

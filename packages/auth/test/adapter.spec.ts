@@ -52,6 +52,24 @@ describe("createAdapter should create drizzle adapter", () => {
     },
   );
 
+  test("createAdapter getUserByEmail should scope to one namespaced OIDC provider (cross-IdP isolation)", async () => {
+    // Arrange: two DB OIDC IdPs share an email; users.provider is namespaced
+    // "oidc-<key>". A sign-in via oidc-a must not resolve the oidc-b user (the
+    // H1 cross-IdP collision the collapsed "oidc" value used to allow).
+    const db = createDb();
+    const email = "shared@example.com";
+    await db.insert(users).values({ id: "a", name: "user-a", email, provider: "oidc-a" });
+    await db.insert(users).values({ id: "b", name: "user-b", email, provider: "oidc-b" });
+
+    // Act
+    const viaA = await createAdapter(db, "oidc-a").getUserByEmail?.(email);
+    const viaB = await createAdapter(db, "oidc-b").getUserByEmail?.(email);
+
+    // Assert: each IdP resolves only its own user, never the other's.
+    expect(viaA?.id).toBe("a");
+    expect(viaB?.id).toBe("b");
+  });
+
   test("createAdapter getUserByEmail should throw error if provider is unknown", async () => {
     // Arrange
     const db = createDb();

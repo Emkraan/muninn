@@ -23,6 +23,7 @@ import {
   emptySuperJSON,
 } from "@homarr/definitions";
 import type {
+  AuthProviderKey,
   BackgroundImageAttachment,
   BackgroundImageRepeat,
   BackgroundImageSize,
@@ -36,7 +37,6 @@ import type {
   OnboardingStep,
   SearchEngineType,
   SectionKind,
-  SupportedAuthProvider,
   WidgetKind,
 } from "@homarr/definitions";
 import type {
@@ -106,7 +106,7 @@ export const users = pgTable("user", {
   emailVerified: timestamp(),
   image: text(),
   password: text(),
-  provider: varchar({ length: 64 }).$type<SupportedAuthProvider>().default("credentials").notNull(),
+  provider: varchar({ length: 64 }).$type<AuthProviderKey>().default("credentials").notNull(),
   homeBoardId: varchar({ length: 64 }).references((): AnyPgColumn => boards.id, {
     onDelete: "set null",
   }),

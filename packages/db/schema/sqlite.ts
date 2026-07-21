@@ -12,6 +12,7 @@ import {
   emptySuperJSON,
 } from "@homarr/definitions";
 import type {
+  AuthProviderKey,
   BackgroundImageAttachment,
   BackgroundImageRepeat,
   BackgroundImageSize,
@@ -25,7 +26,6 @@ import type {
   OnboardingStep,
   SearchEngineType,
   SectionKind,
-  SupportedAuthProvider,
   WidgetKind,
 } from "@homarr/definitions";
 import type {
@@ -92,7 +92,7 @@ export const users = sqliteTable("user", {
   emailVerified: int({ mode: "timestamp_ms" }),
   image: text(),
   password: text(),
-  provider: text().$type<SupportedAuthProvider>().default("credentials").notNull(),
+  provider: text().$type<AuthProviderKey>().default("credentials").notNull(),
   homeBoardId: text().references((): AnySQLiteColumn => boards.id, {
     onDelete: "set null",
   }),

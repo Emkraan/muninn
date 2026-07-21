@@ -7,7 +7,7 @@ import Credentials from "next-auth/providers/credentials";
 
 import { createLogger } from "@homarr/core/infrastructure/logs";
 import { db } from "@homarr/db";
-import type { SupportedAuthProvider } from "@homarr/definitions";
+import type { AuthProviderKey } from "@homarr/definitions";
 
 import { createAdapter } from "./adapter";
 import { createSessionCallback } from "./callbacks";
@@ -41,7 +41,7 @@ const createCookies = (useSecureCookies: boolean) => {
 
 // See why it's unknown in the [...nextauth]/route.ts file
 export const createConfiguration = (
-  provider: SupportedAuthProvider | "unknown",
+  provider: AuthProviderKey | "unknown",
   headers: ReadonlyHeaders | null,
   useSecureCookies: boolean,
   // Emkraan multi-OIDC (P4): DB-built OIDC/OAuth2 providers, injected by

@@ -4,9 +4,9 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import type { Database } from "@homarr/db";
 import { and, eq } from "@homarr/db";
 import { accounts, sessions, users } from "@homarr/db/schema";
-import type { SupportedAuthProvider } from "@homarr/definitions";
+import type { AuthProviderKey } from "@homarr/definitions";
 
-export const createAdapter = (db: Database, provider: SupportedAuthProvider | "unknown"): Adapter => {
+export const createAdapter = (db: Database, provider: AuthProviderKey | "unknown"): Adapter => {
   const drizzleAdapter = DrizzleAdapter(db, { usersTable: users, sessionsTable: sessions, accountsTable: accounts });
 
   return {

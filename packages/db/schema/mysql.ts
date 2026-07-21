@@ -24,6 +24,7 @@ import {
   emptySuperJSON,
 } from "@homarr/definitions";
 import type {
+  AuthProviderKey,
   BackgroundImageAttachment,
   BackgroundImageRepeat,
   BackgroundImageSize,
@@ -37,7 +38,6 @@ import type {
   OnboardingStep,
   SearchEngineType,
   SectionKind,
-  SupportedAuthProvider,
   WidgetKind,
 } from "@homarr/definitions";
 import type {
@@ -107,7 +107,7 @@ export const users = mysqlTable("user", {
   emailVerified: timestamp(),
   image: text(),
   password: text(),
-  provider: varchar({ length: 64 }).$type<SupportedAuthProvider>().default("credentials").notNull(),
+  provider: varchar({ length: 64 }).$type<AuthProviderKey>().default("credentials").notNull(),
   homeBoardId: varchar({ length: 64 }).references((): AnyMySqlColumn => boards.id, {
     onDelete: "set null",
   }),

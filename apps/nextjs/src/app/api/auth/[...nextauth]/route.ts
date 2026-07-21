@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 
 import { createHandlersAsync } from "@homarr/auth";
 import { createLogger } from "@homarr/core/infrastructure/logs";
-import type { SupportedAuthProvider } from "@homarr/definitions";
+import type { AuthProviderKey } from "@homarr/definitions";
 
 const logger = createLogger({ module: "nextAuthRoute" });
 
@@ -32,19 +32,21 @@ const isSecureCookieEnabled = (req: NextRequest): boolean => {
  * @param req request containing the url
  * @returns the provider or "unknown" if the provider could not be extracted
  */
-const extractProvider = (req: NextRequest): SupportedAuthProvider | "unknown" => {
-  const url = new URL(req.url);
+const extractProvider = (req: NextRequest): AuthProviderKey | "unknown" => {
+  const { pathname } = new URL(req.url);
 
-  if (url.pathname.includes("oidc")) {
-    return "oidc";
-  }
-
-  if (url.pathname.includes("credentials")) {
-    return "credentials";
-  }
-
-  if (url.pathname.includes("ldap")) {
-    return "ldap";
+  // NextAuth routes are /api/auth/(callback|signin)/<providerId>. Parse the
+  // provider id exactly (not a substring match) so each DB OIDC provider keeps
+  // its "oidc-<key>" identity - the adapter's getUserByEmail relies on this to
+  // scope email lookups to a single IdP. Parsing the segment also hardens the
+  // old substring bug (a callback URL query param containing "oidc" no longer
+  // forces provider="oidc").
+  const providerId = /\/api\/auth\/(?:callback|signin)\/([^/?#]+)/.exec(pathname)?.[1];
+  if (providerId) {
+    const decoded = decodeURIComponent(providerId);
+    if (decoded === "credentials") return "credentials";
+    if (decoded === "ldap") return "ldap";
+    if (decoded === "oidc" || decoded.startsWith("oidc-")) return decoded as AuthProviderKey;
   }
 
   return "unknown";
