@@ -24,14 +24,7 @@ import {
   Title,
   UnstyledButton,
 } from "@mantine/core";
-import {
-  IconKeyboard,
-  IconLanguage,
-  IconLibrary,
-  IconMoneybagHeart,
-  IconPackage,
-  IconUsers,
-} from "@tabler/icons-react";
+import { IconKeyboard, IconLanguage, IconLibrary, IconPackage, IconUsers } from "@tabler/icons-react";
 
 import { capitalize, objectEntries } from "@homarr/common";
 import { hotkeys } from "@homarr/definitions";
@@ -42,7 +35,6 @@ import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
 import { createMetaTitle } from "~/metadata";
 import { getDependenciesAsync, getPackageVersion } from "~/versions/package-reader";
 import githubContributors from "@static-data/contributors.json";
-import openCollectiveContributors from "@static-data/opencollective-contributors.json";
 import crowdinContributors from "@static-data/translators.json";
 import classes from "./about.module.css";
 
@@ -117,30 +109,6 @@ export default async function AboutPage() {
                   link={`https://crowdin.com/profile/${translator.username}`}
                   image={translator.avatarUrl}
                   name={translator.username}
-                />
-              ))}
-            </Flex>
-          </AccordionPanel>
-        </AccordionItem>
-        <AccordionItem value="sponsors">
-          <AccordionControl icon={<IconMoneybagHeart size="1rem" />}>
-            <Stack gap={0}>
-              <Text>{t("accordion.sponsors.title")}</Text>
-              <Text size="sm" c="dimmed">
-                {t("accordion.sponsors.subtitle", {
-                  count: String(openCollectiveContributors.length),
-                })}
-              </Text>
-            </Stack>
-          </AccordionControl>
-          <AccordionPanel>
-            <Flex wrap="wrap" gap="xs">
-              {openCollectiveContributors.map((sponsor) => (
-                <GenericContributorLinkCard
-                  key={sponsor.slug}
-                  link={`https://opencollective.com/${sponsor.slug}`}
-                  image={sponsor.imageUrl}
-                  name={sponsor.name}
                 />
               ))}
             </Flex>

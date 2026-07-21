@@ -5185,15 +5185,15 @@
       },
       "about": {
         "version": "Version {version}",
-        "text": "Muninn is a community driven open source project that is being maintained by volunteers. Thanks to these people, Muninn has been a growing project since 2021. Our team is working completely remote from many different countries on Muninn in their leisure time for no compensation.",
+        "text": "Muninn is Emkraan's first-party fleet launcher, built on the open-source Homarr project (github.com/homarr-labs/homarr, Apache-2.0). Huge thanks to the Homarr project and everyone who contributes to it - the people credited below built the upstream that Muninn is based on.",
         "accordion": {
           "contributors": {
-            "title": "Contributors",
-            "subtitle": "{count} maintaining code & Muninn"
+            "title": "Built on Homarr",
+            "subtitle": "{count} people contribute to Homarr, the open-source project Muninn is based on"
           },
           "translators": {
-            "title": "Translators",
-            "subtitle": "{count} contributing translations in many languages"
+            "title": "Homarr translators",
+            "subtitle": "{count} contributing Homarr's translations across many languages"
           },
           "sponsors": {
             "title": "Sponsors",
@@ -5201,7 +5201,7 @@
           },
           "libraries": {
             "title": "Libraries",
-            "subtitle": "{count} used in the Code of Muninn"
+            "subtitle": "{count} open-source libraries powering Muninn"
           },
           "hotkeys": {
             "title": "Hotkeys",
