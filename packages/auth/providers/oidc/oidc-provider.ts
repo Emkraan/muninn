@@ -40,7 +40,7 @@ export const extractProfileName = (profile: Profile) => {
 
 // --- Emkraan multi-OIDC (P4): build a NextAuth provider from a DB row -------
 
-const buildProfileName = (row: OidcProviderRow, profile: Profile): string | undefined => {
+export const buildProfileName = (row: OidcProviderRow, profile: Profile): string | undefined => {
   const claim = row.nameClaim ?? row.usernameClaim;
   if (claim) {
     const value = profile[claim as keyof Profile];

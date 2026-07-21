@@ -255,6 +255,30 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
     });
     expect(dbUser?.name).toBe("test-new");
   });
+  test("signInEventHandler should resolve the username from the provider's nameClaim (per-provider)", async () => {
+    // Arrange: provider configured with a custom nameClaim, and a profile that
+    // has NO preferred_username/name (only the custom claim). The old global
+    // extractProfileName would have thrown; the per-provider path must use the
+    // claim value and not overwrite it.
+    const db = createDb();
+    await createUserAsync(db);
+    await createOidcProviderAsync(db, { nameClaim: "display_name" });
+    const eventHandler = createSignInEventHandler(db);
+
+    // Act
+    await eventHandler?.({
+      user: { id: "1", name: "test" },
+      profile: { sub: "abc", display_name: "Alice Corp", email: "alice@corp.com" },
+      account: { provider: "oidc-test", providerAccountId: "abc", type: "oidc" } as never,
+    });
+
+    // Assert
+    const dbUser = await db.query.users.findFirst({
+      where: eq(users.id, "1"),
+      columns: { name: true },
+    });
+    expect(dbUser?.name).toBe("Alice Corp");
+  });
   test("signInEventHandler should set color-scheme cookie", async () => {
     // Arrange
     const db = createDb();
@@ -293,7 +317,10 @@ const createGroupAsync = async (db: Database, name = "test") =>
     position: 1,
   });
 
-const createOidcProviderAsync = async (db: Database, options?: { groupsLocalManagement?: boolean }) =>
+const createOidcProviderAsync = async (
+  db: Database,
+  options?: { groupsLocalManagement?: boolean; nameClaim?: string },
+) =>
   await db.insert(oidcProviders).values({
     id: "1",
     key: "test",
@@ -302,6 +329,7 @@ const createOidcProviderAsync = async (db: Database, options?: { groupsLocalMana
     clientId: "client-id",
     clientSecret: "aa.bb",
     groupsClaim: "someRandomGroupsKey",
+    nameClaim: options?.nameClaim ?? null,
     groupsLocalManagement: options?.groupsLocalManagement ?? false,
     createdAt: new Date(),
     updatedAt: new Date(),
