@@ -33,7 +33,10 @@ describe("all should return all apps", () => {
     const caller = appRouter.createCaller({
       db,
       deviceType: undefined,
-      session: createDefaultSession(),
+      // Strict per-user RBAC (P3): app.all is visibility-scoped. A user with a
+      // broad app-visibility permission sees every app; a permission-less user
+      // sees none (nothing is shared by default).
+      session: createDefaultSession(["app-use-all"]),
     });
 
     await db.insert(apps).values([
