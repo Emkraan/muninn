@@ -33,6 +33,7 @@ import type {
   IntegrationKind,
   IntegrationPermission,
   IntegrationSecretKind,
+  OidcProviderType,
   OnboardingStep,
   SearchEngineType,
   SectionKind,
@@ -53,6 +54,41 @@ const customBlob = customType<{ data: Buffer }>({
 });
 
 export * from "@homarr/core/infrastructure/certificates/hostnames/db/mysql";
+
+// Emkraan multi-OIDC provider store (P4). See sqlite schema for notes.
+export const oidcProviders = mysqlTable("oidcProvider", {
+  id: varchar({ length: 64 }).notNull().primaryKey(),
+  key: varchar({ length: 64 }).notNull().unique(),
+  displayName: text().notNull(),
+  providerType: varchar({ length: 64 }).$type<OidcProviderType>().notNull(),
+  enabled: boolean().default(true).notNull(),
+  showOnLogin: boolean().default(true).notNull(),
+  isDefault: boolean().default(false).notNull(),
+  clientId: text().notNull(),
+  clientSecret: text().$type<`${string}.${string}`>().notNull(),
+  issuer: text(),
+  discoveryUrl: text(),
+  tenant: varchar({ length: 128 }),
+  authorizationUrl: text(),
+  tokenUrl: text(),
+  userinfoUrl: text(),
+  scopes: text(),
+  tokenEndpointAuthMethod: varchar({ length: 64 }).default("client_secret_basic").notNull(),
+  allowDangerousEmailAccountLinking: boolean().default(false).notNull(),
+  forceUserinfo: boolean().default(false).notNull(),
+  nameClaim: varchar({ length: 128 }),
+  emailClaim: varchar({ length: 128 }),
+  pictureClaim: varchar({ length: 128 }),
+  usernameClaim: varchar({ length: 128 }),
+  groupsClaim: varchar({ length: 128 }),
+  allowedGroups: text(),
+  adminGroups: text(),
+  groupsLocalManagement: boolean().default(false).notNull(),
+  createdAt: timestamp().notNull(),
+  updatedAt: timestamp()
+    .$onUpdateFn(() => new Date())
+    .notNull(),
+});
 
 export const apiKeys = mysqlTable("apiKey", {
   id: varchar({ length: 64 }).notNull().primaryKey(),

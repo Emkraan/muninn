@@ -21,6 +21,7 @@ import type {
   IntegrationKind,
   IntegrationPermission,
   IntegrationSecretKind,
+  OidcProviderType,
   OnboardingStep,
   SearchEngineType,
   SectionKind,
@@ -35,6 +36,44 @@ import type {
 } from "@homarr/validation/custom-widget";
 
 export * from "@homarr/core/infrastructure/certificates/hostnames/db/sqlite";
+
+// Emkraan multi-OIDC provider store (P4). Client secret is stored encrypted
+// (encryptSecret/decryptSecret, SECRET_ENCRYPTION_KEY) as `${hex}.${hex}`,
+// same as integrationSecret.value. Each row builds one NextAuth OIDC provider
+// with id `oidc-${key}` and callback /api/auth/callback/oidc-${key}.
+export const oidcProviders = sqliteTable("oidcProvider", {
+  id: text().notNull().primaryKey(),
+  key: text().notNull().unique(),
+  displayName: text().notNull(),
+  providerType: text().$type<OidcProviderType>().notNull(),
+  enabled: int({ mode: "boolean" }).default(true).notNull(),
+  showOnLogin: int({ mode: "boolean" }).default(true).notNull(),
+  isDefault: int({ mode: "boolean" }).default(false).notNull(),
+  clientId: text().notNull(),
+  clientSecret: text().$type<`${string}.${string}`>().notNull(),
+  issuer: text(),
+  discoveryUrl: text(),
+  tenant: text(),
+  authorizationUrl: text(),
+  tokenUrl: text(),
+  userinfoUrl: text(),
+  scopes: text(),
+  tokenEndpointAuthMethod: text().default("client_secret_basic").notNull(),
+  allowDangerousEmailAccountLinking: int({ mode: "boolean" }).default(false).notNull(),
+  forceUserinfo: int({ mode: "boolean" }).default(false).notNull(),
+  nameClaim: text(),
+  emailClaim: text(),
+  pictureClaim: text(),
+  usernameClaim: text(),
+  groupsClaim: text(),
+  allowedGroups: text(),
+  adminGroups: text(),
+  groupsLocalManagement: int({ mode: "boolean" }).default(false).notNull(),
+  createdAt: int({ mode: "timestamp" }).notNull(),
+  updatedAt: int({ mode: "timestamp" })
+    .$onUpdateFn(() => new Date())
+    .notNull(),
+});
 
 export const apiKeys = sqliteTable("apiKey", {
   id: text().notNull().primaryKey(),

@@ -36,6 +36,7 @@ export const {
   invites,
   items,
   medias,
+  oidcProviders,
   onboarding,
   searchEngines,
   sections,
@@ -59,6 +60,7 @@ export type Account = InferSelectModel<typeof schema.accounts>;
 export type Session = InferSelectModel<typeof schema.sessions>;
 export type VerificationToken = InferSelectModel<typeof schema.verificationTokens>;
 export type Integration = InferSelectModel<typeof schema.integrations>;
+export type OidcProvider = InferSelectModel<typeof schema.oidcProviders>;
 export type IntegrationSecret = InferSelectModel<typeof schema.integrationSecrets>;
 export type CustomWidgetDefinition = InferSelectModel<typeof schema.customWidgetDefinitions>;
 export type CustomWidgetSecret = InferSelectModel<typeof schema.customWidgetSecrets>;
