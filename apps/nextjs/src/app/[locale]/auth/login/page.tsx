@@ -3,6 +3,7 @@ import { Alert, Card, Center, Code, Stack, Text, Title } from "@mantine/core";
 import { IconLogin } from "@tabler/icons-react";
 
 import { env } from "@homarr/auth/env";
+import { loadLoginProvidersAsync } from "@homarr/auth";
 import { auth } from "@homarr/auth/next";
 import { getScopedI18n } from "@homarr/translation/server";
 import { sanitizeRedirectionUrl } from "@homarr/validation/redirection-url";
@@ -27,6 +28,8 @@ export default async function Login(props: LoginProps) {
   }
 
   const t = await getScopedI18n("user.page.login");
+  // Emkraan multi-OIDC (P4): DB-configured provider buttons (enabled + show-on-login).
+  const oidcProviders = await loadLoginProvidersAsync();
 
   return (
     <Center>
@@ -50,8 +53,7 @@ export default async function Login(props: LoginProps) {
         <Card w={64 * 6} maw="90vw">
           <LoginForm
             providers={env.AUTH_PROVIDERS}
-            oidcClientName={env.AUTH_OIDC_CLIENT_NAME}
-            isOidcAutoLoginEnabled={env.AUTH_OIDC_AUTO_LOGIN}
+            oidcProviders={oidcProviders}
             callbackUrl={searchParams.callbackUrl ?? "/"}
           />
         </Card>

@@ -18,16 +18,21 @@ import { userSignInSchema } from "@homarr/validation/user";
 
 type Provider = "credentials" | "ldap" | "oidc";
 
+interface OidcProviderButton {
+  id: string;
+  displayName: string;
+  isDefault: boolean;
+}
+
 interface LoginFormProps {
   providers: string[];
-  oidcClientName: string;
-  isOidcAutoLoginEnabled: boolean;
+  oidcProviders: OidcProviderButton[];
   callbackUrl: string;
 }
 
 const extendedValidation = userSignInSchema.extend({ provider: z.enum(["credentials", "ldap"]) });
 
-export const LoginForm = ({ providers, oidcClientName, isOidcAutoLoginEnabled, callbackUrl }: LoginFormProps) => {
+export const LoginForm = ({ providers, oidcProviders, callbackUrl }: LoginFormProps) => {
   const t = useScopedI18n("user");
   const searchParams = useSearchParams();
   const isError = searchParams.has("error");
@@ -44,13 +49,15 @@ export const LoginForm = ({ providers, oidcClientName, isOidcAutoLoginEnabled, c
   const credentialInputsVisible = providers.includes("credentials") || providers.includes("ldap");
 
   const onSuccess = useCallback(
-    async (provider: Provider, response: Awaited<ReturnType<typeof signIn>>) => {
+    async (provider: string, response: Awaited<ReturnType<typeof signIn>>) => {
       if (!response.ok || response.error) {
         // eslint-disable-next-line @typescript-eslint/only-throw-error
         throw response.error;
       }
 
-      if (provider === "oidc") {
+      // Any non-credentials provider (every OIDC provider, id "oidc-<key>") is
+      // redirected to the IdP by Auth.js.
+      if (provider !== "credentials" && provider !== "ldap") {
         if (!response.url) {
           showErrorNotification({
             title: t("action.login.notification.error.title"),
@@ -87,7 +94,7 @@ export const LoginForm = ({ providers, oidcClientName, isOidcAutoLoginEnabled, c
   }, [t]);
 
   const signInAsync = useCallback(
-    async (provider: Provider, options?: Parameters<typeof signIn>[1]) => {
+    async (provider: string, options?: Parameters<typeof signIn>[1]) => {
       setIsPending(true);
       await signIn(provider, {
         ...options,
@@ -100,15 +107,18 @@ export const LoginForm = ({ providers, oidcClientName, isOidcAutoLoginEnabled, c
     [setIsPending, onSuccess, onError, callbackUrl],
   );
 
+  // Auto-login to the provider marked as default (generalizes the old single
+  // AUTH_OIDC_AUTO_LOGIN env flag to the DB provider store).
+  const defaultProvider = oidcProviders.find((provider) => provider.isDefault);
   const isLoginInProgress = useRef(false);
 
   useEffect(() => {
-    if (isError) return;
-    if (isOidcAutoLoginEnabled && !isPending && !isLoginInProgress.current) {
+    if (isError || !defaultProvider) return;
+    if (!isPending && !isLoginInProgress.current) {
       isLoginInProgress.current = true;
-      void signInAsync("oidc");
+      void signInAsync(defaultProvider.id);
     }
-  }, [signInAsync, isOidcAutoLoginEnabled, isPending, isError]);
+  }, [signInAsync, defaultProvider, isPending, isError]);
 
   return (
     <Stack gap="xl">
@@ -146,15 +156,20 @@ export const LoginForm = ({ providers, oidcClientName, isOidcAutoLoginEnabled, c
                 )}
               </Stack>
             </form>
-            {providers.includes("oidc") && <Divider label="OIDC" labelPosition="center" />}
+            {oidcProviders.length > 0 && <Divider label="Single sign-on" labelPosition="center" />}
           </>
         )}
 
-        {providers.includes("oidc") && (
-          <Button fullWidth variant="light" onClick={async () => await signInAsync("oidc")}>
-            {t("action.login.labelWith", { provider: oidcClientName })}
+        {oidcProviders.map((provider) => (
+          <Button
+            key={provider.id}
+            fullWidth
+            variant="light"
+            onClick={async () => await signInAsync(provider.id)}
+          >
+            {t("action.login.labelWith", { provider: provider.displayName })}
           </Button>
-        )}
+        ))}
       </Stack>
     </Stack>
   );
