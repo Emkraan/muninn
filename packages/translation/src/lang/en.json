@@ -5343,7 +5343,7 @@
           }
         }
       },
-      "addToMuninn": {
+      "addToHomarr": {
         "label": "Add to Muninn",
         "notification": {
           "success": {

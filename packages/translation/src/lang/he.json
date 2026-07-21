@@ -5037,7 +5037,7 @@
           }
         }
       },
-      "addToMuninn": {
+      "addToHomarr": {
         "label": "הוסף ל- Muninn",
         "notification": {
           "success": {

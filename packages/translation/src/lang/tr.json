@@ -5037,7 +5037,7 @@
           }
         }
       },
-      "addToMuninn": {
+      "addToHomarr": {
         "label": "Muninn'a Ekle",
         "notification": {
           "success": {
