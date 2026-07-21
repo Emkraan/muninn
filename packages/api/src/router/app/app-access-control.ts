@@ -2,7 +2,7 @@ import SuperJSON from "superjson";
 
 import type { Session } from "@homarr/auth";
 import type { Database } from "@homarr/db";
-import { eq, inArray, or } from "@homarr/db";
+import { and, eq, inArray, or } from "@homarr/db";
 import { boardGroupPermissions, boards, boardUserPermissions, groupMembers, items } from "@homarr/db/schema";
 
 import type { WidgetComponentProps } from "../../../../widgets/src";
@@ -23,9 +23,12 @@ export class AppAccessControl {
     return await this.canUserSeeAppsAsync([appId]);
   }
 
-  async canUserSeeAppsAsync(appIds: string[]) {
+  // "all" when the user holds a global grant, otherwise the concrete set of app
+  // ids the user may see (apps placed on boards they can view). Exposed so the
+  // router's bulk-read endpoints (all/getPaginated/search/selectable) can scope
+  // their queries and never leak the full app table.
+  async getVisibleAppScopeAsync(): Promise<"all" | string[]> {
     const permissions = this.user?.permissions ?? [];
-    // Global grants that legitimately see every app.
     if (
       permissions.includes("admin") ||
       permissions.includes("app-use-all") ||
@@ -33,34 +36,40 @@ export class AppAccessControl {
       permissions.includes("app-full-all") ||
       permissions.includes("board-view-all")
     ) {
-      return true;
+      return "all";
     }
-
-    const accessibleAppIds = await this.getAccessibleAppIdsAsync();
-    return appIds.every((appId) => accessibleAppIds.includes(appId));
+    return await this.getAccessibleAppIdsAsync();
   }
 
-  // App ids placed on any board the current user is allowed to view.
+  async canUserSeeAppsAsync(appIds: string[]) {
+    const scope = await this.getVisibleAppScopeAsync();
+    if (scope === "all") return true;
+    return appIds.every((appId) => scope.includes(appId));
+  }
+
+  // App ids placed on any board the current user is allowed to view. The items
+  // query is scoped to the viewable board ids (no whole-table scan).
   private async getAccessibleAppIdsAsync() {
     const viewableBoardIds = await this.getViewableBoardIdsAsync();
     if (viewableBoardIds.size === 0) return [];
 
     const itemsWithApps = await this.db.query.items.findMany({
-      where: or(eq(items.kind, "app"), eq(items.kind, "bookmarks")),
+      where: and(
+        inArray(items.boardId, [...viewableBoardIds]),
+        or(eq(items.kind, "app"), eq(items.kind, "bookmarks")),
+      ),
       columns: { kind: true, options: true, boardId: true },
     });
 
-    return itemsWithApps
-      .filter((item) => viewableBoardIds.has(item.boardId))
-      .flatMap((item) => {
-        if (item.kind === "app") {
-          const parsedOptions = SuperJSON.parse<WidgetComponentProps<"app">["options"]>(item.options);
-          return [parsedOptions.appId];
-        }
+    return itemsWithApps.flatMap((item) => {
+      if (item.kind === "app") {
+        const parsedOptions = SuperJSON.parse<WidgetComponentProps<"app">["options"]>(item.options);
+        return [parsedOptions.appId];
+      }
 
-        const parsedOptions = SuperJSON.parse<WidgetComponentProps<"bookmarks">["options"]>(item.options);
-        return parsedOptions.items;
-      });
+      const parsedOptions = SuperJSON.parse<WidgetComponentProps<"bookmarks">["options"]>(item.options);
+      return parsedOptions.items;
+    });
   }
 
   // Board ids this user can view: public + (when authenticated) their own +

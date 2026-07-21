@@ -147,7 +147,9 @@ export default async function Layout(props: {
       dir={direction}
       data-mantine-color-scheme={colorScheme}
       style={{
-        backgroundColor: colorScheme === "dark" ? "#0B1220" : colorScheme === "auto" ? undefined : "#fff",
+        // Cobalt is a dark-first system: dark + auto get the cobalt canvas
+        // (prevents a light flash before hydration); only explicit light is white.
+        backgroundColor: colorScheme === "light" ? "#fff" : "#0B1220",
       }}
       suppressHydrationWarning
     >

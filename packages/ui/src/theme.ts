@@ -5,7 +5,8 @@ import { modalComponent } from "./theme/modal";
 export const theme = createTheme({
   // Emkraan Cobalt: logo-blue accent + a dark surface ladder that leans blue.
   primaryColor: "cobalt",
-  primaryShade: { light: 6, dark: 5 },
+  // dark:6 (#1B6FB8) keeps white text on filled primary above WCAG AA (~5.2:1).
+  primaryShade: { light: 6, dark: 6 },
   autoContrast: true,
   respectReducedMotion: true,
   cursorType: "pointer",

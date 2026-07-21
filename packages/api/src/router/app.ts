@@ -4,7 +4,7 @@ import { z } from "zod/v4";
 import type { Session } from "@homarr/auth";
 import { createId } from "@homarr/common";
 import type { Database, InferSelectModel } from "@homarr/db";
-import { asc, eq, inArray, like } from "@homarr/db";
+import { and, asc, eq, inArray, like } from "@homarr/db";
 import { apps } from "@homarr/db/schema";
 import { selectAppSchema } from "@homarr/db/validationSchemas";
 import { getIconForName } from "@homarr/icons";
@@ -35,7 +35,11 @@ export const appRouter = createTRPCRouter({
       },
     })
     .query(async ({ input, ctx }) => {
-      const whereQuery = input.search ? like(apps.name, `%${input.search.trim()}%`) : undefined;
+      const scope = await new AppAccessControl(ctx.db, ctx.session?.user ?? null).getVisibleAppScopeAsync();
+      if (scope !== "all" && scope.length === 0) return { items: [], totalCount: 0 };
+      const scopeWhere = scope === "all" ? undefined : inArray(apps.id, scope);
+      const searchWhere = input.search ? like(apps.name, `%${input.search.trim()}%`) : undefined;
+      const whereQuery = and(scopeWhere, searchWhere);
       const totalCount = await ctx.db.$count(apps, whereQuery);
 
       const dbApps = await ctx.db.query.apps.findMany({
@@ -62,8 +66,11 @@ export const appRouter = createTRPCRouter({
       },
       mcp: { enabled: true, description: "List all apps" },
     })
-    .query(({ ctx }) => {
+    .query(async ({ ctx }) => {
+      const scope = await new AppAccessControl(ctx.db, ctx.session?.user ?? null).getVisibleAppScopeAsync();
+      if (scope !== "all" && scope.length === 0) return [];
       return ctx.db.query.apps.findMany({
+        where: scope === "all" ? undefined : inArray(apps.id, scope),
         orderBy: asc(apps.name),
       });
     }),
@@ -87,9 +94,11 @@ export const appRouter = createTRPCRouter({
         description: "Search apps by name. REQUIRED: query (search string). OPTIONAL: limit (number, default 10)",
       },
     })
-    .query(({ ctx, input }) => {
+    .query(async ({ ctx, input }) => {
+      const scope = await new AppAccessControl(ctx.db, ctx.session?.user ?? null).getVisibleAppScopeAsync();
+      if (scope !== "all" && scope.length === 0) return [];
       return ctx.db.query.apps.findMany({
-        where: like(apps.name, `%${input.query}%`),
+        where: and(like(apps.name, `%${input.query}%`), scope === "all" ? undefined : inArray(apps.id, scope)),
         orderBy: asc(apps.name),
         limit: input.limit,
       });
@@ -116,7 +125,9 @@ export const appRouter = createTRPCRouter({
         protect: true,
       },
     })
-    .query(({ ctx }) => {
+    .query(async ({ ctx }) => {
+      const scope = await new AppAccessControl(ctx.db, ctx.session?.user ?? null).getVisibleAppScopeAsync();
+      if (scope !== "all" && scope.length === 0) return [];
       return ctx.db.query.apps.findMany({
         columns: {
           id: true,
@@ -126,6 +137,7 @@ export const appRouter = createTRPCRouter({
           href: true,
           pingUrl: true,
         },
+        where: scope === "all" ? undefined : inArray(apps.id, scope),
         orderBy: asc(apps.name),
       });
     }),
