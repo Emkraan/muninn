@@ -38,7 +38,7 @@ export const extractProfileName = (profile: Profile) => {
   return profile[env.AUTH_OIDC_NAME_ATTRIBUTE_OVERWRITE as keyof typeof profile] as string;
 };
 
-// --- Emkraan multi-OIDC (P4): build a NextAuth provider from a DB row -------
+// --- Multi-provider OIDC: build a NextAuth provider from a DB row -------
 
 export const buildProfileName = (row: OidcProviderRow, profile: Profile): string | undefined => {
   const claim = row.nameClaim ?? row.usernameClaim;
@@ -104,6 +104,16 @@ export const buildOidcProviderFromDb = (
     } satisfies OAuth2Config<Profile>;
   }
 
+  // @auth/core's assertConfig requires an `issuer` even when discovery
+  // (`wellKnown`) is used - a provider with wellKnown but no issuer throws
+  // InvalidEndpoints and 500s the ENTIRE /api/auth/* surface (breaking every
+  // sign-in AND sign-out). Always supply an issuer: prefer the resolved one,
+  // else derive it from the discovery URL. Keep wellKnown so discovery still
+  // drives the endpoints.
+  const wellKnown = resolved.discoveryUrl;
+  const issuer =
+    resolved.issuer ?? (wellKnown ? wellKnown.replace(/\/\.well-known\/openid-configuration\/?$/, "") : undefined);
+
   return {
     id,
     name: row.displayName,
@@ -114,7 +124,8 @@ export const buildOidcProviderFromDb = (
       token_endpoint_auth_method:
         row.tokenEndpointAuthMethod as (typeof env)["AUTH_OIDC_TOKEN_ENDPOINT_AUTH_METHOD"],
     },
-    ...(resolved.discoveryUrl ? { wellKnown: resolved.discoveryUrl } : { issuer: resolved.issuer }),
+    ...(issuer ? { issuer } : {}),
+    ...(wellKnown ? { wellKnown } : {}),
     allowDangerousEmailAccountLinking: row.allowDangerousEmailAccountLinking,
     authorization: { params: { scope, redirect_uri: redirectUri } },
     token: { conform: conformTokenResponse },

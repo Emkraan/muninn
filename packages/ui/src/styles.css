@@ -5,7 +5,7 @@
 @import "mantine-react-table/styles.css";
 
 /* ============================================================================
-   Emkraan Cobalt layer (Muninn). Layered over Mantine: live animated
+   Cobalt layer (Muninn). Layered over Mantine: live animated
    background, brand tag, focus polish. Palette + fonts come from the Mantine
    theme (packages/ui/src/theme.ts) + next/font variables (--font-sans /
    --font-display / --font-mono set on <body>).
@@ -92,8 +92,8 @@
   }
 }
 
-/* Emkraan brand tag, pinned bottom-left (below Mantine overlays at z 200+). */
-.emkraan-tag {
+/* Brand attribution tag, pinned bottom-left (below Mantine overlays at z 200+). */
+.brand-tag {
   position: fixed;
   left: 14px;
   bottom: 12px;
@@ -109,21 +109,21 @@
   opacity: 0.6;
   transition: opacity 150ms ease, transform 150ms ease;
 }
-.emkraan-tag:hover {
+.brand-tag:hover {
   opacity: 1;
   transform: translateY(-1px);
 }
-.emkraan-tag-text {
+.brand-tag-text {
   font-family: var(--font-sans), Inter, system-ui, sans-serif;
   font-size: 11px;
   color: #aeb8c6;
 }
-.emkraan-tag-text b {
+.brand-tag-text b {
   color: #f4f7fb;
   font-weight: 600;
 }
 @media (max-width: 640px) {
-  .emkraan-tag {
+  .brand-tag {
     display: none;
   }
 }

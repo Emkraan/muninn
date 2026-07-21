@@ -4,14 +4,14 @@ import { themes as prismThemes } from "prism-react-renderer";
 const a11yEmoji = require("@fec/remark-a11y-emoji");
 
 const config: Config = {
-  title: "Homarr documentation",
-  tagline: "A simple yet powerful dashboard for your server.",
-  url: "https://homarr.dev",
+  title: "Muninn documentation",
+  tagline: "A self-hosted dashboard and app launcher for your homelab.",
+  url: "https://muninn.dev",
   baseUrl: "/",
   trailingSlash: undefined,
   favicon: "img/logo.png",
-  organizationName: "homarr-labs",
-  projectName: "homarr",
+  organizationName: "Emkraan",
+  projectName: "muninn",
   i18n: {
     defaultLocale: "en",
     locales: ["en"],
@@ -47,9 +47,9 @@ const config: Config = {
     {
       src: "https://widget.kapa.ai/kapa-widget.bundle.js",
       "data-website-id": "1e4656f4-abeb-4343-bbae-1d8626f52378",
-      "data-project-name": "Homarr",
-      "data-project-color": "#2B2B2B",
-      "data-project-logo": "https://homarr.dev/img/favicon.png",
+      "data-project-name": "Muninn",
+      "data-project-color": "#0B1220",
+      "data-project-logo": "/img/favicon.png",
       async: true,
     },
   ],
@@ -60,7 +60,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
-          editUrl: ({ docPath }) => `https://github.com/homarr-labs/homarr/edit/dev/apps/docs/docs/${docPath}`,
+          editUrl: ({ docPath }) => `https://github.com/Emkraan/muninn/edit/dev/apps/docs/docs/${docPath}`,
           remarkPlugins: [a11yEmoji],
           exclude: [],
           showLastUpdateAuthor: false,
@@ -70,7 +70,7 @@ const config: Config = {
           showReadingTime: true,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl: "https://github.com/homarr-labs/homarr/edit/dev/apps/docs",
+          editUrl: "https://github.com/Emkraan/muninn/edit/dev/apps/docs",
           authorsMapPath: "authors.yml",
         },
         theme: {
@@ -107,9 +107,9 @@ const config: Config = {
 
   themeConfig: {
     navbar: {
-      title: "Homarr",
+      title: "Muninn",
       logo: {
-        alt: "Homarr Logo",
+        alt: "Muninn Logo",
         src: "img/logo.png",
       },
       items: [
@@ -130,7 +130,7 @@ const config: Config = {
           to: "/about-us",
         },
         {
-          to: "https://demo.homarr.dev/",
+          to: "https://github.com/Emkraan/muninn",
           label: "Demo",
           position: "right",
         },
@@ -149,7 +149,7 @@ const config: Config = {
               label: "Discord",
             },
             {
-              to: "https://github.com/homarr-labs/homarr",
+              to: "https://github.com/Emkraan/muninn",
               label: "GitHub",
             },
             {
@@ -213,7 +213,7 @@ const config: Config = {
             },
             {
               label: "GitHub",
-              to: "https://github.com/homarr-labs/homarr",
+              to: "https://github.com/Emkraan/muninn",
             },
             {
               label: "Donate",
@@ -236,11 +236,11 @@ const config: Config = {
         },
       ],
       logo: {
-        alt: "Homarr Logo",
+        alt: "Muninn Logo",
         src: "img/logo.png",
         height: 100,
       },
-      copyright: `<span class="copyright_text">Copyright © ${new Date().getFullYear()} Homarr<span> — <a href="/docs/community/license">License</a>`,
+      copyright: `<span class="copyright_text">Copyright © ${new Date().getFullYear()} Muninn<span> — <a href="/docs/community/license">License</a>`,
     },
     prism: {
       theme: prismThemes.github,
@@ -254,7 +254,7 @@ const config: Config = {
     metadata: [
       {
         name: "keywords",
-        content: "Homarr, Dashboard, Selfhosted, Hosting, Modules, Open-Source",
+        content: "Muninn, Dashboard, Selfhosted, Hosting, Modules, Open-Source",
       },
     ],
     zoom: {
@@ -286,7 +286,7 @@ const config: Config = {
       "posthog-docusaurus",
       {
         apiKey: "phc_pWxeD1hbl4ip02JYReX1Crjkt5DhB3dduigirHMCtFE",
-        appUrl: "https://hog.homarr.dev",
+        appUrl: "",
         enableInDevelopment: true,
         ui_host: "https://eu.posthog.com",
         defaults: "2026-01-30",

@@ -45,7 +45,7 @@ export const createConfiguration = (
   provider: AuthProviderKey | "unknown",
   headers: ReadonlyHeaders | null,
   useSecureCookies: boolean,
-  // Emkraan multi-OIDC (P4): DB-built OIDC/OAuth2 providers, injected by
+  // Multi-provider OIDC: DB-built OIDC/OAuth2 providers, injected by
   // createHandlersAsync. Already gated by `enabled` in the DB, so they bypass
   // the env-driven filterProviders (which only gates credentials/ldap).
   oidcProviders: (OIDCConfig<Profile> | OAuth2Config<Profile>)[] = [],
@@ -79,7 +79,7 @@ export const createConfiguration = (
       session: createSessionCallback(db),
       // eslint-disable-next-line no-restricted-syntax
       signIn: async ({ user, account, profile }) => {
-        // Emkraan multi-OIDC (P4): enforce the per-provider "allowed groups"
+        // Multi-provider OIDC: enforce the per-provider "allowed groups"
         // gate. DB OIDC providers dispatch as account.provider "oidc-<key>";
         // recover the key, load its group config, and deny sign-in when
         // allowedGroups is non-empty and the profile's groups claim does not

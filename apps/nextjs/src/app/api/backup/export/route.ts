@@ -50,7 +50,7 @@ export async function GET() {
     const zipBuffer = zip.toBuffer();
 
     const date = new Date().toISOString().split("T")[0];
-    const filename = `homarr-backup-${date}.zip`;
+    const filename = `muninn-backup-${date}.zip`;
 
     return new NextResponse(zipBuffer, {
       status: 200,

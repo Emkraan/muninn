@@ -1,8 +1,8 @@
-// Emkraan: Muninn does NOT send usage analytics to Homarr's telemetry host
+// Muninn does NOT send usage analytics to Homarr's telemetry host
 // (upstream pointed PostHog at hog.homarr.dev). getPostHogClient returns a
 // no-op stub so the analytics cron and trackEvent run but never transmit
 // anything off-box. If first-party telemetry is ever wanted, point this at an
-// Emkraan-owned endpoint - never Homarr's.
+// a first-party endpoint you control - never Homarr's.
 interface NoopAnalyticsClient {
   capture: (payload: { distinctId: string; event: string; properties?: Record<string, unknown> }) => void;
   flush: () => Promise<void>;

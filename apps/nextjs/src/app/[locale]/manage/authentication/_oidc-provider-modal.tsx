@@ -29,7 +29,7 @@ import { showErrorNotification, showSuccessNotification } from "@homarr/notifica
 
 // Kept in sync with the sentinel in oidc-provider-router.ts: sending it back on
 // save means "leave the stored client secret unchanged".
-const SECRET_SENTINEL = "__emkraan_secret_unchanged__";
+const SECRET_SENTINEL = "__secret_unchanged__";
 
 type ProviderRow = RouterOutputs["oidcProvider"]["all"][number];
 

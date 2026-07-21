@@ -223,7 +223,7 @@ const seedDefaultSearchEnginesAsync = async (db: Database) => {
     {
       id: homarrId,
       name: "Muninn Docs",
-      iconUrl: "/icon.png",
+      iconUrl: "/logo/logo.png",
       short: "docs",
       description: "Search the Muninn documentation",
       urlTemplate: createDocumentationLink("/search", undefined, { q: "%s" }),

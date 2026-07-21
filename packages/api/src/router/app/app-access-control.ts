@@ -7,7 +7,7 @@ import { boardGroupPermissions, boards, boardUserPermissions, groupMembers, item
 
 import type { WidgetComponentProps } from "../../../../widgets/src";
 
-// Emkraan RBAC: apps are NOT visible to every logged-in user (that was the
+// RBAC: apps are NOT visible to every logged-in user (that was the
 // upstream Homarr behaviour). A user may see an app only if they hold a global
 // app permission, OR the app is placed on a board they can view (public, their
 // own, or explicitly granted to them / one of their groups). This mirrors the

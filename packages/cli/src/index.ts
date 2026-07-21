@@ -9,6 +9,6 @@ import { usersRoot } from "./commands/users";
 const commands = [usersRoot, integrationsRoot, resetPassword, fixUsernames, recreateAdmin];
 
 void run(commands, {
-  name: "homarr-cli",
+  name: "muninn-cli",
   version: "1.0.0",
 });

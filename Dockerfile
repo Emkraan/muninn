@@ -49,8 +49,8 @@ VOLUME /appdata
 
 # Enable homarr cli
 COPY --from=builder /app/packages/cli/cli.cjs /app/apps/cli/cli.cjs
-RUN echo $'#!/bin/bash\ncd /app/apps/cli && node ./cli.cjs "$@"' > /usr/bin/homarr
-RUN chmod +x /usr/bin/homarr
+RUN echo $'#!/bin/bash\ncd /app/apps/cli && node ./cli.cjs "$@"' > /usr/bin/muninn
+RUN chmod +x /usr/bin/muninn && ln -sf /usr/bin/muninn /usr/bin/homarr
 
 # Don't run production as root
 RUN mkdir -p /var/cache/nginx && \
