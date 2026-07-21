@@ -4,11 +4,10 @@ import {
   AccordionControl,
   AccordionItem,
   AccordionPanel,
-  AspectRatio,
-  Avatar,
+  Anchor,
+  Badge,
   Card,
   Center,
-  Flex,
   Group,
   Kbd,
   SimpleGrid,
@@ -24,7 +23,7 @@ import {
   Title,
   UnstyledButton,
 } from "@mantine/core";
-import { IconKeyboard, IconLanguage, IconLibrary, IconPackage, IconUsers } from "@tabler/icons-react";
+import { IconKeyboard, IconLibrary, IconPackage } from "@tabler/icons-react";
 
 import { capitalize, objectEntries } from "@homarr/common";
 import { hotkeys } from "@homarr/definitions";
@@ -34,8 +33,6 @@ import { homarrLogoPath } from "~/components/layout/logo/homarr-logo";
 import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
 import { createMetaTitle } from "~/metadata";
 import { getDependenciesAsync, getPackageVersion } from "~/versions/package-reader";
-import githubContributors from "@static-data/contributors.json";
-import crowdinContributors from "@static-data/translators.json";
 import classes from "./about.module.css";
 
 export async function generateMetadata() {
@@ -51,6 +48,8 @@ export default async function AboutPage() {
   const version = getPackageVersion();
   const dependencies = await getDependenciesAsync();
 
+  const highlights = ["Cobalt UI", "Per-user access control", "Multi-provider SSO", "REST API + docs"];
+
   return (
     <div>
       <DynamicBreadcrumb />
@@ -63,57 +62,35 @@ export default async function AboutPage() {
           </Stack>
         </Group>
       </Center>
-      <Text mb="xl">{t("text")}</Text>
 
-      <Accordion defaultValue="contributors" variant="filled" radius="md">
-        <AccordionItem value="contributors">
-          <AccordionControl icon={<IconUsers size="1rem" />}>
-            <Stack gap={0}>
-              <Text>{t("accordion.contributors.title")}</Text>
-              <Text size="sm" c="dimmed">
-                {t("accordion.contributors.subtitle", {
-                  count: String(githubContributors.length),
-                })}
-              </Text>
-            </Stack>
-          </AccordionControl>
-          <AccordionPanel>
-            <Flex wrap="wrap" gap="xs">
-              {githubContributors.map((contributor) => (
-                <GenericContributorLinkCard
-                  key={contributor.login}
-                  link={`https://github.com/${contributor.login}`}
-                  image={contributor.avatar_url}
-                  name={contributor.login}
-                />
-              ))}
-            </Flex>
-          </AccordionPanel>
-        </AccordionItem>
-        <AccordionItem value="translators">
-          <AccordionControl icon={<IconLanguage size="1rem" />}>
-            <Stack gap={0}>
-              <Text>{t("accordion.translators.title")}</Text>
-              <Text size="sm" c="dimmed">
-                {t("accordion.translators.subtitle", {
-                  count: String(crowdinContributors.length),
-                })}
-              </Text>
-            </Stack>
-          </AccordionControl>
-          <AccordionPanel>
-            <Flex wrap="wrap" gap="xs">
-              {crowdinContributors.map((translator) => (
-                <GenericContributorLinkCard
-                  key={translator.username}
-                  link={`https://crowdin.com/profile/${translator.username}`}
-                  image={translator.avatarUrl}
-                  name={translator.username}
-                />
-              ))}
-            </Flex>
-          </AccordionPanel>
-        </AccordionItem>
+      <Stack gap="md" mb="xl" maw={720} mx="auto">
+        <Text ta="center">{t("text")}</Text>
+        <Group justify="center" gap="xs">
+          {highlights.map((highlight) => (
+            <Badge key={highlight} variant="light" radius="sm" size="lg">
+              {highlight}
+            </Badge>
+          ))}
+        </Group>
+        <Stack gap={2} align="center">
+          <Text size="xs" c="dimmed">
+            {t("builtOn")}
+          </Text>
+          <Group gap="xs">
+            <Anchor size="xs" c="dimmed" href="https://github.com/Emkraan/muninn" target="_blank">
+              Muninn on GitHub
+            </Anchor>
+            <Text size="xs" c="dimmed">
+              ·
+            </Text>
+            <Anchor size="xs" c="dimmed" href="https://github.com/homarr-labs/homarr" target="_blank">
+              Homarr
+            </Anchor>
+          </Group>
+        </Stack>
+      </Stack>
+
+      <Accordion defaultValue="libraries" variant="filled" radius="md">
         <AccordionItem value="libraries">
           <AccordionControl icon={<IconLibrary size="1rem" />}>
             <Stack gap={0}>
@@ -201,24 +178,3 @@ export default async function AboutPage() {
     </div>
   );
 }
-
-interface GenericContributorLinkCardProps {
-  name: string;
-  link: string;
-  image: string;
-}
-
-const GenericContributorLinkCard = ({ name, image, link }: GenericContributorLinkCardProps) => {
-  return (
-    <AspectRatio ratio={1}>
-      <Card className={classes.contributorCard} component="a" href={link} target="_blank" w={100}>
-        <Stack align="center">
-          <Avatar src={image} alt={name} size={40} display="block" />
-          <Text lineClamp={1} size="sm">
-            {name}
-          </Text>
-        </Stack>
-      </Card>
-    </AspectRatio>
-  );
-};

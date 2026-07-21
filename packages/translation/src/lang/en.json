@@ -5185,7 +5185,7 @@
       },
       "about": {
         "version": "Version {version}",
-        "text": "Muninn is Emkraan's first-party fleet launcher, built on the open-source Homarr project (github.com/homarr-labs/homarr, Apache-2.0). Huge thanks to the Homarr project and everyone who contributes to it - the people credited below built the upstream that Muninn is based on.",
+        "text": "Muninn is Emkraan's first-party homelab launcher - one live dashboard for your whole fleet, with per-user access control, multi-provider single sign-on, and a documented API, in the Emkraan Cobalt design.",
         "accordion": {
           "contributors": {
             "title": "Built on Homarr",
@@ -5218,7 +5218,8 @@
             },
             "note": "Tip: Mod refers to both Ctrl key and ⌘ key on macOS"
           }
-        }
+        },
+        "builtOn": "Built on the open-source Homarr project, licensed under Apache-2.0."
       }
     }
   },
