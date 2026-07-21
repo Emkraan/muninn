@@ -1,5 +1,7 @@
 import type { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
 import { cookies } from "next/headers";
+import type { OAuth2Config, OIDCConfig } from "@auth/core/providers";
+import type { Profile } from "@auth/core/types";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
@@ -14,7 +16,6 @@ import { createSignInEventHandler } from "./events";
 import { createCredentialsConfiguration, createLdapConfiguration } from "./providers/credentials/credentials-provider";
 import { EmptyNextAuthProvider } from "./providers/empty/empty-provider";
 import { filterProviders } from "./providers/filter-providers";
-import { OidcProvider } from "./providers/oidc/oidc-provider";
 import { createRedirectUri } from "./redirect";
 import { expireDateAfter, generateSessionToken, sessionTokenCookieName } from "./session";
 
@@ -43,6 +44,10 @@ export const createConfiguration = (
   provider: SupportedAuthProvider | "unknown",
   headers: ReadonlyHeaders | null,
   useSecureCookies: boolean,
+  // Emkraan multi-OIDC (P4): DB-built OIDC/OAuth2 providers, injected by
+  // createHandlersAsync. Already gated by `enabled` in the DB, so they bypass
+  // the env-driven filterProviders (which only gates credentials/ldap).
+  oidcProviders: (OIDCConfig<Profile> | OAuth2Config<Profile>)[] = [],
 ) => {
   const adapter = createAdapter(db, provider);
   return NextAuth({
@@ -61,12 +66,14 @@ export const createConfiguration = (
     trustHost: true,
     cookies: createCookies(useSecureCookies),
     adapter,
-    providers: filterProviders([
-      Credentials(createCredentialsConfiguration(db)),
-      Credentials(createLdapConfiguration(db)),
-      EmptyNextAuthProvider(),
-      OidcProvider(headers),
-    ]),
+    providers: [
+      ...filterProviders([
+        Credentials(createCredentialsConfiguration(db)),
+        Credentials(createLdapConfiguration(db)),
+        EmptyNextAuthProvider(),
+      ]),
+      ...oidcProviders,
+    ],
     callbacks: {
       session: createSessionCallback(db),
       // eslint-disable-next-line no-restricted-syntax
