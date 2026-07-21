@@ -16,6 +16,7 @@ import { createSignInEventHandler } from "./events";
 import { createCredentialsConfiguration, createLdapConfiguration } from "./providers/credentials/credentials-provider";
 import { EmptyNextAuthProvider } from "./providers/empty/empty-provider";
 import { filterProviders } from "./providers/filter-providers";
+import { getOidcGroupConfigAsync } from "./providers/oidc/load-db-providers";
 import { createRedirectUri } from "./redirect";
 import { expireDateAfter, generateSessionToken, sessionTokenCookieName } from "./session";
 
@@ -77,7 +78,34 @@ export const createConfiguration = (
     callbacks: {
       session: createSessionCallback(db),
       // eslint-disable-next-line no-restricted-syntax
-      signIn: async ({ user }) => {
+      signIn: async ({ user, account, profile }) => {
+        // Emkraan multi-OIDC (P4): enforce the per-provider "allowed groups"
+        // gate. DB OIDC providers dispatch as account.provider "oidc-<key>";
+        // recover the key, load its group config, and deny sign-in when
+        // allowedGroups is non-empty and the profile's groups claim does not
+        // intersect it. Fail closed: a missing/empty/non-array claim => deny.
+        // This is the only hook that can deny (the signIn EVENT runs after auth
+        // and cannot block). Providers that leave allowedGroups empty are
+        // unaffected, as are credentials/ldap.
+        if (account?.provider.startsWith("oidc-")) {
+          const oidcKey = account.provider.slice("oidc-".length);
+          const groupConfig = await getOidcGroupConfigAsync(db, oidcKey);
+          if (groupConfig && groupConfig.allowedGroups.length > 0) {
+            const claimValue = profile?.[groupConfig.groupsClaim];
+            const userGroups = Array.isArray(claimValue)
+              ? claimValue.filter((group): group is string => typeof group === "string")
+              : [];
+            const isAllowed = userGroups.some((group) => groupConfig.allowedGroups.includes(group));
+            if (!isAllowed) {
+              logger.warn("OIDC sign-in denied: user is not a member of any allowed group.", {
+                provider: account.provider,
+                userId: user.id,
+              });
+              return false;
+            }
+          }
+        }
+
         /**
          * For credentials provider only jwt is supported by default
          * so we have to create the session and set the cookie manually.

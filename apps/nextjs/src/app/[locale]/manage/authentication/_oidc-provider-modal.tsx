@@ -194,6 +194,11 @@ export const OidcProviderModal = createModal<{ provider?: ProviderRow }>(({ acti
       return;
     }
 
+    if (values.isDefault && !values.showOnLogin) {
+      form.setFieldError("isDefault", "A default (auto sign-in) provider must also be shown on the login page.");
+      return;
+    }
+
     mutate({
       id: innerProps.provider?.id,
       key: values.key,
@@ -386,7 +391,7 @@ export const OidcProviderModal = createModal<{ provider?: ProviderRow }>(({ acti
                 />
                 <TextInput
                   label="Admin groups"
-                  description="Comma-separated. Members are granted the admin permission."
+                  description="Comma-separated. Not yet enforced: to grant admin, create a Muninn group whose name matches the IdP group and give it the admin permission."
                   {...form.getInputProps("adminGroups")}
                 />
                 <Switch

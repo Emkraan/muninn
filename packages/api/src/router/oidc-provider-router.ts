@@ -47,6 +47,14 @@ const upsertSchema = z.object({
   groupsLocalManagement: z.boolean().default(false),
 });
 
+// A default (auto sign-in) provider must be shown on the login page, otherwise
+// loadLoginProvidersAsync filters it out and it becomes silently unreachable
+// (no button, and the auto-login target is never found).
+const upsertInputSchema = upsertSchema.refine((value) => !(value.isDefault && !value.showOnLogin), {
+  message: "A default (auto sign-in) provider must also be shown on the login page.",
+  path: ["isDefault"],
+});
+
 export const oidcProviderRouter = createTRPCRouter({
   // Admin list. Client secret is NEVER returned; a boolean flag + sentinel are.
   all: permissionRequiredProcedure.requiresPermission("admin").query(async () => {
@@ -60,7 +68,7 @@ export const oidcProviderRouter = createTRPCRouter({
 
   upsert: permissionRequiredProcedure
     .requiresPermission("admin")
-    .input(upsertSchema)
+    .input(upsertInputSchema)
     .mutation(async ({ input }) => {
       const { id, clientSecret, ...fields } = input;
 
