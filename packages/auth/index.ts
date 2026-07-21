@@ -30,3 +30,8 @@ export const createHandlersAsync = async (provider: SupportedAuthProvider | "unk
 };
 
 export { getSessionFromTokenAsync as getSessionFromToken, sessionTokenCookieName } from "./session";
+export {
+  invalidateOidcProvidersCache,
+  loadLoginProvidersAsync,
+  type LoginProviderButton,
+} from "./providers/oidc/load-db-providers";
