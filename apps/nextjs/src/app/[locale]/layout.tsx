@@ -71,10 +71,6 @@ export const generateMetadata = async (): Promise<Metadata> => ({
     siteName: "Muninn",
     images: [{ url: "/logo/logo.png", width: 512, height: 512, alt: "Muninn" }],
   },
-  icons: {
-    icon: "/logo/logo.png",
-    apple: "/logo/logo.png",
-  },
   appleWebApp: {
     title: "Muninn",
     capable: true,
