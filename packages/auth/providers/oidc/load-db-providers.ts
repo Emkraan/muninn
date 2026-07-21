@@ -1,6 +1,7 @@
 import type { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
 
 import { db, eq } from "@homarr/db";
+import type { Database } from "@homarr/db";
 import type { OidcProvider as OidcProviderRow } from "@homarr/db/schema";
 import { oidcProviders } from "@homarr/db/schema";
 
@@ -30,6 +31,43 @@ const loadEnabledRowsAsync = async (): Promise<OidcProviderRow[]> => {
 export const loadOidcProvidersAsync = async (headers: ReadonlyHeaders | null) => {
   const rows = await loadEnabledRowsAsync();
   return rows.map((row) => buildOidcProviderFromDb(row, headers));
+};
+
+const splitList = (value: string | null | undefined) =>
+  (value ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+export interface OidcGroupConfig {
+  groupsClaim: string;
+  groupsLocalManagement: boolean;
+  allowedGroups: string[];
+  adminGroups: string[];
+}
+
+/**
+ * Per-provider group-sync config, resolved by provider key (the part after the
+ * "oidc-" NextAuth id prefix). Drives the sign-in event so group mapping works
+ * from the DB provider store instead of the retired AUTH_OIDC_* env vars. Uses
+ * the request's db handle (the sign-in path already has one) rather than the
+ * module cache, so it stays correct under the test in-memory db.
+ */
+export const getOidcGroupConfigAsync = async (
+  database: Database,
+  key: string,
+): Promise<OidcGroupConfig | null> => {
+  const row = await database.query.oidcProviders.findFirst({
+    where: eq(oidcProviders.key, key),
+  });
+  if (!row) return null;
+  const claim = row.groupsClaim?.trim();
+  return {
+    groupsClaim: claim && claim.length > 0 ? claim : "groups",
+    groupsLocalManagement: row.groupsLocalManagement,
+    allowedGroups: splitList(row.allowedGroups),
+    adminGroups: splitList(row.adminGroups),
+  };
 };
 
 export interface LoginProviderButton {

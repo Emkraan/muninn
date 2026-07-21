@@ -33,24 +33,26 @@ export const env = createEnv({
       .min(1)
       .regex(/^[a-zA-Z0-9-_]+$/, "AUTH_COOKIE_PREFIX must only contain letters, numbers, hyphens and underscores")
       .default("homarr"),
-    ...(authProviders.includes("oidc")
-      ? {
-          AUTH_OIDC_ISSUER: z.string().url(),
-          AUTH_OIDC_CLIENT_ID: z.string().min(1),
-          AUTH_OIDC_CLIENT_SECRET: z.string().min(1),
-          AUTH_OIDC_CLIENT_NAME: z.string().min(1).default("OIDC"),
-          AUTH_OIDC_AUTO_LOGIN: createBooleanSchema(false),
-          AUTH_OIDC_SCOPE_OVERWRITE: z.string().min(1).default("openid email profile groups"),
-          AUTH_OIDC_GROUPS_ATTRIBUTE: z.string().default("groups"), // Is used in the signIn event to assign the correct groups, key is from object of decoded id_token
-          AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT: createBooleanSchema(false), // When enabled, group memberships of oidc users are managed locally instead of synced from the groups claim
-          AUTH_OIDC_NAME_ATTRIBUTE_OVERWRITE: z.string().optional(),
-          AUTH_OIDC_FORCE_USERINFO: createBooleanSchema(false),
-          AUTH_OIDC_ENABLE_DANGEROUS_ACCOUNT_LINKING: createBooleanSchema(false),
-          AUTH_OIDC_TOKEN_ENDPOINT_AUTH_METHOD: z
-            .enum(["client_secret_basic", "client_secret_post", "client_secret_jwt", "none"])
-            .default("client_secret_basic"),
-        }
-      : {}),
+    // Emkraan multi-OIDC (P4): identity providers are configured in the DB and
+    // managed at /manage/authentication, so the env-based single-provider config
+    // is retired. These vars stay defined (optional, with defaults) only so the
+    // few remaining fallbacks - name-attribute override, global groups-local-
+    // management default - keep resolving; listing "oidc" in AUTH_PROVIDERS no
+    // longer forces issuer/client credentials.
+    AUTH_OIDC_ISSUER: z.string().url().optional(),
+    AUTH_OIDC_CLIENT_ID: z.string().min(1).optional(),
+    AUTH_OIDC_CLIENT_SECRET: z.string().min(1).optional(),
+    AUTH_OIDC_CLIENT_NAME: z.string().min(1).default("OIDC"),
+    AUTH_OIDC_AUTO_LOGIN: createBooleanSchema(false),
+    AUTH_OIDC_SCOPE_OVERWRITE: z.string().min(1).default("openid email profile groups"),
+    AUTH_OIDC_GROUPS_ATTRIBUTE: z.string().default("groups"), // Is used in the signIn event to assign the correct groups, key is from object of decoded id_token
+    AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT: createBooleanSchema(false), // When enabled, group memberships of oidc users are managed locally instead of synced from the groups claim
+    AUTH_OIDC_NAME_ATTRIBUTE_OVERWRITE: z.string().optional(),
+    AUTH_OIDC_FORCE_USERINFO: createBooleanSchema(false),
+    AUTH_OIDC_ENABLE_DANGEROUS_ACCOUNT_LINKING: createBooleanSchema(false),
+    AUTH_OIDC_TOKEN_ENDPOINT_AUTH_METHOD: z
+      .enum(["client_secret_basic", "client_secret_post", "client_secret_jwt", "none"])
+      .default("client_secret_basic"),
     ...(authProviders.includes("ldap")
       ? {
           AUTH_LDAP_URI: z.string().url(),

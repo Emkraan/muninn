@@ -8,13 +8,17 @@ import type { Database } from "@homarr/db";
 import { groupMembers, groups, users } from "@homarr/db/schema";
 import { colorSchemeCookieKey, everyoneGroup } from "@homarr/definitions";
 
-import { env } from "./env";
 import { extractProfileName } from "./providers/oidc/oidc-provider";
+import { getOidcGroupConfigAsync } from "./providers/oidc/load-db-providers";
 
 const logger = createLogger({ module: "authEvents" });
 
+// NextAuth ids for DB OIDC providers are "oidc-<key>"; recover the key.
+const oidcKeyFromProvider = (provider: string | undefined): string | null =>
+  provider?.startsWith("oidc-") ? provider.slice("oidc-".length) : null;
+
 export const createSignInEventHandler = (db: Database): Exclude<NextAuthConfig["events"], undefined>["signIn"] => {
-  return async ({ user, profile }) => {
+  return async ({ user, profile, account }) => {
     logger.debug(`SignIn EventHandler for user: ${JSON.stringify(user)} . profile: ${JSON.stringify(profile)}`);
     if (!user.id) throw new Error("User ID is missing");
 
@@ -29,10 +33,15 @@ export const createSignInEventHandler = (db: Database): Exclude<NextAuthConfig["
 
     if (!dbUser) throw new Error("User not found");
 
-    const groupsKey = env.AUTH_OIDC_GROUPS_ATTRIBUTE;
+    // Group sync config now comes from the DB provider store (per provider),
+    // replacing the retired AUTH_OIDC_* env vars.
+    const oidcKey = oidcKeyFromProvider(account?.provider);
+    const groupConfig = oidcKey ? await getOidcGroupConfigAsync(db, oidcKey) : null;
+    const groupsKey = groupConfig?.groupsClaim ?? "groups";
     // Groups from oidc provider are provided from the profile, it's not typed.
     if (
-      !env.AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT &&
+      groupConfig &&
+      !groupConfig.groupsLocalManagement &&
       profile &&
       groupsKey in profile &&
       Array.isArray(profile[groupsKey])

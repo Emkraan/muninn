@@ -5,7 +5,7 @@ import { describe, expect, test, vi } from "vitest";
 
 import { eq } from "@homarr/db";
 import type { Database } from "@homarr/db";
-import { groupMembers, groups, users } from "@homarr/db/schema";
+import { groupMembers, groups, oidcProviders, users } from "@homarr/db/schema";
 import { createDb } from "@homarr/db/test";
 import { colorSchemeCookieKey, everyoneGroup } from "@homarr/definitions";
 
@@ -132,18 +132,23 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
     });
   });
   describe("signInEventHandler should synchronize oidc groups", () => {
+    // The groups claim key + local-management flag now come from the DB provider
+    // row (keyed by the "oidc-<key>" NextAuth id on the account), not env.
+    const oidcAccount = { provider: "oidc-test", providerAccountId: "sub", type: "oidc" } as never;
+
     test("should add missing group membership", async () => {
       // Arrange
       const db = createDb();
       await createUserAsync(db);
       await createGroupAsync(db);
+      await createOidcProviderAsync(db);
       const eventHandler = createSignInEventHandler(db);
 
       // Act
       await eventHandler?.({
         user: { id: "1", name: "test" },
         profile: { preferred_username: "test", someRandomGroupsKey: ["test"] },
-        account: null,
+        account: oidcAccount,
       });
 
       // Assert
@@ -157,6 +162,7 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
       const db = createDb();
       await createUserAsync(db);
       await createGroupAsync(db);
+      await createOidcProviderAsync(db);
       await db.insert(groupMembers).values({
         userId: "1",
         groupId: "1",
@@ -167,7 +173,7 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
       await eventHandler?.({
         user: { id: "1", name: "test" },
         profile: { preferred_username: "test", someRandomGroupsKey: [] },
-        account: null,
+        account: oidcAccount,
       });
 
       // Assert
@@ -181,6 +187,7 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
       const db = createDb();
       await createUserAsync(db);
       await createGroupAsync(db, everyoneGroup);
+      await createOidcProviderAsync(db);
       await db.insert(groupMembers).values({
         userId: "1",
         groupId: "1",
@@ -191,7 +198,7 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
       await eventHandler?.({
         user: { id: "1", name: "test" },
         profile: { preferred_username: "test", someRandomGroupsKey: [] },
-        account: null,
+        account: oidcAccount,
       });
 
       // Assert
@@ -200,19 +207,19 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
       });
       expect(dbGroupMembers?.groupId).toBe("1");
     });
-    test("should not synchronize groups when AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT is enabled", async () => {
+    test("should not synchronize groups when the provider manages groups locally", async () => {
       // Arrange
-      mockEnv.AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT = true;
       const db = createDb();
       await createUserAsync(db);
       await createGroupAsync(db);
+      await createOidcProviderAsync(db, { groupsLocalManagement: true });
       const eventHandler = createSignInEventHandler(db);
 
       // Act
       await eventHandler?.({
         user: { id: "1", name: "test" },
         profile: { preferred_username: "test", someRandomGroupsKey: ["test"] },
-        account: null,
+        account: oidcAccount,
       });
 
       // Assert
@@ -220,9 +227,6 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
         where: eq(groupMembers.userId, "1"),
       });
       expect(dbGroupMembers).toBeUndefined();
-
-      // Cleanup
-      mockEnv.AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT = false;
     });
   });
   test.each([
@@ -287,4 +291,18 @@ const createGroupAsync = async (db: Database, name = "test") =>
     id: "1",
     name,
     position: 1,
+  });
+
+const createOidcProviderAsync = async (db: Database, options?: { groupsLocalManagement?: boolean }) =>
+  await db.insert(oidcProviders).values({
+    id: "1",
+    key: "test",
+    displayName: "Test",
+    providerType: "oidc",
+    clientId: "client-id",
+    clientSecret: "aa.bb",
+    groupsClaim: "someRandomGroupsKey",
+    groupsLocalManagement: options?.groupsLocalManagement ?? false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
