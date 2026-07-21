@@ -50,10 +50,16 @@ export const createSessionCallback = (db: Database): NextAuthCallbackOf<"session
       },
     });
 
+    // Never expose the credentials password hash in the session payload
+    // (/api/v1/auth/session is readable by the authenticated client).
+    const { password: _password, ...safeSessionUser } = session.user as typeof session.user & {
+      password?: string | null;
+    };
+
     return {
       ...session,
       user: {
-        ...session.user,
+        ...safeSessionUser,
         ...additionalProperties,
         id: user.id,
         name: user.name,
