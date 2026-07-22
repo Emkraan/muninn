@@ -30,7 +30,9 @@ first-party standard.
   its own claim and group-to-role mapping and provider profile-picture pull. This
   replaces Homarr's single env-configured OIDC provider.
 - **Documented REST API + console** — a served OpenAPI spec, an in-app API
-  reference, scoped API keys, and an MCP endpoint.
+  reference, an MCP endpoint, and per-key scoped, optionally-expiring API keys
+  (a key can never exceed its owner's permissions; users can self-issue keys
+  scoped to their own access). Replaces Homarr's unscoped, never-expiring keys.
 
 ## Status
 
