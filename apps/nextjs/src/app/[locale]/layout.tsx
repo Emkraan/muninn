@@ -176,6 +176,10 @@ export default async function Layout(props: {
             rel="noopener noreferrer"
             aria-label={`Built by ${appEnv.BRAND_ATTRIBUTION}`}
           >
+            {appEnv.BRAND_ATTRIBUTION_LOGO && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className="brand-tag-mark" src={appEnv.BRAND_ATTRIBUTION_LOGO} alt="" width={18} height={18} />
+            )}
             <span className="brand-tag-text">
               Built by <b>{appEnv.BRAND_ATTRIBUTION}</b>
             </span>

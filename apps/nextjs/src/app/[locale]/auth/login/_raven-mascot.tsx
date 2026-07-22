@@ -23,7 +23,7 @@ export const RavenMascot = () => {
     }
 
     const SIZE = 72;
-    const GESTURES = ["flap", "peck", "hop", "look"] as const;
+    const GESTURES = ["peck", "hop", "look", "caw", "preen"] as const;
     let x = 24;
     let alive = true;
     let moveTimer = 0;
@@ -59,16 +59,20 @@ export const RavenMascot = () => {
       const dir = tx > x ? -1 : 1; // scaleX flip = face the travel direction
       const dur = rnd(1.8, 3.2);
       el.style.setProperty("--wander-dur", `${dur}s`);
+      // Wings flap for the whole trip -> reads as flying, not sliding.
+      el.dataset.flying = "1";
+      delete el.dataset.action;
       el.style.transform = `translate3d(${tx}px, ${ty}px, 0) scaleX(${dir})`;
       x = tx;
       gestureTimer = window.setTimeout(() => {
         if (!alive) return;
-        if (Math.random() < 0.7) {
+        delete el.dataset.flying; // landed
+        if (Math.random() < 0.75) {
           const gesture = GESTURES[Math.floor(Math.random() * GESTURES.length)];
           if (gesture) el.dataset.action = gesture;
           clearTimer = window.setTimeout(() => {
             if (alive) delete el.dataset.action;
-          }, 1300);
+          }, 1400);
         }
         moveTimer = window.setTimeout(step, rnd(1500, 4000));
       }, dur * 1000);
@@ -93,11 +97,19 @@ export const RavenMascot = () => {
               <stop offset="0%" stopColor="#4A9FE0" />
               <stop offset="100%" stopColor="#1B6FB8" />
             </linearGradient>
+            {/* Volumetric fill: top-left key light -> shadowed base, for a 3D read. */}
+            <radialGradient id="ravenVol" cx="34%" cy="28%" r="85%">
+              <stop offset="0%" stopColor="#7CC0F0" />
+              <stop offset="52%" stopColor="#2E86C8" />
+              <stop offset="100%" stopColor="#124F7E" />
+            </radialGradient>
           </defs>
           {/* Raven cues: heavy hooked dagger bill, shaggy throat hackles, long wedge tail. */}
           <path className={classes.ravenTail} d="M34 56 L2 70 L11 71 L5 76 L15 74 L13 80 L34 66 Z" fill="url(#ravenGrad)" />
-          <path className={classes.ravenWingR} d="M40 42 C28 38 18 47 24 58 C33 54 41 54 50 50 Z" fill="#155A95" />
-          <ellipse cx="50" cy="55" rx="26" ry="12.5" fill="url(#ravenGrad)" transform="rotate(-8 50 55)" />
+          <path className={classes.ravenWingR} d="M40 42 C28 38 18 47 24 58 C33 54 41 54 50 50 Z" fill="#124F7E" />
+          <ellipse cx="50" cy="55" rx="26" ry="12.5" fill="url(#ravenVol)" transform="rotate(-8 50 55)" />
+          {/* specular sheen on the back */}
+          <ellipse cx="43" cy="50" rx="11" ry="4.2" fill="#BFE2FB" opacity="0.35" transform="rotate(-12 43 50)" />
           <path
             className={classes.ravenWingL}
             d="M54 44 C71 39 83 48 74 61 C64 62 58 60 50 52 C59 54 63 51 60 47 Z"
@@ -106,7 +118,7 @@ export const RavenMascot = () => {
           <g className={classes.ravenHead}>
             <path
               d="M61 41 C61 32 69 28 76 31 C81 33 82 40 79 44 C76 48 68 49 63 47 C61 46 61 43 61 41 Z"
-              fill="url(#ravenGrad)"
+              fill="url(#ravenVol)"
             />
             <path d="M77 35 L98 37 C99.5 37.4 99.5 39 98 39.6 L95 40 L96.5 42.5 L92.5 41.5 L78 45 Z" fill="#155A95" />
             <path d="M63 47 L65 53 L68 48 L71 54 L74 49 L76 55 L78 49 L79 52 L64 51 Z" fill="#155A95" />

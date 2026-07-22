@@ -92,15 +92,17 @@
   }
 }
 
-/* Brand attribution tag, pinned bottom-left (below Mantine overlays at z 200+). */
+/* Brand attribution tag, pinned bottom-left. z 150 clears the app-shell nav
+   (~100) so it shows on manage pages too, but stays below Mantine overlays (200+). */
 .brand-tag {
   position: fixed;
   left: 14px;
   bottom: 12px;
-  z-index: 50;
+  z-index: 150;
   display: inline-flex;
   align-items: center;
-  padding: 5px 11px;
+  gap: 7px;
+  padding: 5px 11px 5px 8px;
   border-radius: 999px;
   background: rgba(19, 27, 46, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -112,6 +114,13 @@
 .brand-tag:hover {
   opacity: 1;
   transform: translateY(-1px);
+}
+.brand-tag-mark {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  object-fit: contain;
+  display: block;
 }
 .brand-tag-text {
   font-family: var(--font-sans), Inter, system-ui, sans-serif;
