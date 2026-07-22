@@ -105,7 +105,7 @@ export const BoardCardMenuDropdown = ({ board }: BoardCardMenuDropdownProps) => 
           <Menu.Divider />
           <Menu.Item
             component={Link}
-            href={`/boards/${board.name}/settings`}
+            href={`/manage/boards/${board.name}/settings`}
             leftSection={<IconSettings {...iconProps} />}
           >
             {t("settings.label")}

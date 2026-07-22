@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { Stack, Title } from "@mantine/core";
 
 import { api } from "@homarr/api/server";
 import { auth } from "@homarr/auth/next";
@@ -7,7 +6,7 @@ import { env } from "@homarr/docker/env";
 import { getScopedI18n } from "@homarr/translation/server";
 
 import { ServicesTable } from "~/app/[locale]/manage/tools/kubernetes/services/services-table";
-import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
+import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 
 export default async function ServicesPage() {
   const session = await auth();
@@ -18,12 +17,8 @@ export default async function ServicesPage() {
   const services = await api.kubernetes.services.getServices();
   const tServices = await getScopedI18n("kubernetes.services");
   return (
-    <>
-      <DynamicBreadcrumb />
-      <Stack>
-        <Title order={1}>{tServices("label")}</Title>
-        <ServicesTable initialServices={services} />
-      </Stack>
-    </>
+    <ManagePageLayout title={tServices("label")}>
+      <ServicesTable initialServices={services} />
+    </ManagePageLayout>
   );
 }

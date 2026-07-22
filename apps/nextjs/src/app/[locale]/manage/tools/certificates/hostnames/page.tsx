@@ -20,7 +20,7 @@ import { getTrustedCertificateHostnamesAsync } from "@homarr/core/infrastructure
 import { getI18n } from "@homarr/translation/server";
 import { Link } from "@homarr/ui";
 
-import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
+import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 import { NoResults } from "~/components/no-results";
 import { RemoveHostnameActionIcon } from "./_components/remove-hostname";
 
@@ -48,52 +48,49 @@ export default async function TrustedHostnamesPage() {
   });
 
   return (
-    <>
-      <DynamicBreadcrumb />
+    <ManagePageLayout
+      title={
+        <Stack gap={4}>
+          <Title>{t("certificate.page.hostnames.title")}</Title>
+          <Text>{t("certificate.page.hostnames.description")}</Text>
+        </Stack>
+      }
+      primaryAction={
+        <Button variant="default" component={Link} href="/manage/tools/certificates">
+          {t("certificate.page.hostnames.toCertificates")}
+        </Button>
+      }
+    >
+      {trustedHostnames.length === 0 && (
+        <NoResults icon={IconCertificateOff} title={t("certificate.page.hostnames.noResults.title")} />
+      )}
 
-      <Stack>
-        <Group justify="space-between">
-          <Stack gap={4}>
-            <Title>{t("certificate.page.hostnames.title")}</Title>
-            <Text>{t("certificate.page.hostnames.description")}</Text>
-          </Stack>
-
-          <Button variant="default" component={Link} href="/manage/tools/certificates">
-            {t("certificate.page.hostnames.toCertificates")}
-          </Button>
-        </Group>
-
-        {trustedHostnames.length === 0 && (
-          <NoResults icon={IconCertificateOff} title={t("certificate.page.hostnames.noResults.title")} />
-        )}
-
-        {trustedHostnames.length >= 1 && (
-          <Table>
-            <TableThead>
-              <TableTr>
-                <TableTh>{t("certificate.field.hostname.label")}</TableTh>
-                <TableTh>{t("certificate.field.subject.label")}</TableTh>
-                <TableTh>{t("certificate.field.fingerprint.label")}</TableTh>
-                <TableTh></TableTh>
+      {trustedHostnames.length >= 1 && (
+        <Table>
+          <TableThead>
+            <TableTr>
+              <TableTh>{t("certificate.field.hostname.label")}</TableTh>
+              <TableTh>{t("certificate.field.subject.label")}</TableTh>
+              <TableTh>{t("certificate.field.fingerprint.label")}</TableTh>
+              <TableTh></TableTh>
+            </TableTr>
+          </TableThead>
+          <TableTbody>
+            {trustedHostnames.map(({ hostname, subject, thumbprint }) => (
+              <TableTr key={`${hostname}-${thumbprint}`}>
+                <TableTd>{hostname}</TableTd>
+                <TableTd>{subject}</TableTd>
+                <TableTd>{thumbprint}</TableTd>
+                <TableTd>
+                  <Group justify="end">
+                    <RemoveHostnameActionIcon hostname={hostname} thumbprint={thumbprint} />
+                  </Group>
+                </TableTd>
               </TableTr>
-            </TableThead>
-            <TableTbody>
-              {trustedHostnames.map(({ hostname, subject, thumbprint }) => (
-                <TableTr key={`${hostname}-${thumbprint}`}>
-                  <TableTd>{hostname}</TableTd>
-                  <TableTd>{subject}</TableTd>
-                  <TableTd>{thumbprint}</TableTd>
-                  <TableTd>
-                    <Group justify="end">
-                      <RemoveHostnameActionIcon hostname={hostname} thumbprint={thumbprint} />
-                    </Group>
-                  </TableTd>
-                </TableTr>
-              ))}
-            </TableTbody>
-          </Table>
-        )}
-      </Stack>
-    </>
+            ))}
+          </TableTbody>
+        </Table>
+      )}
+    </ManagePageLayout>
   );
 }
