@@ -166,8 +166,7 @@
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         },
         "last_used_at": {
           "name": "last_used_at",
