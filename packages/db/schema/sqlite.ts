@@ -12,6 +12,7 @@ import {
   emptySuperJSON,
 } from "@homarr/definitions";
 import type {
+  AppPermission,
   AuthProviderKey,
   BackgroundImageAttachment,
   BackgroundImageRepeat,
@@ -468,6 +469,42 @@ export const apps = sqliteTable("app", {
   pingUrl: text(),
 });
 
+export const appUserPermissions = sqliteTable(
+  "appUserPermission",
+  {
+    appId: text()
+      .notNull()
+      .references(() => apps.id, { onDelete: "cascade" }),
+    userId: text()
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    permission: text().$type<AppPermission>().notNull(),
+  },
+  (table) => ({
+    compoundKey: primaryKey({
+      columns: [table.appId, table.userId, table.permission],
+    }),
+  }),
+);
+
+export const appGroupPermissions = sqliteTable(
+  "appGroupPermissions",
+  {
+    appId: text()
+      .notNull()
+      .references(() => apps.id, { onDelete: "cascade" }),
+    groupId: text()
+      .notNull()
+      .references(() => groups.id, { onDelete: "cascade" }),
+    permission: text().$type<AppPermission>().notNull(),
+  },
+  (table) => ({
+    compoundKey: primaryKey({
+      columns: [table.appId, table.groupId, table.permission],
+    }),
+  }),
+);
+
 export const integrationItems = sqliteTable(
   "integration_item",
   {
@@ -738,6 +775,33 @@ export const integrationGroupPermissionRelations = relations(integrationGroupPer
   integration: one(integrations, {
     fields: [integrationGroupPermissions.integrationId],
     references: [integrations.id],
+  }),
+}));
+
+export const appRelations = relations(apps, ({ many }) => ({
+  userPermissions: many(appUserPermissions),
+  groupPermissions: many(appGroupPermissions),
+}));
+
+export const appUserPermissionRelations = relations(appUserPermissions, ({ one }) => ({
+  user: one(users, {
+    fields: [appUserPermissions.userId],
+    references: [users.id],
+  }),
+  app: one(apps, {
+    fields: [appUserPermissions.appId],
+    references: [apps.id],
+  }),
+}));
+
+export const appGroupPermissionRelations = relations(appGroupPermissions, ({ one }) => ({
+  group: one(groups, {
+    fields: [appGroupPermissions.groupId],
+    references: [groups.id],
+  }),
+  app: one(apps, {
+    fields: [appGroupPermissions.appId],
+    references: [apps.id],
   }),
 }));
 

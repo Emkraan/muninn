@@ -605,6 +605,11 @@
   },
   "app": {
     "search": "Find an app",
+    "permission": {
+      "use": "Select apps in items",
+      "modify": "Edit apps",
+      "full": "Full app access"
+    },
     "page": {
       "list": {
         "title": "Apps",

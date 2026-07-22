@@ -23,6 +23,7 @@ import {
   emptySuperJSON,
 } from "@homarr/definitions";
 import type {
+  AppPermission,
   AuthProviderKey,
   BackgroundImageAttachment,
   BackgroundImageRepeat,
@@ -479,6 +480,43 @@ export const apps = pgTable("app", {
   pingUrl: text(),
 });
 
+export const appUserPermissions = pgTable(
+  "appUserPermission",
+  {
+    appId: varchar({ length: 64 })
+      .notNull()
+      .references(() => apps.id, { onDelete: "cascade" }),
+    userId: varchar({ length: 64 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    permission: varchar({ length: 128 }).$type<AppPermission>().notNull(),
+  },
+  (table) => ({
+    compoundKey: primaryKey({
+      columns: [table.appId, table.userId, table.permission],
+    }),
+  }),
+);
+
+export const appGroupPermissions = pgTable(
+  "appGroupPermissions",
+  {
+    appId: varchar({ length: 64 })
+      .notNull()
+      .references(() => apps.id, { onDelete: "cascade" }),
+    groupId: varchar({ length: 64 })
+      .notNull()
+      .references(() => groups.id, { onDelete: "cascade" }),
+    permission: varchar({ length: 128 }).$type<AppPermission>().notNull(),
+  },
+  (table) => ({
+    compoundKey: primaryKey({
+      columns: [table.appId, table.groupId, table.permission],
+      name: "app_group_permission__pk",
+    }),
+  }),
+);
+
 export const integrationItems = pgTable(
   "integration_item",
   {
@@ -745,6 +783,33 @@ export const integrationGroupPermissionRelations = relations(integrationGroupPer
   integration: one(integrations, {
     fields: [integrationGroupPermissions.integrationId],
     references: [integrations.id],
+  }),
+}));
+
+export const appRelations = relations(apps, ({ many }) => ({
+  userPermissions: many(appUserPermissions),
+  groupPermissions: many(appGroupPermissions),
+}));
+
+export const appUserPermissionRelations = relations(appUserPermissions, ({ one }) => ({
+  user: one(users, {
+    fields: [appUserPermissions.userId],
+    references: [users.id],
+  }),
+  app: one(apps, {
+    fields: [appUserPermissions.appId],
+    references: [apps.id],
+  }),
+}));
+
+export const appGroupPermissionRelations = relations(appGroupPermissions, ({ one }) => ({
+  group: one(groups, {
+    fields: [appGroupPermissions.groupId],
+    references: [groups.id],
+  }),
+  app: one(apps, {
+    fields: [appGroupPermissions.appId],
+    references: [apps.id],
   }),
 }));
 
