@@ -99,6 +99,16 @@ export const apiKeys = mysqlTable("apiKey", {
     .references((): AnyMySqlColumn => users.id, {
       onDelete: "cascade",
     }),
+  // Human-friendly label for the key. Required for new keys (enforced by the
+  // create input); legacy rows are backfilled with an empty string default.
+  name: varchar({ length: 128 }).notNull().default(""),
+  // JSON array of GroupPermissionKey strings the key is scoped to.
+  // NULL/empty is treated as a legacy full-permission key (see get-api-key-session).
+  scopes: text(),
+  // Absolute expiry. NULL means the key never expires.
+  expiresAt: timestamp({ mode: "date" }),
+  createdAt: timestamp({ mode: "date" }).notNull().defaultNow(),
+  lastUsedAt: timestamp({ mode: "date" }),
 });
 
 export const users = mysqlTable("user", {

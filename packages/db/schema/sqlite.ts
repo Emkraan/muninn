@@ -84,6 +84,18 @@ export const apiKeys = sqliteTable("apiKey", {
     .references((): AnySQLiteColumn => users.id, {
       onDelete: "cascade",
     }),
+  // Human-friendly label for the key. Required for new keys (enforced by the
+  // create input); legacy rows are backfilled with an empty string default.
+  name: text().notNull().default(""),
+  // JSON array of GroupPermissionKey strings the key is scoped to.
+  // NULL/empty is treated as a legacy full-permission key (see get-api-key-session).
+  scopes: text(),
+  // Absolute expiry. NULL means the key never expires.
+  expiresAt: int({ mode: "timestamp" }),
+  createdAt: int({ mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  lastUsedAt: int({ mode: "timestamp" }),
 });
 
 export const users = sqliteTable("user", {

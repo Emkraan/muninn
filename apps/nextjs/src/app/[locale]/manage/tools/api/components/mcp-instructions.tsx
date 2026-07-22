@@ -34,12 +34,10 @@ import {
   IconWorld,
 } from "@tabler/icons-react";
 
-import { clientApi } from "@homarr/api/client";
-import { revalidatePathActionAsync } from "@homarr/common/client";
 import { useModalAction } from "@homarr/modals";
 import { useScopedI18n } from "@homarr/translation/client";
 
-import { CopyApiKeyModal } from "./copy-api-key-modal";
+import { CreateApiKeyModal } from "./create-api-key-modal";
 import type { McpToolGroup } from "./api-page-tabs";
 import classes from "./mcp-tools-accordion.module.css";
 
@@ -56,13 +54,7 @@ interface McpInstructionsProps {
 
 export function McpInstructions({ baseUrl, hasApiKeys, toolGroups }: McpInstructionsProps) {
   const t = useScopedI18n("management.page.tool.api.tab.mcp");
-  const { openModal } = useModalAction(CopyApiKeyModal);
-  const { mutate: createApiKey, isPending } = clientApi.apiKeys.create.useMutation({
-    async onSuccess(data) {
-      openModal({ apiKey: data.apiKey });
-      await revalidatePathActionAsync("/manage/tools/api");
-    },
-  });
+  const { openModal: openCreateModal } = useModalAction(CreateApiKeyModal);
   const mcpUrl = `${baseUrl}/api/mcp/mcp`;
 
   const streamableHttpConfig = JSON.stringify(
@@ -121,8 +113,7 @@ export function McpInstructions({ baseUrl, hasApiKeys, toolGroups }: McpInstruct
               size="compact-sm"
               variant="filled"
               leftSection={<IconPlus size={14} />}
-              onClick={() => createApiKey()}
-              loading={isPending}
+              onClick={() => openCreateModal({})}
             >
               {t("createApiKeyButton")}
             </Button>

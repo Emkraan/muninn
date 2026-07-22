@@ -4969,10 +4969,40 @@
                   "text": "This will permanently delete the API token. API clients using this token can no longer authenticate and perform API requests. This action cannot be undone."
                 }
               },
+              "create": {
+                "title": "Create API key",
+                "submit": "Create",
+                "hint": "The key is scoped to the permissions you select and can never exceed your own access. Store it somewhere safe: it is shown only once.",
+                "field": {
+                  "name": {
+                    "label": "Name",
+                    "placeholder": "e.g. Home Assistant automation"
+                  },
+                  "scopes": {
+                    "label": "Scopes",
+                    "description": "Permissions this key grants. Defaults to a read-only set."
+                  },
+                  "expiration": {
+                    "label": "Expires in (days)",
+                    "never": "Never expires"
+                  }
+                },
+                "error": {
+                  "title": "Could not create API key"
+                }
+              },
               "table": {
+                "never": "Never",
+                "neverUsed": "Never used",
+                "legacyBadge": "Legacy (full access)",
+                "scopeCount": "{count} scopes",
                 "header": {
                   "id": "ID",
+                  "name": "Name",
                   "createdBy": "Created by",
+                  "created": "Created",
+                  "expires": "Expires",
+                  "lastUsed": "Last used",
                   "actions": "Actions"
                 }
               }

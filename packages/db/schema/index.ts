@@ -57,6 +57,7 @@ export const {
   widgetSecrets,
 } = schema;
 
+export type ApiKey = InferSelectModel<typeof schema.apiKeys>;
 export type User = InferSelectModel<typeof schema.users>;
 export type Account = InferSelectModel<typeof schema.accounts>;
 export type Session = InferSelectModel<typeof schema.sessions>;
