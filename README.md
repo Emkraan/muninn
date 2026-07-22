@@ -15,7 +15,9 @@ first-party standard.
 
 - **Cobalt UI** — a dark, logo-blue design system with a live animated
   background and a redesigned sign-in screen (glowing logo badge + an ambient
-  animated raven, reduced-motion aware).
+  3D raven mascot that flies around, reduced-motion aware) shared by the login
+  and invite pages. An optional deployment-set footer credit keeps the public
+  build brand-agnostic.
 - **Strict per-user RBAC** — boards, apps, and integrations are private by
   default; an admin selectively grants a specific user or group access to a
   specific resource (each has its own per-user/per-group Access panel). So a
