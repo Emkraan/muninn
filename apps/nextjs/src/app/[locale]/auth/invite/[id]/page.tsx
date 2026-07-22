@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Card, Center, Stack, Text, Title } from "@mantine/core";
+import { Box, Text, Title } from "@mantine/core";
 
 import { auth } from "@homarr/auth/next";
 import { isProviderEnabled } from "@homarr/auth/server";
@@ -7,7 +7,9 @@ import { and, db, eq } from "@homarr/db";
 import { invites } from "@homarr/db/schema";
 import { getScopedI18n } from "@homarr/translation/server";
 
-import { HomarrLogoWithTitle } from "~/components/layout/logo/homarr-logo";
+import { HomarrLogo } from "~/components/layout/logo/homarr-logo";
+import classes from "../../login/login.module.css";
+import { RavenMascot } from "../../login/_raven-mascot";
 import { RegistrationForm } from "./_registration-form";
 
 interface InviteUsagePageProps {
@@ -48,25 +50,31 @@ export default async function InviteUsagePage(props: InviteUsagePageProps) {
   const t = await getScopedI18n("user.page.invite");
 
   return (
-    <Center>
-      <Stack align="center" mt="xl">
-        <HomarrLogoWithTitle size="lg" />
-        <Stack gap={6} align="center">
-          <Title order={3} fw={400} ta="center">
-            {t("title")}
+    <Box className={classes.authPage}>
+      <RavenMascot />
+      <Box className={classes.authCard}>
+        <div className={classes.authHead}>
+          <div className={classes.logoBadge}>
+            <HomarrLogo size={46} />
+          </div>
+          <Title order={2} fw={700}>
+            Muninn
           </Title>
-          <Text size="sm" c="gray.5" ta="center">
+          <Text size="sm" c="dimmed" mt={4}>
             {t("subtitle")}
           </Text>
-        </Stack>
-        <Card w={64 * 6} maw="90vw">
+        </div>
+        <div className={classes.authBody}>
+          <Title order={4} ta="center" mb="lg" fw={600}>
+            {t("title")}
+          </Title>
           <RegistrationForm invite={invite} />
-        </Card>
-        <Text size="xs" c="gray.5" ta="center">
-          {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
-          {t("description", { username: invite.creator.name! })}
-        </Text>
-      </Stack>
-    </Center>
+          <Text size="xs" c="dimmed" ta="center" mt="md">
+            {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+            {t("description", { username: invite.creator.name! })}
+          </Text>
+        </div>
+      </Box>
+    </Box>
   );
 }
