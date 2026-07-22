@@ -92,9 +92,12 @@ export const apiKeys = sqliteTable("apiKey", {
   scopes: text(),
   // Absolute expiry. NULL means the key never expires.
   expiresAt: int({ mode: "timestamp" }),
+  // SQLite ALTER TABLE ADD COLUMN forbids a non-constant default, so the
+  // migration backfills existing rows with a constant and new rows get their
+  // timestamp injected app-side here.
   createdAt: int({ mode: "timestamp" })
     .notNull()
-    .default(sql`(unixepoch())`),
+    .$defaultFn(() => new Date()),
   lastUsedAt: int({ mode: "timestamp" }),
 });
 

@@ -107,7 +107,11 @@ export const apiKeys = mysqlTable("apiKey", {
   scopes: text(),
   // Absolute expiry. NULL means the key never expires.
   expiresAt: timestamp({ mode: "date" }),
-  createdAt: timestamp({ mode: "date" }).notNull().defaultNow(),
+  // Timestamp is injected app-side (see sqlite.ts) so all dialects share one
+  // default mechanism; the migration keeps a DB default only to backfill rows.
+  createdAt: timestamp({ mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
   lastUsedAt: timestamp({ mode: "date" }),
 });
 
