@@ -6,7 +6,7 @@ import { api } from "@homarr/api/server";
 import { getScopedI18n } from "@homarr/translation/server";
 import { Link } from "@homarr/ui";
 
-import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
+import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 import { createMetaTitle } from "~/metadata";
 import { HeroBanner } from "./_components/hero-banner";
 
@@ -23,8 +23,7 @@ export default async function ManagementPage() {
   const t = await getScopedI18n("management.page.home");
 
   return (
-    <>
-      <DynamicBreadcrumb />
+    <ManagePageLayout>
       <HeroBanner />
       <Space h="md" />
       <SimpleGrid cols={{ xs: 1, sm: 2, md: 3 }}>
@@ -47,6 +46,6 @@ export default async function ManagementPage() {
           </Card>
         ))}
       </SimpleGrid>
-    </>
+    </ManagePageLayout>
   );
 }

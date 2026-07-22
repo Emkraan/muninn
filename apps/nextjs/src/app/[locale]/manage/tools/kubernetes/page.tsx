@@ -4,7 +4,7 @@ import { auth } from "@homarr/auth/next";
 import { env } from "@homarr/docker/env";
 
 import { ClusterDashboard } from "~/app/[locale]/manage/tools/kubernetes/cluster-dashboard/cluster-dashboard";
-import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
+import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 
 export default async function KubernetesPage() {
   const session = await auth();
@@ -13,9 +13,8 @@ export default async function KubernetesPage() {
   }
 
   return (
-    <>
-      <DynamicBreadcrumb />
+    <ManagePageLayout>
       <ClusterDashboard />
-    </>
+    </ManagePageLayout>
   );
 }

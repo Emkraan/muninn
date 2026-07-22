@@ -1,11 +1,10 @@
 import { notFound } from "next/navigation";
-import { Stack, Title } from "@mantine/core";
 
 import { api } from "@homarr/api/server";
 import { auth } from "@homarr/auth/next";
 import { getScopedI18n } from "@homarr/translation/server";
 
-import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
+import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 import { createMetaTitle } from "~/metadata";
 import { TasksTable } from "./_components/tasks-table";
 
@@ -31,12 +30,8 @@ export default async function TasksPage() {
   const tTasks = await getScopedI18n("management.page.tool.tasks");
 
   return (
-    <>
-      <DynamicBreadcrumb />
-      <Stack>
-        <Title order={1}>{tTasks("title")}</Title>
-        <TasksTable initialJobs={jobs} />
-      </Stack>
-    </>
+    <ManagePageLayout title={tTasks("title")}>
+      <TasksTable initialJobs={jobs} />
+    </ManagePageLayout>
   );
 }

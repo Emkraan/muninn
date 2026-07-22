@@ -80,11 +80,7 @@ export const UserAvatarMenu = ({ children, availableUpdatesPromise, isDockerEnab
         <Menu.Divider />
         {Boolean(session.data) && (
           <>
-            <Menu.Item
-              component={Link}
-              href={`/manage/users/${session.data?.user.id}/general`}
-              leftSection={<IconSettings size="1rem" />}
-            >
+            <Menu.Item component={Link} href="/manage/preferences" leftSection={<IconSettings size="1rem" />}>
               {t("preferences")}
             </Menu.Item>
 

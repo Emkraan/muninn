@@ -30,7 +30,7 @@ import { hotkeys } from "@homarr/definitions";
 import { getScopedI18n } from "@homarr/translation/server";
 
 import { homarrLogoPath } from "~/components/layout/logo/homarr-logo";
-import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
+import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 import { createMetaTitle } from "~/metadata";
 import { getDependenciesAsync, getPackageVersion } from "~/versions/package-reader";
 import classes from "./about.module.css";
@@ -51,8 +51,7 @@ export default async function AboutPage() {
   const highlights = ["Cobalt UI", "Per-user access control", "Multi-provider SSO", "REST API + docs"];
 
   return (
-    <div>
-      <DynamicBreadcrumb />
+    <ManagePageLayout>
       <Center w="100%">
         <Group py="lg">
           <Image src={homarrLogoPath} width={100} height={100} alt="" />
@@ -175,6 +174,6 @@ export default async function AboutPage() {
           </AccordionPanel>
         </AccordionItem>
       </Accordion>
-    </div>
+    </ManagePageLayout>
   );
 }

@@ -4561,6 +4561,10 @@
           "subtitle": "{app} Board"
         }
       },
+      "preferences": {
+        "title": "Your preferences",
+        "metaTitle": "Preferences"
+      },
       "board": {
         "title": "Your boards",
         "action": {
@@ -4764,6 +4768,7 @@
       },
       "settings": {
         "title": "Settings",
+        "serverWideDefaultNotice": "Server-wide default applied to every user unless they override it in their own preferences.",
         "notification": {
           "success": {
             "message": "Settings saved successfully"
@@ -5674,6 +5679,9 @@
       "label": "Manage",
       "boards": {
         "label": "Boards"
+      },
+      "preferences": {
+        "label": "Preferences"
       },
       "integrations": {
         "label": "Integrations",

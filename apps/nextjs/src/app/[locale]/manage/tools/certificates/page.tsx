@@ -11,7 +11,7 @@ import type { SupportedLanguage } from "@homarr/translation";
 import { getI18n } from "@homarr/translation/server";
 import { Link } from "@homarr/ui";
 
-import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
+import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 import { NoResults } from "~/components/no-results";
 import { AddCertificateButton } from "./_components/add-certificate";
 import { RemoveCertificate } from "./_components/remove-certificate";
@@ -55,80 +55,72 @@ export default async function CertificatesPage({ params }: CertificatesPageProps
     });
 
   return (
-    <>
-      <DynamicBreadcrumb />
-
-      <Stack>
-        <Group justify="space-between">
-          <Stack gap={4}>
-            <Title>{t("certificate.page.list.title")}</Title>
-            <Text>{t("certificate.page.list.description")}</Text>
-          </Stack>
-
-          <Group>
-            <Button variant="default" component={Link} href="/manage/tools/certificates/hostnames">
-              {t("certificate.page.list.toHostnames")}
-            </Button>
-            <AddCertificateButton />
-          </Group>
+    <ManagePageLayout
+      title={
+        <Stack gap={4}>
+          <Title>{t("certificate.page.list.title")}</Title>
+          <Text>{t("certificate.page.list.description")}</Text>
+        </Stack>
+      }
+      primaryAction={
+        <Group>
+          <Button variant="default" component={Link} href="/manage/tools/certificates/hostnames">
+            {t("certificate.page.list.toHostnames")}
+          </Button>
+          <AddCertificateButton />
         </Group>
+      }
+    >
+      {x509Certificates.length === 0 && (
+        <NoResults icon={IconCertificateOff} title={t("certificate.page.list.noResults.title")} />
+      )}
 
-        {x509Certificates.length === 0 && (
-          <NoResults icon={IconCertificateOff} title={t("certificate.page.list.noResults.title")} />
-        )}
-
-        <SimpleGrid cols={{ sm: 1, lg: 2, xl: 3 }} spacing="lg">
-          {x509Certificates.map((cert) => (
-            <Card key={cert.fileName}>
-              <Group wrap="nowrap">
-                {cert.isError ? (
-                  <IconAlertTriangle
-                    color={getMantineColor("red", 6)}
-                    style={{ minWidth: 32 }}
-                    size={32}
-                    stroke={1.5}
-                  />
-                ) : (
-                  <IconCertificate
-                    color={getMantineColor(iconColor(cert.x509.validToDate), 6)}
-                    style={{ minWidth: 32 }}
-                    size={32}
-                    stroke={1.5}
-                  />
-                )}
-                <Stack flex={1} gap="xs" maw="calc(100% - 48px)">
-                  <Group justify="space-between" wrap="nowrap">
-                    <Text fw={500} lineClamp={1} style={{ wordBreak: "break-all" }}>
-                      {cert.isError ? t("certificate.page.list.invalid.title") : cert.x509.subject}
+      <SimpleGrid cols={{ sm: 1, lg: 2, xl: 3 }} spacing="lg">
+        {x509Certificates.map((cert) => (
+          <Card key={cert.fileName}>
+            <Group wrap="nowrap">
+              {cert.isError ? (
+                <IconAlertTriangle color={getMantineColor("red", 6)} style={{ minWidth: 32 }} size={32} stroke={1.5} />
+              ) : (
+                <IconCertificate
+                  color={getMantineColor(iconColor(cert.x509.validToDate), 6)}
+                  style={{ minWidth: 32 }}
+                  size={32}
+                  stroke={1.5}
+                />
+              )}
+              <Stack flex={1} gap="xs" maw="calc(100% - 48px)">
+                <Group justify="space-between" wrap="nowrap">
+                  <Text fw={500} lineClamp={1} style={{ wordBreak: "break-all" }}>
+                    {cert.isError ? t("certificate.page.list.invalid.title") : cert.x509.subject}
+                  </Text>
+                  <Text c="gray.6" ta="end" size="sm">
+                    {cert.fileName}
+                  </Text>
+                </Group>
+                <Group justify="space-between">
+                  {cert.isError ? (
+                    <Text size="sm" c="gray.6">
+                      {t("certificate.page.list.invalid.description")}
                     </Text>
-                    <Text c="gray.6" ta="end" size="sm">
-                      {cert.fileName}
+                  ) : (
+                    <Text size="sm" c="gray.6" title={cert.x509.validToDate.toISOString()}>
+                      {t("certificate.page.list.expires", {
+                        when: new Intl.RelativeTimeFormat(locale).format(
+                          dayjs(cert.x509.validToDate).diff(dayjs(), "days"),
+                          "days",
+                        ),
+                      })}
                     </Text>
-                  </Group>
-                  <Group justify="space-between">
-                    {cert.isError ? (
-                      <Text size="sm" c="gray.6">
-                        {t("certificate.page.list.invalid.description")}
-                      </Text>
-                    ) : (
-                      <Text size="sm" c="gray.6" title={cert.x509.validToDate.toISOString()}>
-                        {t("certificate.page.list.expires", {
-                          when: new Intl.RelativeTimeFormat(locale).format(
-                            dayjs(cert.x509.validToDate).diff(dayjs(), "days"),
-                            "days",
-                          ),
-                        })}
-                      </Text>
-                    )}
-                    <RemoveCertificate fileName={cert.fileName} />
-                  </Group>
-                </Stack>
-              </Group>
-            </Card>
-          ))}
-        </SimpleGrid>
-      </Stack>
-    </>
+                  )}
+                  <RemoveCertificate fileName={cert.fileName} />
+                </Group>
+              </Stack>
+            </Group>
+          </Card>
+        ))}
+      </SimpleGrid>
+    </ManagePageLayout>
   );
 }
 

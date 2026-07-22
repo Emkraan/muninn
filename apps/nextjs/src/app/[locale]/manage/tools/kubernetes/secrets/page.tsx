@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { Stack, Title } from "@mantine/core";
 
 import { api } from "@homarr/api/server";
 import { auth } from "@homarr/auth/next";
@@ -7,7 +6,7 @@ import { env } from "@homarr/docker/env";
 import { getScopedI18n } from "@homarr/translation/server";
 
 import { SecretsTable } from "~/app/[locale]/manage/tools/kubernetes/secrets/secrets-table";
-import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
+import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 
 export default async function SecretsPage() {
   const session = await auth();
@@ -18,12 +17,8 @@ export default async function SecretsPage() {
   const secrets = await api.kubernetes.secrets.getSecrets();
   const tSecrets = await getScopedI18n("kubernetes.secrets");
   return (
-    <>
-      <DynamicBreadcrumb />
-      <Stack>
-        <Title order={1}>{tSecrets("label")}</Title>
-        <SecretsTable initialSecrets={secrets} />
-      </Stack>
-    </>
+    <ManagePageLayout title={tSecrets("label")}>
+      <SecretsTable initialSecrets={secrets} />
+    </ManagePageLayout>
   );
 }

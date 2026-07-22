@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { Container, Stack, Title } from "@mantine/core";
 
 import { api } from "@homarr/api/server";
 import { auth } from "@homarr/auth/next";
 
+import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
 import { catchTrpcNotFound } from "~/errors/trpc-catch-error";
 import { CustomWidgetBetaBanner } from "../../_beta-banner";
@@ -161,30 +161,30 @@ export default async function EditCustomWidgetPage(props: EditCustomWidgetPagePr
   const displayValues = buildDisplayInitialValues(definition.displayType, displayConfig);
 
   return (
-    <>
-      <DynamicBreadcrumb dynamicMappings={new Map([[params.id, definition.name]])} nonInteractable={["edit"]} />
-      <Container fluid>
-        <Stack>
-          <Title>{definition.name}</Title>
-          <CustomWidgetBetaBanner />
-          <CustomWidgetForm
-            mode="edit"
-            definitionId={params.id}
-            initialValues={{
-              name: definition.name,
-              description: definition.description ?? "",
-              iconUrl: definition.iconUrl ?? "",
-              url: definition.url,
-              authType: definition.authType,
-              headerName: definition.headerName ?? "",
-              method: definition.method,
-              requestBody: definition.requestBody ?? "",
-              ...displayValues,
-              secrets: buildInitialSecrets(definition.authType, definition.secrets),
-            }}
-          />
-        </Stack>
-      </Container>
-    </>
+    <ManagePageLayout
+      fluid
+      title={definition.name}
+      breadcrumb={
+        <DynamicBreadcrumb dynamicMappings={new Map([[params.id, definition.name]])} nonInteractable={["edit"]} />
+      }
+    >
+      <CustomWidgetBetaBanner />
+      <CustomWidgetForm
+        mode="edit"
+        definitionId={params.id}
+        initialValues={{
+          name: definition.name,
+          description: definition.description ?? "",
+          iconUrl: definition.iconUrl ?? "",
+          url: definition.url,
+          authType: definition.authType,
+          headerName: definition.headerName ?? "",
+          method: definition.method,
+          requestBody: definition.requestBody ?? "",
+          ...displayValues,
+          secrets: buildInitialSecrets(definition.authType, definition.secrets),
+        }}
+      />
+    </ManagePageLayout>
   );
 }

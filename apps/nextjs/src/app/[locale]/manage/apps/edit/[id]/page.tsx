@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
-import { Container, Fieldset, Stack, Title } from "@mantine/core";
+import { Fieldset, Title } from "@mantine/core";
 
 import { api } from "@homarr/api/server";
 import { auth } from "@homarr/auth/next";
 import { getI18n } from "@homarr/translation/server";
 
+import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
 import { AppAccessSettings } from "../../_components/app-access-settings";
 import { AppEditForm } from "./_app-edit-form";
@@ -29,23 +30,22 @@ export default async function AppEditPage(props: AppEditPageProps) {
   const appPermissions = await api.app.getAppPermissions({ id: app.id }).catch(() => null);
 
   return (
-    <>
-      <DynamicBreadcrumb dynamicMappings={new Map([[params.id, app.name]])} nonInteractable={["edit"]} />
-      <Container>
-        <Stack>
-          <Title>{t("app.page.edit.title")}</Title>
-          <AppEditForm app={app} />
+    <ManagePageLayout
+      title={t("app.page.edit.title")}
+      breadcrumb={
+        <DynamicBreadcrumb dynamicMappings={new Map([[params.id, app.name]])} nonInteractable={["edit"]} />
+      }
+    >
+      <AppEditForm app={app} />
 
-          {appPermissions && (
-            <>
-              <Title order={2}>{t("permission.title")}</Title>
-              <Fieldset>
-                <AppAccessSettings app={app} initialPermissions={appPermissions} />
-              </Fieldset>
-            </>
-          )}
-        </Stack>
-      </Container>
-    </>
+      {appPermissions && (
+        <>
+          <Title order={2}>{t("permission.title")}</Title>
+          <Fieldset>
+            <AppAccessSettings app={app} initialPermissions={appPermissions} />
+          </Fieldset>
+        </>
+      )}
+    </ManagePageLayout>
   );
 }

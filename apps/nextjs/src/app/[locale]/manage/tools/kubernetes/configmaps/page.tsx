@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { Stack, Title } from "@mantine/core";
 
 import { api } from "@homarr/api/server";
 import { auth } from "@homarr/auth/next";
@@ -7,7 +6,7 @@ import { env } from "@homarr/docker/env";
 import { getScopedI18n } from "@homarr/translation/server";
 
 import { ConfigmapsTable } from "~/app/[locale]/manage/tools/kubernetes/configmaps/configmaps-table";
-import { DynamicBreadcrumb } from "~/components/navigation/dynamic-breadcrumb";
+import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 
 export default async function ConfigMapsPage() {
   const session = await auth();
@@ -19,12 +18,8 @@ export default async function ConfigMapsPage() {
   const tConfigMaps = await getScopedI18n("kubernetes.configmaps");
 
   return (
-    <>
-      <DynamicBreadcrumb />
-      <Stack>
-        <Title order={1}>{tConfigMaps("label")}</Title>
-        <ConfigmapsTable initialConfigMaps={configMaps} />
-      </Stack>
-    </>
+    <ManagePageLayout title={tConfigMaps("label")}>
+      <ConfigmapsTable initialConfigMaps={configMaps} />
+    </ManagePageLayout>
   );
 }
