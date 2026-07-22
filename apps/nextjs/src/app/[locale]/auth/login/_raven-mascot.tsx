@@ -94,16 +94,31 @@ export const RavenMascot = () => {
               <stop offset="100%" stopColor="#1B6FB8" />
             </linearGradient>
           </defs>
-          <path className={classes.ravenTail} d="M20 58 L4 66 L22 66 Z" fill="url(#ravenGrad)" />
-          <path className={classes.ravenWingR} d="M40 44 C30 40 22 46 26 56 C34 52 42 52 48 50 Z" fill="#155A95" />
-          <ellipse cx="52" cy="54" rx="22" ry="14" fill="url(#ravenGrad)" />
-          <path className={classes.ravenWingL} d="M56 44 C70 38 82 46 76 58 C66 52 58 52 52 50 Z" fill="url(#ravenGrad)" />
+          {/* Raven cues: heavy hooked dagger bill, shaggy throat hackles, long wedge tail. */}
+          <path className={classes.ravenTail} d="M34 56 L2 70 L11 71 L5 76 L15 74 L13 80 L34 66 Z" fill="url(#ravenGrad)" />
+          <path className={classes.ravenWingR} d="M40 42 C28 38 18 47 24 58 C33 54 41 54 50 50 Z" fill="#155A95" />
+          <ellipse cx="50" cy="55" rx="26" ry="12.5" fill="url(#ravenGrad)" transform="rotate(-8 50 55)" />
+          <path
+            className={classes.ravenWingL}
+            d="M54 44 C71 39 83 48 74 61 C64 62 58 60 50 52 C59 54 63 51 60 47 Z"
+            fill="url(#ravenGrad)"
+          />
           <g className={classes.ravenHead}>
-            <circle cx="70" cy="40" r="11" fill="url(#ravenGrad)" />
-            <path d="M80 40 L94 38 L80 45 Z" fill="#155A95" />
-            <circle className={classes.ravenEye} cx="72" cy="38" r="2.4" fill="#0B1220" />
+            <path
+              d="M61 41 C61 32 69 28 76 31 C81 33 82 40 79 44 C76 48 68 49 63 47 C61 46 61 43 61 41 Z"
+              fill="url(#ravenGrad)"
+            />
+            <path d="M77 35 L98 37 C99.5 37.4 99.5 39 98 39.6 L95 40 L96.5 42.5 L92.5 41.5 L78 45 Z" fill="#155A95" />
+            <path d="M63 47 L65 53 L68 48 L71 54 L74 49 L76 55 L78 49 L79 52 L64 51 Z" fill="#155A95" />
+            <circle className={classes.ravenEye} cx="71" cy="38" r="2.3" fill="#0B1220" />
           </g>
-          <path d="M46 66 L44 78 L50 66 Z M58 66 L60 80 L64 66 Z" fill="#155A95" />
+          <path
+            d="M46 66 L44 78 M44 78 L41 80 M44 78 L47 80 M58 66 L61 80 M61 80 L58 82 M61 80 L64 82"
+            stroke="#155A95"
+            strokeWidth="2"
+            strokeLinecap="round"
+            fill="none"
+          />
         </svg>
       </div>
     </div>

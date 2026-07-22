@@ -16,9 +16,11 @@ first-party standard.
 - **Cobalt UI** — a dark, logo-blue design system with a live animated
   background and a redesigned sign-in screen (glowing logo badge + an ambient
   animated raven, reduced-motion aware).
-- **Strict per-user RBAC** — boards, apps, and integrations are private to their
-  owner by default; an admin selectively grants access to specific users or
-  groups. (Upstream Homarr shows every app to every logged-in user.)
+- **Strict per-user RBAC** — boards, apps, and integrations are private by
+  default; an admin selectively grants a specific user or group access to a
+  specific resource (each has its own per-user/per-group Access panel). So a
+  user sees exactly the apps/boards/integrations shared with them, nothing more.
+  (Upstream Homarr shows every app to every logged-in user.)
 - **Multi-provider OIDC** — add and manage any number of identity providers from
   the admin UI at **Manage -> Authentication** (Microsoft/Entra, Google, GitHub,
   Okta, Keycloak, Authentik, generic OIDC, or manual OAuth2). Providers are
