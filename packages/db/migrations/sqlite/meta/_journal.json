@@ -309,6 +309,13 @@
       "when": 1784682761429,
       "tag": "0043_add_app_permissions",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "6",
+      "when": 1784718361601,
+      "tag": "0044_scope_api_keys",
+      "breakpoints": true
     }
   ]
 }

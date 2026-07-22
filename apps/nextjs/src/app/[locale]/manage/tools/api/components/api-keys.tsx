@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { ActionIcon, Button, Group, Stack, Text, Title } from "@mantine/core";
+import { ActionIcon, Badge, Button, Group, Stack, Text, Title, Tooltip } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import type { MRT_ColumnDef } from "mantine-react-table";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 
@@ -13,23 +15,29 @@ import { useConfirmModal, useModalAction } from "@homarr/modals";
 import { useScopedI18n } from "@homarr/translation/client";
 import { UserAvatar } from "@homarr/ui";
 
-import { CopyApiKeyModal } from "~/app/[locale]/manage/tools/api/components/copy-api-key-modal";
+import { CreateApiKeyModal } from "~/app/[locale]/manage/tools/api/components/create-api-key-modal";
+
+dayjs.extend(relativeTime);
 
 interface ApiKeysManagementProps {
   apiKeys: RouterOutputs["apiKeys"]["getAll"];
 }
 
+type ApiKeyRow = RouterOutputs["apiKeys"]["getAll"][number];
+
+const parseScopes = (scopes: string | null): string[] => {
+  if (!scopes) return [];
+  try {
+    const parsed = JSON.parse(scopes) as unknown;
+    return Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === "string") : [];
+  } catch {
+    return [];
+  }
+};
+
 export const ApiKeysManagement = ({ apiKeys }: ApiKeysManagementProps) => {
-  const { openModal } = useModalAction(CopyApiKeyModal);
+  const { openModal: openCreateModal } = useModalAction(CreateApiKeyModal);
   const { openConfirmModal } = useConfirmModal();
-  const { mutate: mutateCreate, isPending: isPendingCreate } = clientApi.apiKeys.create.useMutation({
-    async onSuccess(data) {
-      openModal({
-        apiKey: data.apiKey,
-      });
-      await revalidatePathActionAsync("/manage/tools/api");
-    },
-  });
   const { mutateAsync: mutateDeleteAsync, isPending: isPendingDelete } = clientApi.apiKeys.delete.useMutation({
     async onSuccess() {
       await revalidatePathActionAsync("/manage/tools/api");
@@ -51,11 +59,31 @@ export const ApiKeysManagement = ({ apiKeys }: ApiKeysManagementProps) => {
     [t, openConfirmModal, mutateDeleteAsync],
   );
 
-  const columns = useMemo<MRT_ColumnDef<RouterOutputs["apiKeys"]["getAll"][number]>[]>(
+  const columns = useMemo<MRT_ColumnDef<ApiKeyRow>[]>(
     () => [
       {
-        accessorKey: "id",
-        header: t("table.header.id"),
+        accessorKey: "name",
+        header: t("table.header.name"),
+        Cell: ({ row }) => {
+          const scopes = parseScopes(row.original.scopes);
+          const isLegacy = scopes.length === 0;
+          return (
+            <Stack gap={2}>
+              <Text size="sm">{row.original.name || row.original.id}</Text>
+              {isLegacy ? (
+                <Badge color="yellow" variant="light" size="xs">
+                  {t("table.legacyBadge")}
+                </Badge>
+              ) : (
+                <Tooltip label={scopes.join(", ")} multiline maw={320}>
+                  <Text size="xs" c="dimmed">
+                    {t("table.scopeCount", { count: scopes.length })}
+                  </Text>
+                </Tooltip>
+              )}
+            </Stack>
+          );
+        },
       },
       {
         accessorKey: "user",
@@ -66,6 +94,43 @@ export const ApiKeysManagement = ({ apiKeys }: ApiKeysManagementProps) => {
             <Text>{row.original.user.name}</Text>
           </Group>
         ),
+      },
+      {
+        accessorKey: "createdAt",
+        header: t("table.header.created"),
+        Cell: ({ row }) => <Text size="sm">{dayjs(row.original.createdAt).format("YYYY-MM-DD HH:mm")}</Text>,
+      },
+      {
+        accessorKey: "expiresAt",
+        header: t("table.header.expires"),
+        Cell: ({ row }) => {
+          const expiresAt = row.original.expiresAt;
+          if (!expiresAt) {
+            return (
+              <Text size="sm" c="dimmed">
+                {t("table.never")}
+              </Text>
+            );
+          }
+          const isExpired = dayjs(expiresAt).isBefore(dayjs());
+          return (
+            <Text size="sm" c={isExpired ? "red" : undefined}>
+              {dayjs(expiresAt).format("YYYY-MM-DD HH:mm")}
+            </Text>
+          );
+        },
+      },
+      {
+        accessorKey: "lastUsedAt",
+        header: t("table.header.lastUsed"),
+        Cell: ({ row }) =>
+          row.original.lastUsedAt ? (
+            <Text size="sm">{dayjs(row.original.lastUsedAt).fromNow()}</Text>
+          ) : (
+            <Text size="sm" c="dimmed">
+              {t("table.neverUsed")}
+            </Text>
+          ),
       },
       {
         header: t("table.header.actions"),
@@ -85,14 +150,7 @@ export const ApiKeysManagement = ({ apiKeys }: ApiKeysManagementProps) => {
     columns,
     data: apiKeys,
     renderTopToolbarCustomActions: () => (
-      <Button
-        onClick={() => {
-          mutateCreate();
-        }}
-        loading={isPendingCreate}
-      >
-        {t("button.createApiToken")}
-      </Button>
+      <Button onClick={() => openCreateModal({})}>{t("button.createApiToken")}</Button>
     ),
     enableDensityToggle: false,
     state: {
