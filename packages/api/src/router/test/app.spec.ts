@@ -3,7 +3,8 @@ import { describe, expect, test, vi } from "vitest";
 
 import type { Session } from "@homarr/auth";
 import { createId } from "@homarr/common";
-import { apps } from "@homarr/db/schema";
+import { eq } from "@homarr/db";
+import { apps, appUserPermissions, users } from "@homarr/db/schema";
 import { createDb } from "@homarr/db/test";
 import type { GroupPermissionKey } from "@homarr/definitions";
 
@@ -23,6 +24,11 @@ const createFakeAccessControl = (canAccess: boolean) =>
 
 const createDefaultSession = (permissions: GroupPermissionKey[] = []): Session => ({
   user: { id: createId(), permissions, colorScheme: "light" },
+  expires: new Date().toISOString(),
+});
+
+const sessionForUser = (userId: string, permissions: GroupPermissionKey[]): Session => ({
+  user: { id: userId, permissions, colorScheme: "light" },
   expires: new Date().toISOString(),
 });
 
@@ -159,10 +165,12 @@ describe("create should create a new app with all arguments", () => {
   test("should create a new app", async () => {
     // Arrange
     const db = createDb();
+    const userId = createId();
+    await db.insert(users).values({ id: userId, name: "creator" });
     const caller = appRouter.createCaller({
       db,
       deviceType: undefined,
-      session: createDefaultSession(["app-create"]),
+      session: sessionForUser(userId, ["app-create"]),
     });
     const input = {
       name: "Mantine",
@@ -183,15 +191,21 @@ describe("create should create a new app with all arguments", () => {
     expect(dbApp!.iconUrl).toBe(input.iconUrl);
     expect(dbApp!.href).toBe(input.href);
     expect(dbApp!.pingUrl).toBe(input.pingUrl);
+    // The creator gets `full` control of the app they made.
+    const grant = await db.query.appUserPermissions.findFirst({ where: eq(appUserPermissions.appId, dbApp!.id) });
+    expect(grant?.userId).toBe(userId);
+    expect(grant?.permission).toBe("full");
   });
 
   test("should create a new app only with required arguments", async () => {
     // Arrange
     const db = createDb();
+    const userId = createId();
+    await db.insert(users).values({ id: userId, name: "creator" });
     const caller = appRouter.createCaller({
       db,
       deviceType: undefined,
-      session: createDefaultSession(["app-create"]),
+      session: sessionForUser(userId, ["app-create"]),
     });
     const input = {
       name: "Mantine",
@@ -212,6 +226,127 @@ describe("create should create a new app with all arguments", () => {
     expect(dbApp!.iconUrl).toBe(input.iconUrl);
     expect(dbApp!.href).toBe(input.href);
     expect(dbApp!.pingUrl).toBe(null);
+  });
+});
+
+describe("create dedup (global, by name + href)", () => {
+  test("identical name + URL references the existing shared app instead of duplicating", async () => {
+    // Arrange: user A owns an existing app.
+    const db = createDb();
+    const userA = createId();
+    const userB = createId();
+    const appId = createId();
+    await db.insert(users).values([
+      { id: userA, name: "usera" },
+      { id: userB, name: "userb" },
+    ]);
+    await db.insert(apps).values({ id: appId, name: "Google", iconUrl: "ic-a", href: "https://google.com" });
+    await db.insert(appUserPermissions).values({ appId, userId: userA, permission: "full" });
+
+    const caller = appRouter.createCaller({
+      db,
+      deviceType: undefined,
+      session: sessionForUser(userB, ["app-create"]),
+    });
+
+    // Act: user B creates the same name + (normalized-equal) URL.
+    const result = await caller.create({
+      name: "Google",
+      description: null,
+      iconUrl: "ic-b",
+      href: "https://google.com/", // trailing slash normalizes to the same identity
+      pingUrl: "",
+    });
+
+    // Assert: no duplicate; referenced the existing record; B got `use` (not full).
+    expect(result.referencedExisting).toBe(true);
+    expect(result.appId).toBe(appId);
+    expect((await db.query.apps.findMany()).length).toBe(1);
+    const grants = await db.query.appUserPermissions.findMany({ where: eq(appUserPermissions.appId, appId) });
+    expect(grants.find((g) => g.userId === userA)?.permission).toBe("full");
+    expect(grants.find((g) => g.userId === userB)?.permission).toBe("use");
+  });
+
+  test("same name but different URL creates a distinct app (no dedup)", async () => {
+    // Arrange
+    const db = createDb();
+    const userA = createId();
+    const userB = createId();
+    const appId = createId();
+    await db.insert(users).values([
+      { id: userA, name: "usera" },
+      { id: userB, name: "userb" },
+    ]);
+    await db.insert(apps).values({ id: appId, name: "Google", iconUrl: "ic", href: "https://google.com" });
+    await db.insert(appUserPermissions).values({ appId, userId: userA, permission: "full" });
+
+    const caller = appRouter.createCaller({
+      db,
+      deviceType: undefined,
+      session: sessionForUser(userB, ["app-create"]),
+    });
+
+    // Act: same display name, different URL -> a genuinely different app.
+    const result = await caller.create({
+      name: "Google",
+      description: null,
+      iconUrl: "ic",
+      href: "https://google.co.uk",
+      pingUrl: "",
+    });
+
+    // Assert: a new app exists (two total); B is its full owner.
+    expect(result.referencedExisting).toBe(false);
+    expect(result.appId).not.toBe(appId);
+    expect((await db.query.apps.findMany()).length).toBe(2);
+    const grants = await db.query.appUserPermissions.findMany({ where: eq(appUserPermissions.appId, result.appId) });
+    expect(grants.find((g) => g.userId === userB)?.permission).toBe("full");
+  });
+});
+
+describe("getDuplicateTagMap derives <owner>_<name> tags on name collisions", () => {
+  test("tags colliding apps by their full-holder, omits uniquely-named apps", async () => {
+    // Arrange: two apps named "Google" (different URLs, different owners) + one unique "Plex".
+    const db = createDb();
+    const userA = createId();
+    const userB = createId();
+    const google1 = createId();
+    const google2 = createId();
+    const plex = createId();
+    await db.insert(users).values([
+      { id: userA, name: "User A" },
+      { id: userB, name: "User B" },
+    ]);
+    await db.insert(apps).values([
+      { id: google1, name: "Google", iconUrl: "ic", href: "https://google.com" },
+      { id: google2, name: "Google", iconUrl: "ic", href: "https://google.co.uk" },
+      { id: plex, name: "Plex", iconUrl: "ic", href: "https://plex.tv" },
+    ]);
+    await db.insert(appUserPermissions).values([
+      { appId: google1, userId: userA, permission: "full" },
+      { appId: google2, userId: userB, permission: "full" },
+      { appId: plex, userId: userA, permission: "full" },
+    ]);
+
+    const caller = appRouter.createCaller({
+      db,
+      deviceType: undefined,
+      session: sessionForUser(userA, ["app-modify-all"]),
+    });
+
+    // Act
+    const map = await caller.getDuplicateTagMap();
+
+    // Assert: colliding "Google" apps tagged by owner; unique "Plex" omitted.
+    expect(map[google1]).toBe("user_a_google");
+    expect(map[google2]).toBe("user_b_google");
+    expect(map[plex]).toBeUndefined();
+  });
+
+  test("requires the app-modify-all permission", async () => {
+    const db = createDb();
+    const caller = appRouter.createCaller({ db, deviceType: undefined, session: sessionForUser(createId(), []) });
+    await expect(caller.getDuplicateTagMap()).rejects.toThrow("Permission denied");
   });
 });
 

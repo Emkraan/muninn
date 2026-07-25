@@ -36,10 +36,16 @@ export default async function AppsPage(props: AppsPageProps) {
 
   const searchParams = searchParamsSchema.parse(await props.searchParams);
 
-  const { items: apps, totalCount } = await api.app.getPaginated(searchParams);
-  const t = await getScopedI18n("app");
-
   const canCreate = session.user.permissions.includes("app-create");
+  const canManageAll = session.user.permissions.includes("app-modify-all");
+
+  // The duplicate-name disambiguation tag is an admin backend aid; only fetch it
+  // for users who manage all apps (the query is gated the same way).
+  const [{ items: apps, totalCount }, duplicateTagMap] = await Promise.all([
+    api.app.getPaginated(searchParams),
+    canManageAll ? api.app.getDuplicateTagMap() : Promise.resolve({} as Record<string, string>),
+  ]);
+  const t = await getScopedI18n("app");
 
   return (
     <ManagePageLayout
@@ -62,7 +68,7 @@ export default async function AppsPage(props: AppsPageProps) {
         <TourTarget id="manage-apps-list">
           <Stack gap="sm">
             {apps.map((app) => (
-              <AppCard key={app.id} app={app} />
+              <AppCard key={app.id} app={app} disambiguationTag={duplicateTagMap[app.id]} />
             ))}
           </Stack>
         </TourTarget>
@@ -73,9 +79,12 @@ export default async function AppsPage(props: AppsPageProps) {
 
 interface AppCardProps {
   app: RouterOutputs["app"]["all"][number];
+  // Admin-only `<owner>_<name>` tag, present only when this app's display name
+  // collides with another app's (see app.getDuplicateTagMap).
+  disambiguationTag?: string;
 }
 
-const AppCard = async ({ app }: AppCardProps) => {
+const AppCard = async ({ app, disambiguationTag }: AppCardProps) => {
   const t = await getScopedI18n("app");
   const session = await auth();
 
@@ -97,6 +106,17 @@ const AppCard = async ({ app }: AppCardProps) => {
             <Text fw={500} lineClamp={1}>
               {app.name}
             </Text>
+            {disambiguationTag && (
+              <Text
+                size="xs"
+                c="dimmed"
+                ff="monospace"
+                lineClamp={1}
+                title="Backend tag (this name is shared by more than one app)"
+              >
+                {disambiguationTag}
+              </Text>
+            )}
             {app.description && (
               <Text size="sm" c="gray.6" lineClamp={4}>
                 {app.description.split("\n").map((line, index) => (
