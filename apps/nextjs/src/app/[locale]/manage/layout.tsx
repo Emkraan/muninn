@@ -16,13 +16,13 @@ import {
   IconHelpSquareRoundedFilled,
   IconHomeFilled,
   IconLayoutDashboardFilled,
+  IconLibraryFilled,
   IconMailForward,
   IconPhotoFilled,
   IconPointerFilled,
   IconSearch,
   IconSettingsFilled,
   IconShieldLockFilled,
-  IconUserFilled,
   IconUsers,
   IconUsersGroup,
 } from "@tabler/icons-react";
@@ -44,6 +44,11 @@ import { ManageTourProvider } from "~/components/onboarding/manage-tour";
 export default async function ManageLayout({ children }: PropsWithChildren) {
   const t = await getScopedI18n("management.navbar");
   const session = await auth();
+  const isAdmin = session?.user.permissions.includes("admin") ?? false;
+
+  // Unified admin hub IA (Emkraan admin-hub-standard): a few coherent groups
+  // instead of a flat list. Home | Library (content) | Settings (all admin
+  // config incl. Authentication) | Tools (operational) | Help | About.
   const navigationLinks: NavigationLink[] = [
     {
       label: t("items.home"),
@@ -52,61 +57,76 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
       "data-onboarding-tour-id": "manage-welcome",
     },
     {
-      icon: IconLayoutDashboardFilled,
-      href: "/manage/boards",
-      label: t("items.boards"),
-      "data-onboarding-tour-id": "manage-boards",
-    },
-    {
-      icon: IconBox,
-      href: "/manage/apps",
-      label: t("items.apps"),
-      hidden: !session,
-      iconProps: {
-        strokeWidth: 2.5,
-      },
-      "data-onboarding-tour-id": "manage-apps",
-    },
-    {
-      icon: IconAffiliateFilled,
-      href: "/manage/integrations",
-      label: t("items.integrations"),
-      hidden: !session,
-      "data-onboarding-tour-id": "manage-integrations",
-    },
-    {
-      icon: IconApi,
-      href: "/manage/custom-widgets",
-      label: t("items.customWidgets"),
-      hidden: !session,
-    },
-    {
-      icon: IconSearch,
-      href: "/manage/search-engines",
-      label: t("items.searchEngies"),
-      hidden: !session,
-      iconProps: {
-        strokeWidth: 2.5,
-      },
-      "data-onboarding-tour-id": "manage-search-engines",
-    },
-    {
-      icon: IconPhotoFilled,
-      href: "/manage/medias",
-      label: t("items.medias"),
-      hidden: !session,
-      "data-onboarding-tour-id": "manage-medias",
-    },
-    {
-      icon: IconUserFilled,
-      label: t("items.users.label"),
-      hidden: !session?.user.permissions.includes("admin"),
-      "data-onboarding-tour-id": "manage-users",
+      label: t("items.library"),
+      icon: IconLibraryFilled,
       items: [
+        {
+          label: t("items.boards"),
+          icon: IconLayoutDashboardFilled,
+          href: "/manage/boards",
+          "data-onboarding-tour-id": "manage-boards",
+        },
+        {
+          label: t("items.apps"),
+          icon: IconBox,
+          href: "/manage/apps",
+          hidden: !session,
+          "data-onboarding-tour-id": "manage-apps",
+        },
+        {
+          label: t("items.integrations"),
+          icon: IconAffiliateFilled,
+          href: "/manage/integrations",
+          hidden: !session,
+          "data-onboarding-tour-id": "manage-integrations",
+        },
+        {
+          label: t("items.searchEngies"),
+          icon: IconSearch,
+          href: "/manage/search-engines",
+          hidden: !session,
+          "data-onboarding-tour-id": "manage-search-engines",
+        },
+        {
+          label: t("items.medias"),
+          icon: IconPhotoFilled,
+          href: "/manage/medias",
+          hidden: !session,
+          "data-onboarding-tour-id": "manage-medias",
+        },
+        {
+          label: t("items.customWidgets"),
+          icon: IconApi,
+          href: "/manage/custom-widgets",
+          hidden: !session,
+        },
+      ],
+    },
+    {
+      label: t("items.settings.label"),
+      icon: IconSettingsFilled,
+      hidden: !isAdmin,
+      "data-onboarding-tour-id": "manage-settings",
+      items: [
+        {
+          label: t("items.settings.general"),
+          icon: IconSettingsFilled,
+          href: "/manage/settings",
+        },
+        {
+          label: t("items.settings.authentication"),
+          icon: IconShieldLockFilled,
+          href: "/manage/authentication",
+        },
         {
           label: t("items.users.items.manage"),
           icon: IconUsers,
           href: "/manage/users",
+        },
+        {
+          label: t("items.users.items.groups"),
+          icon: IconUsersGroup,
+          href: "/manage/users/groups",
         },
         {
           label: t("items.users.items.invites"),
@@ -115,41 +135,40 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
           hidden: !isProviderEnabled("credentials"),
         },
         {
-          label: t("items.users.items.groups"),
-          icon: IconUsersGroup,
-          href: "/manage/users/groups",
+          label: t("items.tools.items.api"),
+          icon: IconDirectionsFilled,
+          href: "/manage/tools/api",
+        },
+        {
+          label: t("items.tools.items.certificates"),
+          icon: IconCertificate,
+          href: "/manage/tools/certificates",
+        },
+        {
+          label: t("items.tools.items.backup"),
+          icon: IconDatabaseExport,
+          href: "/manage/tools/backup",
+          hidden: dbEnv.DRIVER !== "better-sqlite3",
         },
       ],
     },
     {
-      label: "Authentication",
-      icon: IconShieldLockFilled,
-      href: "/manage/authentication",
-      hidden: !session?.user.permissions.includes("admin"),
-    },
-    {
       label: t("items.tools.label"),
       icon: IconPointerFilled,
-      // As permissions always include there children permissions, we can check other-view-logs as admin includes it
+      // As permissions always include their children permissions, we can check other-view-logs as admin includes it
       hidden: !session?.user.permissions.includes("other-view-logs"),
       items: [
         {
           label: t("items.tools.items.docker"),
           icon: IconBrandDocker,
           href: "/manage/tools/docker",
-          hidden: !(session?.user.permissions.includes("admin") && env.ENABLE_DOCKER),
+          hidden: !(isAdmin && env.ENABLE_DOCKER),
         },
         {
           label: t("items.tools.items.kubernetes"),
           icon: IconBox,
           href: "/manage/tools/kubernetes",
-          hidden: !(session?.user.permissions.includes("admin") && env.ENABLE_KUBERNETES),
-        },
-        {
-          label: t("items.tools.items.api"),
-          icon: IconDirectionsFilled,
-          href: "/manage/tools/api",
-          hidden: !session?.user.permissions.includes("admin"),
+          hidden: !(isAdmin && env.ENABLE_KUBERNETES),
         },
         {
           label: t("items.tools.items.logs"),
@@ -158,31 +177,12 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
           hidden: !session?.user.permissions.includes("other-view-logs"),
         },
         {
-          label: t("items.tools.items.certificates"),
-          icon: IconCertificate,
-          href: "/manage/tools/certificates",
-          hidden: !session?.user.permissions.includes("admin"),
-        },
-        {
           label: t("items.tools.items.tasks"),
           icon: IconClipboardListFilled,
           href: "/manage/tools/tasks",
-          hidden: !session?.user.permissions.includes("admin"),
-        },
-        {
-          label: t("items.tools.items.backup"),
-          icon: IconDatabaseExport,
-          href: "/manage/tools/backup",
-          hidden: !session?.user.permissions.includes("admin") || dbEnv.DRIVER !== "better-sqlite3",
+          hidden: !isAdmin,
         },
       ],
-    },
-    {
-      label: t("items.settings"),
-      href: "/manage/settings",
-      icon: IconSettingsFilled,
-      hidden: !session?.user.permissions.includes("admin"),
-      "data-onboarding-tour-id": "manage-settings",
     },
     {
       label: t("items.help.label"),
@@ -214,8 +214,6 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
       href: "/manage/about",
     },
   ];
-
-  const isAdmin = session?.user.permissions.includes("admin") ?? false;
 
   const shell = (
     <ClientShell hasNavigation>

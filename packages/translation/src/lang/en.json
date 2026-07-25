@@ -4525,7 +4525,11 @@
             "backup": "Backup"
           }
         },
-        "settings": "Settings",
+        "settings": {
+          "label": "Settings",
+          "general": "General",
+          "authentication": "Authentication"
+        },
         "help": {
           "label": "Help",
           "items": {
@@ -4535,7 +4539,8 @@
             "sourceCode": "Source Code"
           }
         },
-        "about": "About"
+        "about": "About",
+        "library": "Library"
       }
     },
     "page": {
