@@ -103,10 +103,11 @@ const resolveTablePairs = (): TablePair[] => {
 };
 
 const countRows = async (db: AnySqliteDb | AnyPgDb, table: SQLiteTable | PgTable): Promise<number> => {
+  // The union of the two dialect db types has incompatible select/from
+  // overloads, so cast to any for this dialect-agnostic count query.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = (await db
+  const rows = (await (db as any)
     .select({ value: sql<number>`count(*)` })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .from(table as any)) as { value: number | string }[];
   return Number(rows[0]?.value ?? 0);
 };
