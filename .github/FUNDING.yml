@@ -1,3 +1,4 @@
-# These are supported funding model platforms
-
-open_collective: homarr
+# Funding channels for Muninn (free, Apache-2.0 OSS).
+buy_me_a_coffee: emkraan
+custom:
+  - https://www.paypal.com/ncp/payment/Z5LS6SWMFQGU4
