@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Anchor, Button, Card, Code, Collapse, Divider, PasswordInput, Stack, Text, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { IconBrandGithub, IconBrandGoogle, IconBrandWindows, IconLogin2 } from "@tabler/icons-react";
 import { z } from "zod/v4";
 
 import { signIn } from "@homarr/auth/client";
@@ -19,8 +20,23 @@ import { userSignInSchema } from "@homarr/validation/user";
 interface OidcProviderButton {
   id: string;
   displayName: string;
+  providerType: string;
   isDefault: boolean;
 }
+
+// Brand icon per provider type for the snagarr-style sign-in buttons.
+const oidcProviderIcon = (providerType: string) => {
+  switch (providerType) {
+    case "microsoft":
+      return IconBrandWindows;
+    case "google":
+      return IconBrandGoogle;
+    case "github":
+      return IconBrandGithub;
+    default:
+      return IconLogin2;
+  }
+};
 
 interface LoginFormProps {
   providers: string[];
@@ -158,16 +174,20 @@ export const LoginForm = ({ providers, oidcProviders, callbackUrl }: LoginFormPr
           </>
         )}
 
-        {oidcProviders.map((provider) => (
-          <Button
-            key={provider.id}
-            fullWidth
-            variant="light"
-            onClick={async () => await signInAsync(provider.id)}
-          >
-            {t("action.login.labelWith", { provider: provider.displayName })}
-          </Button>
-        ))}
+        {oidcProviders.map((provider) => {
+          const ProviderIcon = oidcProviderIcon(provider.providerType);
+          return (
+            <Button
+              key={provider.id}
+              fullWidth
+              variant="light"
+              leftSection={<ProviderIcon size={18} stroke={1.5} />}
+              onClick={async () => await signInAsync(provider.id)}
+            >
+              {t("action.login.labelWith", { provider: provider.displayName })}
+            </Button>
+          );
+        })}
       </Stack>
     </Stack>
   );
