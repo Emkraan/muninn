@@ -36,7 +36,7 @@ test("OpenAPI documentation should carry Muninn branding", () => {
   expect(document.info.title).toBe("Muninn API");
   expect(document.info.description).toBeTruthy();
   expect(document.info.contact).toEqual({
-    name: "Emkraan",
+    name: "Muninn",
     url: "https://github.com/Emkraan/muninn",
   });
   expect(document.info.license?.name).toBe("Apache-2.0");

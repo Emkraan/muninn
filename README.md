@@ -8,7 +8,7 @@ board over 50+ service integrations, with **strict per-user access control**
 Muninn is a fork of [Homarr](https://github.com/homarr-labs/homarr)
 (Apache-2.0) — it inherits Homarr's full dashboard: boards, drag-and-drop grid
 layout, 54 widgets, 53 integrations, spotlight search, Docker/Kubernetes tools,
-and backup/restore. On top of that foundation Muninn adds the Emkraan
+and backup/restore. On top of that foundation Muninn adds a cohesive
 first-party standard.
 
 ## What Muninn adds on top of Homarr
@@ -36,9 +36,10 @@ first-party standard.
 
 ## Status
 
-In active development. Not yet the public release. The homelab deployment is
-driven by the private `Emkraan/hq-muninn` stack repo, which pins a released
-image tag from `ghcr.io/emkraan/muninn`.
+In active development, not yet a tagged public release. A deployment pins a
+released image tag from `ghcr.io/emkraan/muninn`; environment-specific
+configuration (secrets, host bindings, an optional footer credit) lives in a
+separate private stack repository, so the published image stays brand-agnostic.
 
 ## Built on Homarr
 

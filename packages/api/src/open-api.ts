@@ -71,7 +71,7 @@ export const openApiDocument = (base: string) => {
       "The broader automation surface (Docker, Kubernetes, logs, widgets and more) is available through the Model Context Protocol (MCP) endpoint at /api/mcp.",
     version: openApiVersion,
     contact: {
-      name: "Emkraan",
+      name: "Muninn",
       url: "https://github.com/Emkraan/muninn",
     },
     license: {

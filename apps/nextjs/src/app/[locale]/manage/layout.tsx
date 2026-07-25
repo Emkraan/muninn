@@ -75,9 +75,9 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
     isAdmin;
   const showToolsGroup = canManageDocker || canManageKubernetes || canViewLogs || canManageTasks;
 
-  // Unified admin hub IA (Emkraan admin-hub-standard): a few coherent groups
-  // instead of a flat list. Home | Library (content) | Settings (all admin
-  // config incl. Authentication) | Tools (operational) | Help | About.
+  // Unified admin hub IA: a few coherent groups instead of a flat list.
+  // Home | Library (content) | Settings (all admin config incl. Authentication)
+  // | Tools (operational) | Help | About.
   const navigationLinks: NavigationLink[] = [
     {
       label: t("items.home"),
