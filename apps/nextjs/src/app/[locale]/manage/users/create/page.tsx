@@ -15,7 +15,7 @@ export async function generateMetadata() {
   if (!isProviderEnabled("credentials")) return {};
 
   const session = await auth();
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-users")) {
     return {};
   }
 
@@ -32,7 +32,7 @@ export default async function CreateUserPage() {
   }
 
   const session = await auth();
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-users")) {
     return notFound();
   }
 

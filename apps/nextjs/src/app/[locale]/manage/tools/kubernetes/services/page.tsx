@@ -10,7 +10,7 @@ import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 
 export default async function ServicesPage() {
   const session = await auth();
-  if (!(session?.user.permissions.includes("admin") && env.ENABLE_KUBERNETES)) {
+  if (!(session?.user.permissions.includes("other-manage-kubernetes") && env.ENABLE_KUBERNETES)) {
     notFound();
   }
 

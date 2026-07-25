@@ -5,6 +5,7 @@ import type { Session } from "@homarr/auth";
 import { createId } from "@homarr/common";
 import { boards, serverSettings } from "@homarr/db/schema";
 import { createDb } from "@homarr/db/test";
+import { getPermissionsWithChildren } from "@homarr/definitions";
 import { defaultServerSettings, defaultServerSettingsKeys } from "@homarr/server-settings";
 
 import { serverSettingsRouter } from "../serverSettings";
@@ -15,7 +16,8 @@ vi.mock("@homarr/auth", () => ({ auth: () => ({}) as Session }));
 const defaultSession = {
   user: {
     id: createId(),
-    permissions: ["admin"],
+    // A real admin session carries the expanded permission set (incl. other-manage-settings).
+    permissions: getPermissionsWithChildren(["admin"]),
     colorScheme: "light",
   },
   expires: new Date().toISOString(),

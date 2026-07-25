@@ -8,7 +8,7 @@ import { KubernetesClient } from "../kubernetes-client";
 
 export const configMapsRouter = createTRPCRouter({
   getConfigMaps: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-kubernetes")
     .concat(kubernetesMiddleware())
     .query(async (): Promise<KubernetesBaseResource[]> => {
       const { coreApi } = KubernetesClient.getInstance();

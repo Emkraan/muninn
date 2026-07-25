@@ -26,7 +26,7 @@ import { RemoveHostnameActionIcon } from "./_components/remove-hostname";
 
 export default async function TrustedHostnamesPage() {
   const session = await auth();
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-certificates")) {
     notFound();
   }
 

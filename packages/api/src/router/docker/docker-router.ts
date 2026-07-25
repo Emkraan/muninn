@@ -15,7 +15,7 @@ import { createTRPCRouter, permissionRequiredProcedure } from "../../trpc";
 
 export const dockerRouter = createTRPCRouter({
   getContainers: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-docker")
     .meta({
       mcp: {
         enabled: true,
@@ -35,7 +35,7 @@ export const dockerRouter = createTRPCRouter({
       };
     }),
   startAll: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-docker")
     .meta({
       mcp: {
         enabled: true,
@@ -53,7 +53,7 @@ export const dockerRouter = createTRPCRouter({
       );
     }),
   stopAll: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-docker")
     .meta({
       mcp: {
         enabled: true,
@@ -71,7 +71,7 @@ export const dockerRouter = createTRPCRouter({
       );
     }),
   restartAll: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-docker")
     .meta({
       mcp: {
         enabled: true,
@@ -90,7 +90,7 @@ export const dockerRouter = createTRPCRouter({
       );
     }),
   removeAll: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-docker")
     .meta({
       mcp: {
         enabled: true,
@@ -109,7 +109,7 @@ export const dockerRouter = createTRPCRouter({
       );
     }),
   logs: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-docker")
     .meta({
       mcp: {
         enabled: true,
@@ -139,7 +139,7 @@ export const dockerRouter = createTRPCRouter({
       };
     }),
   subscribeLogs: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-docker")
     .concat(dockerMiddleware())
     .input(
       z.object({

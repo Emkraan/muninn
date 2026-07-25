@@ -16,7 +16,7 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export const apiKeysRouter = createTRPCRouter({
   getAll: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-api-keys")
     .meta({
       openapi: {
         method: "GET",
@@ -122,7 +122,7 @@ export const apiKeysRouter = createTRPCRouter({
       };
     }),
   delete: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-api-keys")
     .meta({
       openapi: {
         method: "DELETE",

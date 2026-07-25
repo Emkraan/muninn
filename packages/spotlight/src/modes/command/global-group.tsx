@@ -101,7 +101,7 @@ export const globalCommandGroup = createGroup<Command>({
         icon: IconUserPlus,
         name: tOption("newUser.label"),
         useInteraction: interaction.link(() => ({ href: "/manage/users/new" })),
-        hidden: !session?.user.permissions.includes("admin"),
+        hidden: !session?.user.permissions.includes("other-manage-users"),
       },
       {
         commandKey: "newInvite",
@@ -133,7 +133,7 @@ export const globalCommandGroup = createGroup<Command>({
             },
           };
         },
-        hidden: !session?.user.permissions.includes("admin"),
+        hidden: !session?.user.permissions.includes("other-manage-groups"),
       },
     ];
 

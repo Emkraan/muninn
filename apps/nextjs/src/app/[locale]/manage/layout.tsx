@@ -44,7 +44,36 @@ import { ManageTourProvider } from "~/components/onboarding/manage-tour";
 export default async function ManageLayout({ children }: PropsWithChildren) {
   const t = await getScopedI18n("management.navbar");
   const session = await auth();
-  const isAdmin = session?.user.permissions.includes("admin") ?? false;
+  const permissions = session?.user.permissions ?? [];
+  const isAdmin = permissions.includes("admin");
+
+  // Fine-grained admin capabilities. Because every "other-manage-*" key is a
+  // child of "admin" (see getPermissionsWithChildren), a full admin holds all of
+  // these via expansion and therefore still sees every group and item below.
+  const canManageSettings = permissions.includes("other-manage-settings");
+  const canManageAuthentication = permissions.includes("other-manage-authentication");
+  const canManageUsers = permissions.includes("other-manage-users");
+  const canManageGroups = permissions.includes("other-manage-groups");
+  const canManageApiKeys = permissions.includes("other-manage-api-keys");
+  const canManageCertificates = permissions.includes("other-manage-certificates");
+  const canManageBackup = permissions.includes("other-manage-backup");
+  const canManageDocker = permissions.includes("other-manage-docker");
+  const canManageKubernetes = permissions.includes("other-manage-kubernetes");
+  const canManageTasks = permissions.includes("other-manage-tasks");
+  const canViewLogs = permissions.includes("other-view-logs");
+
+  // A collapsible group is shown when the user holds ANY of its item permissions
+  // (invites has no granular key and stays admin-only, so it also opens the group).
+  const showSettingsGroup =
+    canManageSettings ||
+    canManageAuthentication ||
+    canManageUsers ||
+    canManageGroups ||
+    canManageApiKeys ||
+    canManageCertificates ||
+    canManageBackup ||
+    isAdmin;
+  const showToolsGroup = canManageDocker || canManageKubernetes || canViewLogs || canManageTasks;
 
   // Unified admin hub IA (Emkraan admin-hub-standard): a few coherent groups
   // instead of a flat list. Home | Library (content) | Settings (all admin
@@ -105,82 +134,89 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
     {
       label: t("items.settings.label"),
       icon: IconSettingsFilled,
-      hidden: !isAdmin,
+      hidden: !showSettingsGroup,
       "data-onboarding-tour-id": "manage-settings",
       items: [
         {
           label: t("items.settings.general"),
           icon: IconSettingsFilled,
           href: "/manage/settings",
+          hidden: !canManageSettings,
         },
         {
           label: t("items.settings.authentication"),
           icon: IconShieldLockFilled,
           href: "/manage/authentication",
+          hidden: !canManageAuthentication,
         },
         {
           label: t("items.users.items.manage"),
           icon: IconUsers,
           href: "/manage/users",
+          hidden: !canManageUsers,
         },
         {
           label: t("items.users.items.groups"),
           icon: IconUsersGroup,
           href: "/manage/users/groups",
+          hidden: !canManageGroups,
         },
         {
           label: t("items.users.items.invites"),
           icon: IconMailForward,
           href: "/manage/users/invites",
-          hidden: !isProviderEnabled("credentials"),
+          hidden: !isAdmin || !isProviderEnabled("credentials"),
         },
         {
           label: t("items.tools.items.api"),
           icon: IconDirectionsFilled,
           href: "/manage/tools/api",
+          hidden: !canManageApiKeys,
         },
         {
           label: t("items.tools.items.certificates"),
           icon: IconCertificate,
           href: "/manage/tools/certificates",
+          hidden: !canManageCertificates,
         },
         {
           label: t("items.tools.items.backup"),
           icon: IconDatabaseExport,
           href: "/manage/tools/backup",
-          hidden: dbEnv.DRIVER !== "better-sqlite3",
+          hidden: !canManageBackup || dbEnv.DRIVER !== "better-sqlite3",
         },
       ],
     },
     {
       label: t("items.tools.label"),
       icon: IconPointerFilled,
-      // As permissions always include their children permissions, we can check other-view-logs as admin includes it
-      hidden: !session?.user.permissions.includes("other-view-logs"),
+      // Shown when the user holds any operational Tools capability (docker,
+      // kubernetes, logs or tasks); a full admin holds all of them via expansion.
+      hidden: !showToolsGroup,
       items: [
         {
           label: t("items.tools.items.docker"),
           icon: IconBrandDocker,
           href: "/manage/tools/docker",
-          hidden: !(isAdmin && env.ENABLE_DOCKER),
+          hidden: !(canManageDocker && env.ENABLE_DOCKER),
         },
         {
           label: t("items.tools.items.kubernetes"),
           icon: IconBox,
           href: "/manage/tools/kubernetes",
-          hidden: !(isAdmin && env.ENABLE_KUBERNETES),
+          hidden: !(canManageKubernetes && env.ENABLE_KUBERNETES),
         },
         {
           label: t("items.tools.items.logs"),
           icon: IconBrandTablerFilled,
           href: "/manage/tools/logs",
-          hidden: !session?.user.permissions.includes("other-view-logs"),
+          hidden: !canViewLogs,
         },
         {
           label: t("items.tools.items.tasks"),
           icon: IconClipboardListFilled,
           href: "/manage/tools/tasks",
-          hidden: !isAdmin,
+          hidden: !canManageTasks,
         },
       ],
     },

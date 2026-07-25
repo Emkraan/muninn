@@ -80,10 +80,10 @@ const isOnboardingActiveAsync = async (): Promise<boolean> => {
 
 export async function POST(req: Request) {
   const session = await auth();
-  const isAdmin = session?.user.permissions.includes("admin") ?? false;
-  const isOnboarding = !isAdmin && (await isOnboardingActiveAsync());
+  const canManageBackup = session?.user.permissions.includes("other-manage-backup") ?? false;
+  const isOnboarding = !canManageBackup && (await isOnboardingActiveAsync());
 
-  if (!isAdmin && !isOnboarding) {
+  if (!canManageBackup && !isOnboarding) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 

@@ -11,7 +11,7 @@ import { dbEnv } from "@homarr/core/infrastructure/db/env";
 
 export async function GET() {
   const session = await auth();
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-backup")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 

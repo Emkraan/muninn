@@ -11,7 +11,7 @@ import { MemoryResourceParser } from "../resource-parser/memory-resource-parser"
 
 export const clusterRouter = createTRPCRouter({
   getCluster: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-kubernetes")
     .concat(kubernetesMiddleware())
     .query(async (): Promise<KubernetesCluster> => {
       const { coreApi, metricsApi, versionApi, kubeConfig } = KubernetesClient.getInstance();
@@ -136,7 +136,7 @@ export const clusterRouter = createTRPCRouter({
       }
     }),
   getClusterResourceCounts: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-kubernetes")
     .query(async (): Promise<ClusterResourceCount[]> => {
       const { coreApi, networkingApi } = KubernetesClient.getInstance();
 

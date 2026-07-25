@@ -10,7 +10,7 @@ import { DockerTable } from "./docker-table";
 
 export default async function DockerPage() {
   const session = await auth();
-  if (!(session?.user.permissions.includes("admin") && env.ENABLE_DOCKER)) {
+  if (!(session?.user.permissions.includes("other-manage-docker") && env.ENABLE_DOCKER)) {
     notFound();
   }
 

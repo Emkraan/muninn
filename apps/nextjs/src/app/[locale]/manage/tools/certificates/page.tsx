@@ -24,7 +24,7 @@ interface CertificatesPageProps {
 
 export default async function CertificatesPage({ params }: CertificatesPageProps) {
   const session = await auth();
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-certificates")) {
     notFound();
   }
 

@@ -29,11 +29,11 @@ export const serverSettingsRouter = createTRPCRouter({
   getCulture: publicProcedure.query(async ({ ctx }) => {
     return await getServerSettingByKeyAsync(ctx.db, "culture");
   }),
-  getAll: permissionRequiredProcedure.requiresPermission("admin").query(async ({ ctx }) => {
+  getAll: permissionRequiredProcedure.requiresPermission("other-manage-settings").query(async ({ ctx }) => {
     return await getServerSettingsAsync(ctx.db);
   }),
   getBoardSettings: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-settings")
     .meta({
       openapi: { method: "GET", path: "/api/settings/board", tags: ["settings"], protect: true },
       mcp: {
@@ -48,7 +48,7 @@ export const serverSettingsRouter = createTRPCRouter({
       return await getServerSettingByKeyAsync(ctx.db, "board");
     }),
   updateBoardSettings: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-settings")
     .meta({
       openapi: { method: "PATCH", path: "/api/settings/board", tags: ["settings"], protect: true },
       mcp: {
@@ -94,7 +94,7 @@ export const serverSettingsRouter = createTRPCRouter({
       return next;
     }),
   saveSettings: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-settings")
     .input(
       z.object({
         settingsKey: z.enum(defaultServerSettingsKeys),

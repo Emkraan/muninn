@@ -7,6 +7,7 @@ import { eq } from "@homarr/db";
 import { invites, onboarding, users } from "@homarr/db/schema";
 import { createDb } from "@homarr/db/test";
 import type { GroupPermissionKey, OnboardingStep } from "@homarr/definitions";
+import { getPermissionsWithChildren } from "@homarr/definitions";
 
 import { userRouter } from "../user";
 
@@ -413,7 +414,8 @@ describe("changeEnableRightClickOnWidgets should toggle the right-click preferen
 
   test("admin can toggle another user's preference", async () => {
     const db = createDb();
-    const adminSession = createSession(["admin"]);
+    // A real admin session carries the expanded permission set (incl. other-manage-users).
+    const adminSession = createSession(getPermissionsWithChildren(["admin"]));
     const caller = userRouter.createCaller({
       db,
       deviceType: undefined,

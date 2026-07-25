@@ -18,7 +18,7 @@ const logger = createLogger({ module: "certificateRouter" });
 
 export const certificateRouter = createTRPCRouter({
   addCertificate: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-certificates")
     .input(
       zfd.formData({
         file: zfd.file().check(checkCertificateFile),
@@ -50,7 +50,7 @@ export const certificateRouter = createTRPCRouter({
       });
     }),
   trustHostnameMismatch: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-certificates")
     .input(z.object({ hostname: z.string(), certificate: z.string() }))
     .mutation(async ({ ctx, input }) => {
       // Validate the certificate
@@ -84,7 +84,7 @@ export const certificateRouter = createTRPCRouter({
       });
     }),
   removeTrustedHostname: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-certificates")
     .input(z.object({ hostname: z.string(), thumbprint: z.string() }))
     .mutation(async ({ ctx, input }) => {
       logger.info("Removing trusted hostname", {
@@ -107,7 +107,7 @@ export const certificateRouter = createTRPCRouter({
       });
     }),
   removeCertificate: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-certificates")
     .input(z.object({ fileName: certificateValidFileNameSchema }))
     .mutation(async ({ input, ctx }) => {
       logger.info("Removing trusted certificate", {

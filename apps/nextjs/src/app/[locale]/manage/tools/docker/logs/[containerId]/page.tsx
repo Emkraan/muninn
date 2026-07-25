@@ -18,7 +18,7 @@ interface DockerContainerLogsPageProps {
 
 export default async function DockerContainerLogsPage({ params, searchParams }: DockerContainerLogsPageProps) {
   const session = await auth();
-  if (!(session?.user.permissions.includes("admin") && env.ENABLE_DOCKER)) {
+  if (!(session?.user.permissions.includes("other-manage-docker") && env.ENABLE_DOCKER)) {
     notFound();
   }
 

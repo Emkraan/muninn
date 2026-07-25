@@ -101,7 +101,7 @@ const upsertInputSchema = upsertSchema.refine((value) => !(value.isDefault && !v
 
 export const oidcProviderRouter = createTRPCRouter({
   // Admin list. Client secret is NEVER returned; a boolean flag + sentinel are.
-  all: permissionRequiredProcedure.requiresPermission("admin").query(async () => {
+  all: permissionRequiredProcedure.requiresPermission("other-manage-authentication").query(async () => {
     const rows = await db.query.oidcProviders.findMany();
     return rows.map(({ clientSecret, ...rest }) => ({
       ...rest,
@@ -111,7 +111,7 @@ export const oidcProviderRouter = createTRPCRouter({
   }),
 
   upsert: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-authentication")
     .input(upsertInputSchema)
     .mutation(async ({ input }) => {
       const { id, clientSecret, ...fields } = input;
@@ -155,7 +155,7 @@ export const oidcProviderRouter = createTRPCRouter({
     }),
 
   delete: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-authentication")
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
       await db.delete(oidcProviders).where(eq(oidcProviders.id, input.id));
@@ -167,7 +167,7 @@ export const oidcProviderRouter = createTRPCRouter({
   // probes it for the token/authorization endpoints. Never throws on a network
   // failure - it returns ok:false with a human-readable message instead.
   verify: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-authentication")
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }): Promise<VerifyResult> => {
       const checks: { name: string; ok: boolean }[] = [];

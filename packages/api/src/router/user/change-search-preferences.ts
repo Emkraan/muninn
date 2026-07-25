@@ -22,7 +22,7 @@ export const changeSearchPreferencesAsync = async (
 ) => {
   const user = session.user;
   // Only admins can change other users search preferences
-  if (!user.permissions.includes("admin") && user.id !== input.userId) {
+  if (!user.permissions.includes("other-manage-users") && user.id !== input.userId) {
     throw new TRPCError({
       code: "NOT_FOUND",
       message: "User not found",

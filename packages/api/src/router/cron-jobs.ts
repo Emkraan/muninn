@@ -16,25 +16,25 @@ const logger = createLogger({ module: "cronJobsRouter" });
 
 export const cronJobsRouter = createTRPCRouter({
   triggerJob: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-tasks")
     .input(jobNameSchema)
     .mutation(async ({ input, ctx }) => {
       await new JobManager(ctx.db, jobGroup).triggerAsync(input);
     }),
   startJob: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-tasks")
     .input(jobNameSchema)
     .mutation(async ({ input, ctx }) => {
       await new JobManager(ctx.db, jobGroup).startAsync(input);
     }),
   stopJob: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-tasks")
     .input(jobNameSchema)
     .mutation(({ input, ctx }) => {
       new JobManager(ctx.db, jobGroup).stop(input);
     }),
   updateJobInterval: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-tasks")
     .input(
       z.object({
         name: jobNameSchema,
@@ -45,21 +45,21 @@ export const cronJobsRouter = createTRPCRouter({
       await new JobManager(ctx.db, jobGroup).updateIntervalAsync(input.name, input.cron);
     }),
   disableJob: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-tasks")
     .input(jobNameSchema)
     .mutation(async ({ input, ctx }) => {
       await new JobManager(ctx.db, jobGroup).disableAsync(input);
     }),
   enableJob: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-tasks")
     .input(jobNameSchema)
     .mutation(async ({ input, ctx }) => {
       await new JobManager(ctx.db, jobGroup).enableAsync(input);
     }),
-  getJobs: permissionRequiredProcedure.requiresPermission("admin").query(async ({ ctx }) => {
+  getJobs: permissionRequiredProcedure.requiresPermission("other-manage-tasks").query(async ({ ctx }) => {
     return await new JobManager(ctx.db, jobGroup).getAllAsync();
   }),
-  subscribeToStatusUpdates: permissionRequiredProcedure.requiresPermission("admin").subscription(() => {
+  subscribeToStatusUpdates: permissionRequiredProcedure.requiresPermission("other-manage-tasks").subscription(() => {
     return observable<TaskStatus>((emit) => {
       const unsubscribes: (() => void)[] = [];
 

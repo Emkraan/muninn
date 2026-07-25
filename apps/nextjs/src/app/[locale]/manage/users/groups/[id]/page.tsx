@@ -23,7 +23,7 @@ export default async function GroupsDetailPage(props: GroupsDetailPageProps) {
   const params = await props.params;
   const session = await auth();
 
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-groups")) {
     notFound();
   }
 

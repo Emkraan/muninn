@@ -35,7 +35,10 @@ export const useHomeEmptyGroups = () => {
   const tPages = useScopedI18n("search.mode.page.group.page.option");
   const visibleSearchModes: SearchMode[] = [appIntegrationBoardMode, externalMode, mediaMode, commandMode, pageMode];
 
-  if (session?.user.permissions.includes("admin")) {
+  if (
+    session?.user.permissions.includes("other-manage-users") ||
+    session?.user.permissions.includes("other-manage-groups")
+  ) {
     visibleSearchModes.unshift(userGroupMode);
   }
 
@@ -53,7 +56,7 @@ export const useHomeEmptyGroups = () => {
           name: tPages("manageBoard.label"),
         });
 
-        if (session?.user.permissions.includes("admin")) {
+        if (session?.user.permissions.includes("other-manage-settings")) {
           quickLinks.push({
             key: "manageSettings",
             icon: IconSettings,

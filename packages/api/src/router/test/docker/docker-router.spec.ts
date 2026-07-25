@@ -59,13 +59,14 @@ const validInputs: {
   subscribeLogs: { id: "1", tail: 200 },
 };
 
-describe("All procedures should only be accessible for users with admin permission", () => {
-  test.each(procedureKeys)("Procedure %s should be accessible for users with admin permission", async (procedure) => {
-    // Arrange
+describe("All procedures should only be accessible for users with the manage-docker permission", () => {
+  test.each(procedureKeys)("Procedure %s should be accessible for a full admin (expanded)", async (procedure) => {
+    // A real admin session carries the expanded permission set (see
+    // getCurrentUserPermissionsAsync), which includes other-manage-docker.
     const caller = dockerRouter.createCaller({
       db: null as unknown as Database,
       deviceType: undefined,
-      session: createSessionWithPermissions("admin"),
+      session: createSessionWithPermissions(...getPermissionsWithChildren(["admin"])),
     });
 
     // Act
@@ -74,15 +75,32 @@ describe("All procedures should only be accessible for users with admin permissi
     await expect(act()).resolves.not.toThrow();
   });
 
+  test.each(procedureKeys)(
+    "Procedure %s should be accessible for a user with only the granular manage-docker permission",
+    async (procedure) => {
+      // Arrange
+      const caller = dockerRouter.createCaller({
+        db: null as unknown as Database,
+        deviceType: undefined,
+        session: createSessionWithPermissions("other-manage-docker"),
+      });
+
+      // Act
+      const act = () => caller[procedure](validInputs[procedure] as never);
+
+      await expect(act()).resolves.not.toThrow();
+    },
+  );
+
   test.each(procedureKeys)("Procedure %s should not be accessible with other permissions", async (procedure) => {
-    // Arrange
-    const groupPermissionsWithoutAdmin = getPermissionsWithChildren(["admin"]).filter(
-      (permission) => permission !== "admin",
+    // Arrange: every admin-implied permission EXCEPT the one docker now requires.
+    const groupPermissionsWithoutDocker = getPermissionsWithChildren(["admin"]).filter(
+      (permission) => permission !== "admin" && permission !== "other-manage-docker",
     );
     const caller = dockerRouter.createCaller({
       db: null as unknown as Database,
       deviceType: undefined,
-      session: createSessionWithPermissions(...groupPermissionsWithoutAdmin),
+      session: createSessionWithPermissions(...groupPermissionsWithoutDocker),
     });
 
     // Act

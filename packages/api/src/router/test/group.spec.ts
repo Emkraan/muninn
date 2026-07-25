@@ -7,6 +7,7 @@ import { eq } from "@homarr/db";
 import { groupMembers, groupPermissions, groups, users } from "@homarr/db/schema";
 import { createDb } from "@homarr/db/test";
 import type { GroupPermissionKey } from "@homarr/definitions";
+import { getPermissionsWithChildren } from "@homarr/definitions";
 
 import { groupRouter } from "../group";
 
@@ -21,7 +22,8 @@ const createSession = (permissions: GroupPermissionKey[]) =>
     expires: new Date().toISOString(),
   }) satisfies Session;
 const defaultSession = createSession([]);
-const adminSession = createSession(["admin"]);
+// A real admin session carries the expanded permission set (incl. other-manage-groups).
+const adminSession = createSession(getPermissionsWithChildren(["admin"]));
 
 // Mock the auth module to return an empty session
 vi.mock("@homarr/auth", async () => {

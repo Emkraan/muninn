@@ -15,7 +15,7 @@ import classes from "./groups.module.css";
 export default async function GroupsListPage() {
   const session = await auth();
 
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-groups")) {
     return notFound();
   }
 
