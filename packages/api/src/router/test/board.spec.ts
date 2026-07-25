@@ -330,6 +330,115 @@ describe("getById returns the full board-as-code document", () => {
   });
 });
 
+describe("granular board-as-code item + section ops", () => {
+  const seedBoardWithItemAsync = async (db: Database) => {
+    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+    const { boardId, sectionId, layoutId } = await createFullBoardAsync(db, "default");
+    const itemId = createId();
+    await caller.saveBoard({
+      id: boardId,
+      sections: [{ id: sectionId, kind: "empty", yOffset: 0, xOffset: 0 }],
+      items: [
+        {
+          id: itemId,
+          kind: "clock",
+          options: { is24HourFormat: true },
+          integrationIds: [],
+          layouts: [{ layoutId, sectionId, height: 1, width: 1, xOffset: 0, yOffset: 0 }],
+          advancedOptions: {},
+        },
+      ],
+    });
+    return { caller, boardId, sectionId, layoutId, itemId };
+  };
+
+  test("removeItem removes the item from the board", async () => {
+    const db = createDb();
+    const { caller, boardId, itemId } = await seedBoardWithItemAsync(db);
+    const board = await caller.removeItem({ id: boardId, itemId });
+    expect(board.items.find((item) => item.id === itemId)).toBeUndefined();
+    expect(await db.query.items.findFirst({ where: eq(items.id, itemId) })).toBeUndefined();
+  });
+
+  test("removeItem throws when the item is not on the board", async () => {
+    const db = createDb();
+    const { caller, boardId } = await seedBoardWithItemAsync(db);
+    await expect(caller.removeItem({ id: boardId, itemId: createId() })).rejects.toThrow("Item not found");
+  });
+
+  test("updateItem replaces only the provided field (options)", async () => {
+    const db = createDb();
+    const { caller, boardId, itemId } = await seedBoardWithItemAsync(db);
+    const board = await caller.updateItem({ id: boardId, itemId, options: { is24HourFormat: false } });
+    expect(board.items.find((item) => item.id === itemId)?.options).toEqual({ is24HourFormat: false });
+  });
+
+  test("addSection adds a section and removeSection removes an empty one", async () => {
+    const db = createDb();
+    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+    const { boardId } = await createFullBoardAsync(db, "default");
+    const newSectionId = createId();
+    let board = await caller.addSection({
+      id: boardId,
+      section: { id: newSectionId, kind: "empty", yOffset: 1, xOffset: 0 },
+    });
+    expect(board.sections.some((section) => section.id === newSectionId)).toBe(true);
+    board = await caller.removeSection({ id: boardId, sectionId: newSectionId });
+    expect(board.sections.some((section) => section.id === newSectionId)).toBe(false);
+  });
+
+  test("removeSection is rejected while an item still references the section", async () => {
+    const db = createDb();
+    const { caller, boardId, sectionId } = await seedBoardWithItemAsync(db);
+    await expect(caller.removeSection({ id: boardId, sectionId })).rejects.toThrow("not empty");
+  });
+
+  test("updateSection rejects a body whose section.id differs from the path sectionId", async () => {
+    const db = createDb();
+    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+    const { boardId, sectionId } = await createFullBoardAsync(db, "default");
+    await expect(
+      caller.updateSection({
+        id: boardId,
+        sectionId,
+        section: { id: createId(), kind: "empty", yOffset: 0, xOffset: 0 },
+      }),
+    ).rejects.toThrow("section.id must equal");
+  });
+
+  test("removeSection rejects a section that has a nested dynamic sub-section", async () => {
+    const db = createDb();
+    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+    const { boardId, sectionId, layoutId } = await createFullBoardAsync(db, "default");
+    const dynamicId = createId();
+    await caller.saveBoard({
+      id: boardId,
+      sections: [
+        { id: sectionId, kind: "empty", yOffset: 0, xOffset: 0 },
+        {
+          id: dynamicId,
+          kind: "dynamic",
+          options: {},
+          layouts: [{ layoutId, parentSectionId: sectionId, height: 1, width: 1, xOffset: 0, yOffset: 0 }],
+        },
+      ],
+      items: [],
+    });
+    await expect(caller.removeSection({ id: boardId, sectionId })).rejects.toThrow("nested sections");
+  });
+
+  test("granular ops require the modify permission", async () => {
+    const db = createDb();
+    const { boardId, itemId } = await seedBoardWithItemAsync(db);
+    const strangerSession = {
+      ...defaultSession,
+      user: { ...defaultSession.user, id: createId(), permissions: [] as GroupPermissionKey[] },
+    };
+    const strangerCaller = boardRouter.createCaller({ db, deviceType: undefined, session: strangerSession });
+    await expect(strangerCaller.removeItem({ id: boardId, itemId })).rejects.toThrow();
+  });
+});
+
 describe("createBoard should create a new board", () => {
   test("should create a new board with permission board-create", async () => {
     // Arrange
