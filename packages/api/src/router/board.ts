@@ -8,7 +8,7 @@ import { createId } from "@homarr/common";
 import type { DeviceType } from "@homarr/common/server";
 import type { Session } from "@homarr/auth";
 import type { Database, InferInsertModel, InferSelectModel, SQL } from "@homarr/db";
-import { and, asc, eq, handleTransactionsAsync, inArray, isNull, like, not, or, sql } from "@homarr/db";
+import { and, asc, eq, handleTransactionsAsync, inArray, isNull, isPostgresql, like, not, or, sql } from "@homarr/db";
 import { createDbInsertCollectionWithoutTransaction } from "@homarr/db/collection";
 import { getServerSettingByKeyAsync } from "@homarr/db/queries";
 import {
@@ -90,6 +90,9 @@ const fullBoardOutputSchema = z
   .object({
     id: z.string(),
     name: z.string(),
+    // Optimistic-concurrency token. Read it, then pass it back as
+    // `expectedVersion` on the next save to detect a concurrent edit (#61).
+    version: z.number(),
     isPublic: z.boolean(),
     creatorId: z.string().nullable(),
     creator: z
@@ -783,11 +786,11 @@ export const boardRouter = createTRPCRouter({
   // ---- Granular board-as-code ops (convenience over the whole-board PUT) ----
   // Each reads the board, changes one element, and reuses saveBoardContentAsync
   // so the atomic write transaction + the `modify` gate are shared, never
-  // duplicated. NOTE: like the whole-board PUT (and the UI's own save), this is
-  // lock-free last-writer-wins - the read and the write are not one atomic
-  // snapshot, so a concurrent edit to the SAME board can be clobbered. Adding
-  // optimistic concurrency (an updatedAt/version check on the board-save path)
-  // is a tracked follow-up that would harden saveBoard and these ops together.
+  // duplicated. Each passes the board `version` it read as the optimistic-
+  // concurrency token: if the board changed between that read and the write, the
+  // guarded version bump matches zero rows and the save is rejected with 409
+  // CONFLICT instead of clobbering the concurrent edit (#61). The whole-board PUT
+  // takes the same token via an optional `expectedVersion` in its body.
   removeItem: protectedProcedure
     .input(boardItemRefSchema)
     .output(fullBoardOutputSchema)
@@ -802,7 +805,7 @@ export const boardRouter = createTRPCRouter({
       if (items.length === board.items.length) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Item not found on this board" });
       }
-      return await saveBoardContentAsync(ctx, { id: input.id, sections: board.sections, items });
+      return await saveBoardContentAsync(ctx, { id: input.id, sections: board.sections, items }, board.version);
     }),
   updateItem: protectedProcedure
     .input(boardItemUpdateSchema)
@@ -832,7 +835,7 @@ export const boardRouter = createTRPCRouter({
             }
           : item,
       );
-      return await saveBoardContentAsync(ctx, { id: input.id, sections: board.sections, items });
+      return await saveBoardContentAsync(ctx, { id: input.id, sections: board.sections, items }, board.version);
     }),
   addSection: protectedProcedure
     .input(boardSectionAddSchema)
@@ -850,7 +853,7 @@ export const boardRouter = createTRPCRouter({
       if (board.sections.some((section) => section.id === input.section.id)) {
         throw new TRPCError({ code: "CONFLICT", message: "A section with this id already exists on the board" });
       }
-      return await saveBoardContentAsync(ctx, { id: input.id, sections: [...board.sections, input.section], items: board.items });
+      return await saveBoardContentAsync(ctx, { id: input.id, sections: [...board.sections, input.section], items: board.items }, board.version);
     }),
   updateSection: protectedProcedure
     .input(boardSectionUpdateSchema)
@@ -876,7 +879,7 @@ export const boardRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Section not found on this board" });
       }
       const sections = board.sections.map((section) => (section.id === input.sectionId ? input.section : section));
-      return await saveBoardContentAsync(ctx, { id: input.id, sections, items: board.items });
+      return await saveBoardContentAsync(ctx, { id: input.id, sections, items: board.items }, board.version);
     }),
   removeSection: protectedProcedure
     .input(boardSectionRefSchema)
@@ -913,7 +916,7 @@ export const boardRouter = createTRPCRouter({
           message: "Section is not empty (it holds items or nested sections); move or remove those first",
         });
       }
-      return await saveBoardContentAsync(ctx, { id: input.id, sections, items: board.items });
+      return await saveBoardContentAsync(ctx, { id: input.id, sections, items: board.items }, board.version);
     }),
   saveLayouts: protectedProcedure.input(boardSaveLayoutsSchema).output(fullBoardOutputSchema).meta(saveLayoutsMeta).mutation(async ({ ctx, input }) => {
     await throwIfActionForbiddenAsync(ctx, eq(boards.id, input.id), "modify");
@@ -1090,7 +1093,7 @@ export const boardRouter = createTRPCRouter({
     .input(boardSaveSchema)
     .output(fullBoardOutputSchema)
     .meta(saveBoardMeta)
-    .mutation(async ({ input, ctx }) => await saveBoardContentAsync(ctx, input)),
+    .mutation(async ({ input, ctx }) => await saveBoardContentAsync(ctx, input, input.expectedVersion)),
   getBoardPermissions: protectedProcedure.input(byIdSchema).query(async ({ input, ctx }) => {
     await throwIfActionForbiddenAsync(ctx, eq(boards.id, input.id), "full");
 
@@ -1685,14 +1688,51 @@ const getFullBoardWithWhereAsync = async (db: Database, where: SQL<unknown>, use
 const saveBoardContentAsync = async (
   ctx: { db: Database; session: Session },
   input: z.infer<typeof boardSaveSchema>,
+  // Optimistic concurrency: the board version the caller observed when it read
+  // the board it is now writing back. When provided, the write bumps the version
+  // only if it still matches - a concurrent commit in between makes the guarded
+  // update match zero rows, and we roll back with 409 CONFLICT rather than
+  // clobber the other edit. When undefined the version is still bumped (so other
+  // readers notice the change) but no conflict is enforced. See #61.
+  expectedVersion?: number,
 ) => {
     await throwIfActionForbiddenAsync(ctx, eq(boards.id, input.id), "modify");
 
     const dbBoard = await getFullBoardWithWhereAsync(ctx.db, eq(boards.id, input.id), ctx.session.user.id);
 
+    const conflictError = new TRPCError({
+      code: "CONFLICT",
+      message: "This board was modified by another request. Reload the latest board and retry.",
+    });
+
     await handleTransactionsAsync(ctx.db, {
       async handleAsync(db, schema) {
         await db.transaction(async (transaction) => {
+          // Optimistic-concurrency guard, first so a conflict rolls back the
+          // whole write. Conditionally bump the version and check how many rows
+          // the guarded update actually matched - zero means the version moved
+          // since the caller read it. We must count matched rows (not re-read
+          // the value): a concurrent op bumps by exactly 1, so the resulting
+          // value can equal expected + 1 even when our own update matched
+          // nothing. Result shape differs per driver (postgres: { rowCount },
+          // mysql2: [ResultSetHeader]).
+          const updateResult = await transaction
+            .update(schema.boards)
+            .set({ version: sql`${schema.boards.version} + 1` })
+            .where(
+              expectedVersion === undefined
+                ? eq(schema.boards.id, input.id)
+                : and(eq(schema.boards.id, input.id), eq(schema.boards.version, expectedVersion)),
+            );
+          if (expectedVersion !== undefined) {
+            const affectedRows = isPostgresql()
+              ? ((updateResult as unknown as { rowCount: number | null }).rowCount ?? 0)
+              : ((updateResult as unknown as [{ affectedRows: number }])[0]?.affectedRows ?? 0);
+            if (affectedRows === 0) {
+              throw conflictError;
+            }
+          }
+
           const addedSections = filterAddedItems(input.sections, dbBoard.sections);
 
           if (addedSections.length > 0) {
@@ -1891,6 +1931,22 @@ const saveBoardContentAsync = async (
       },
       handleSync(db) {
         db.transaction((transaction) => {
+          // Optimistic-concurrency guard (see handleAsync). better-sqlite3
+          // reports affected rows synchronously; zero rows means a version
+          // mismatch, so we throw and better-sqlite3 rolls the transaction back.
+          const bump = transaction
+            .update(boards)
+            .set({ version: sql`${boards.version} + 1` })
+            .where(
+              expectedVersion === undefined
+                ? eq(boards.id, input.id)
+                : and(eq(boards.id, input.id), eq(boards.version, expectedVersion)),
+            )
+            .run();
+          if (expectedVersion !== undefined && bump.changes === 0) {
+            throw conflictError;
+          }
+
           const addedSections = filterAddedItems(input.sections, dbBoard.sections);
 
           if (addedSections.length > 0) {

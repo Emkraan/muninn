@@ -439,6 +439,78 @@ describe("granular board-as-code item + section ops", () => {
   });
 });
 
+describe("optimistic concurrency on the board-save path (#61)", () => {
+  // A minimal whole-board payload (drops the seeded item, keeps one empty
+  // section). expectedVersion is the optimistic-concurrency token; omit to opt
+  // out of the check.
+  const emptyBoardPayload = (boardId: string, sectionId: string, expectedVersion?: number) => ({
+    id: boardId,
+    sections: [{ id: sectionId, kind: "empty" as const, yOffset: 0, xOffset: 0 }],
+    items: [],
+    ...(expectedVersion !== undefined ? { expectedVersion } : {}),
+  });
+
+  test("getById exposes the version and saveBoard bumps it", async () => {
+    const db = createDb();
+    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+    const { boardId, sectionId } = await createFullBoardAsync(db, "default");
+
+    expect((await caller.getById({ id: boardId })).version).toBe(0);
+    await caller.saveBoard(emptyBoardPayload(boardId, sectionId));
+    expect((await caller.getById({ id: boardId })).version).toBe(1);
+  });
+
+  test("saveBoard with a stale expectedVersion is rejected and leaves the board untouched", async () => {
+    const db = createDb();
+    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+    const { boardId, sectionId } = await createFullBoardAsync(db, "default");
+
+    // A concurrent write moves the board from v0 -> v1.
+    await caller.saveBoard(emptyBoardPayload(boardId, sectionId));
+
+    // Our write still believes it is v0, so it is rejected rather than clobbering.
+    await expect(caller.saveBoard(emptyBoardPayload(boardId, sectionId, 0))).rejects.toThrow(
+      "modified by another request",
+    );
+    // The rejected write applied nothing: version is unchanged at v1.
+    expect((await caller.getById({ id: boardId })).version).toBe(1);
+  });
+
+  test("saveBoard with the current expectedVersion succeeds and bumps again", async () => {
+    const db = createDb();
+    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+    const { boardId, sectionId } = await createFullBoardAsync(db, "default");
+
+    await caller.saveBoard(emptyBoardPayload(boardId, sectionId, 0)); // v0 -> v1
+    expect((await caller.getById({ id: boardId })).version).toBe(1);
+    await caller.saveBoard(emptyBoardPayload(boardId, sectionId, 1)); // v1 -> v2
+    expect((await caller.getById({ id: boardId })).version).toBe(2);
+  });
+
+  test("a granular op bumps the version, so a subsequently stale whole-board save conflicts", async () => {
+    const db = createDb();
+    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+    const { boardId, sectionId } = await createFullBoardAsync(db, "default");
+
+    const before = (await caller.getById({ id: boardId })).version; // 0
+    // The granular op does its own read-modify-write and bumps the version.
+    const newSectionId = createId();
+    const afterOp = await caller.addSection({
+      id: boardId,
+      section: { id: newSectionId, kind: "empty", yOffset: 1, xOffset: 0 },
+    });
+    expect(afterOp.version).toBe(before + 1);
+
+    // A whole-board save still holding the pre-op version is rejected before any
+    // diff runs, so the section the granular op added is not clobbered.
+    await expect(caller.saveBoard(emptyBoardPayload(boardId, sectionId, before))).rejects.toThrow(
+      "modified by another request",
+    );
+    const latest = await caller.getById({ id: boardId });
+    expect(latest.sections.some((section) => section.id === newSectionId)).toBe(true);
+  });
+});
+
 describe("createBoard should create a new board", () => {
   test("should create a new board with permission board-create", async () => {
     // Arrange

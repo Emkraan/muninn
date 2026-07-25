@@ -86,6 +86,10 @@ export const boardSaveSchema = z.object({
   id: z.string(),
   sections: z.array(sectionSchema),
   items: z.array(commonItemSchema),
+  // Optimistic concurrency (Muninn): the board `version` the client last read.
+  // When supplied, the save is rejected with 409 CONFLICT if the board changed
+  // since, instead of silently clobbering the other write. Omit to opt out.
+  expectedVersion: z.number().int().nonnegative().optional(),
 });
 
 export const boardCreateSchema = z.object({

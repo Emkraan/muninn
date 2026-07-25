@@ -25,6 +25,7 @@ export class BoardMockBuilder {
       logoImageUrl: null,
       faviconImageUrl: null,
       name: "board",
+      version: 0,
       opacity: 100,
       isPublic: true,
       disableStatus: false,
