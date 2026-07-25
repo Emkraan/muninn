@@ -5,6 +5,10 @@ import "@homarr/common/env";
 import "@homarr/core/infrastructure/logs/env";
 import "@homarr/docker/env";
 
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -13,9 +17,33 @@ const withNextIntl = createNextIntlPlugin({
   requestConfig: "../../packages/translation/src/request.ts",
 });
 
+// Single source of truth for the shipped version: an explicit HOMARR_VERSION
+// env when provided, otherwise the repo-root VERSION file (the same file the
+// release pipeline reads). Resolved at build time and inlined via `env` below,
+// so the app never advertises a stale/"unknown" version.
+function resolveHomarrVersion(): string {
+  const fromEnv = process.env.HOMARR_VERSION?.trim();
+  if (fromEnv) {
+    return fromEnv;
+  }
+
+  try {
+    const configDir = dirname(fileURLToPath(import.meta.url));
+    // apps/nextjs -> repo root
+    const fileVersion = readFileSync(join(configDir, "..", "..", "VERSION"), "utf8").trim();
+    if (fileVersion) {
+      return fileVersion;
+    }
+  } catch {
+    // VERSION file not resolvable in this context - fall through.
+  }
+
+  return "unknown";
+}
+
 const nextConfig: NextConfig = {
   env: {
-    HOMARR_VERSION: process.env.HOMARR_VERSION ?? "unknown",
+    HOMARR_VERSION: resolveHomarrVersion(),
   },
   output: "standalone",
   reactStrictMode: true,

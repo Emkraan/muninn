@@ -8,7 +8,7 @@
   --scalar-color-1: var(--mantine-color-text);
   --scalar-color-2: var(--mantine-color-dimmed);
   --scalar-color-3: var(--mantine-color-dimmed);
-  --scalar-color-accent: var(--mantine-color-red-6);
+  --scalar-color-accent: var(--mantine-primary-color-filled);
 
   --scalar-border-color: var(--mantine-color-gray-3);
 
@@ -30,7 +30,7 @@
   --scalar-color-1: var(--mantine-color-text);
   --scalar-color-2: var(--mantine-color-dimmed);
   --scalar-color-3: var(--mantine-color-dimmed);
-  --scalar-color-accent: var(--mantine-color-red-6);
+  --scalar-color-accent: var(--mantine-primary-color-filled);
 
   --scalar-border-color: var(--mantine-color-dark-4);
 
