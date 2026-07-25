@@ -328,6 +328,7 @@ export const integrationGroupPermissions = mysqlTable(
 export const boards = mysqlTable("board", {
   id: varchar({ length: 64 }).notNull().primaryKey(),
   name: varchar({ length: 256 }).unique().notNull(),
+  version: int().default(0).notNull(),
   isPublic: boolean().default(false).notNull(),
   creatorId: varchar({ length: 64 }).references(() => users.id, {
     onDelete: "set null",

@@ -316,6 +316,13 @@
       "when": 1784718361601,
       "tag": "0044_scope_api_keys",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "6",
+      "when": 1785017055952,
+      "tag": "0045_add_board_version",
+      "breakpoints": true
     }
   ]
 }

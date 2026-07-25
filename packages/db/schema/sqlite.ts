@@ -317,6 +317,7 @@ export const integrationGroupPermissions = sqliteTable(
 export const boards = sqliteTable("board", {
   id: text().notNull().primaryKey(),
   name: text().unique().notNull(),
+  version: int().default(0).notNull(),
   isPublic: int({ mode: "boolean" }).default(false).notNull(),
   creatorId: text().references(() => users.id, {
     onDelete: "set null",
