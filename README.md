@@ -41,6 +41,16 @@ released image tag from `ghcr.io/emkraan/muninn`; environment-specific
 configuration (secrets, host bindings, an optional footer credit) lives in a
 separate private stack repository, so the published image stays brand-agnostic.
 
+## Support
+
+Muninn is free and open source, and always will be. If it is useful to you and
+you would like to support its development, you can:
+
+- [Buy Me a Coffee](https://buymeacoffee.com/emkraan)
+- [Donate via PayPal](https://www.paypal.com/ncp/payment/Z5LS6SWMFQGU4)
+
+Entirely optional, and every feature stays free either way.
+
 ## Built on Homarr
 
 Muninn is based on Homarr v1.71.0 and remains under the **Apache License 2.0**.
