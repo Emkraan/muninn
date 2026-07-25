@@ -18,8 +18,32 @@ export const apiKeysRouter = createTRPCRouter({
   getAll: permissionRequiredProcedure
     .requiresPermission("admin")
     .meta({
+      openapi: {
+        method: "GET",
+        path: "/api/api-keys",
+        tags: ["apiKeys"],
+        protect: true,
+      },
       mcp: { enabled: true, description: "List all API keys (admin only)" },
     })
+    .output(
+      z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          scopes: z.string().nullable(),
+          expiresAt: z.date().nullable(),
+          createdAt: z.date(),
+          lastUsedAt: z.date().nullable(),
+          user: z.object({
+            id: z.string(),
+            name: z.string().nullable(),
+            image: z.string().nullable(),
+            email: z.string().nullable(),
+          }),
+        }),
+      ),
+    )
     .query(() => {
       return db.query.apiKeys.findMany({
         columns: {
@@ -49,6 +73,12 @@ export const apiKeysRouter = createTRPCRouter({
   // grant more than its creator already has.
   create: protectedProcedure
     .meta({
+      openapi: {
+        method: "POST",
+        path: "/api/api-keys",
+        tags: ["apiKeys"],
+        protect: true,
+      },
       mcp: {
         enabled: true,
         description:
@@ -56,6 +86,7 @@ export const apiKeysRouter = createTRPCRouter({
       },
     })
     .input(apiKeyCreateSchema)
+    .output(z.object({ apiKey: z.string() }))
     .mutation(async ({ ctx, input }) => {
       // Privilege-escalation guard: every requested scope (and its implied
       // children) must be covered by the caller's own live permissions.
@@ -93,12 +124,19 @@ export const apiKeysRouter = createTRPCRouter({
   delete: permissionRequiredProcedure
     .requiresPermission("admin")
     .meta({
+      openapi: {
+        method: "DELETE",
+        path: "/api/api-keys/{apiKeyId}",
+        tags: ["apiKeys"],
+        protect: true,
+      },
       mcp: {
         enabled: true,
         description: "Delete an API key by ID (admin only). REQUIRED: apiKeyId (string)",
       },
     })
     .input(z.object({ apiKeyId: z.string() }))
+    .output(z.void())
     .mutation(async ({ ctx, input }) => {
       await ctx.db.delete(apiKeys).where(eq(apiKeys.id, input.apiKeyId)).limit(1);
     }),

@@ -26,6 +26,10 @@ export function ScalarApiReference({ document }: ScalarApiReferenceProps) {
         showDeveloperTools: "never",
         defaultOpenAllTags: true,
         forceDarkModeState: colorScheme,
+        favicon: "/logo/logo.png",
+        metaData: {
+          title: "Muninn API",
+        },
         authentication: {
           preferredSecurityScheme: "apikey",
         },

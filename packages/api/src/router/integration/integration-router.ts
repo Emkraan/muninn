@@ -8,6 +8,7 @@ import { decryptSecret, encryptSecret } from "@homarr/common/server";
 import { createLogger } from "@homarr/core/infrastructure/logs";
 import type { Database } from "@homarr/db";
 import { and, asc, eq, handleTransactionsAsync, inArray, like, or } from "@homarr/db";
+import { selectAppSchema } from "@homarr/db/validationSchemas";
 import {
   apps,
   groupMembers,
@@ -25,6 +26,7 @@ import {
   integrationDefs,
   integrationKinds,
   integrationSecretKindObject,
+  integrationSecretKinds,
 } from "@homarr/definitions";
 import { createIntegrationAsync } from "@homarr/integrations";
 import { invalidateIntegrationCacheAsync } from "@homarr/redis";
@@ -64,12 +66,33 @@ export const integrationRouter = createTRPCRouter({
     }),
   all: protectedProcedure
     .meta({
+      openapi: {
+        method: "GET",
+        path: "/api/integrations",
+        tags: ["integrations"],
+        protect: true,
+      },
       mcp: {
         enabled: true,
         description:
           "List all configured integrations (connections to services like Sonarr, Radarr, Plex, etc.). Returns each integration's id, name, kind, url, and permissions. Use the 'id' field as 'integrationId' in other tools. Check permissions.hasUseAccess before reading data and permissions.hasInteractAccess before performing actions — false means the API key owner lacks that permission level for this integration, not an error",
       },
     })
+    .output(
+      z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          kind: z.enum(integrationKinds),
+          url: z.string(),
+          permissions: z.object({
+            hasUseAccess: z.boolean(),
+            hasInteractAccess: z.boolean(),
+            hasFullAccess: z.boolean(),
+          }),
+        }),
+      ),
+    )
     .query(async ({ ctx }) => {
       const groupsOfCurrentUser = await ctx.db.query.groupMembers.findMany({
         where: eq(groupMembers.userId, ctx.session.user.id),
@@ -244,6 +267,12 @@ export const integrationRouter = createTRPCRouter({
   }),
   byId: protectedProcedure
     .meta({
+      openapi: {
+        method: "GET",
+        path: "/api/integrations/{id}",
+        tags: ["integrations"],
+        protect: true,
+      },
       mcp: {
         enabled: true,
         description:
@@ -251,6 +280,22 @@ export const integrationRouter = createTRPCRouter({
       },
     })
     .input(byIdSchema)
+    .output(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        kind: z.enum(integrationKinds),
+        url: z.string(),
+        secrets: z.array(
+          z.object({
+            kind: z.enum(integrationSecretKinds),
+            value: z.string().nullable(),
+            updatedAt: z.date(),
+          }),
+        ),
+        app: selectAppSchema.pick({ id: true, name: true, iconUrl: true, href: true }).nullable(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       await throwIfActionForbiddenAsync(ctx, eq(integrations.id, input.id), "full");
       const integration = await ctx.db.query.integrations.findFirst({
