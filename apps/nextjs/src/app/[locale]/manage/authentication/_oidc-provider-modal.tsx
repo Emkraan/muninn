@@ -5,44 +5,41 @@ import {
   Accordion,
   Alert,
   Anchor,
+  Button,
+  Card,
   Code,
   CopyButton,
   Divider,
   Group,
+  Input,
   PasswordInput,
   Select,
+  SimpleGrid,
   Stack,
   Switch,
   Text,
   TextInput,
+  UnstyledButton,
 } from "@mantine/core";
-import { IconCheck, IconCopy, IconInfoCircle } from "@tabler/icons-react";
+import { IconCheck, IconCopy, IconInfoCircle, IconPlugConnected } from "@tabler/icons-react";
 import { z } from "zod/v4";
 
 import type { RouterOutputs } from "@homarr/api";
 import { clientApi } from "@homarr/api/client";
 import { revalidatePathActionAsync } from "@homarr/common/client";
+import type { OidcProviderType } from "@homarr/definitions";
 import { oidcProviderTypes } from "@homarr/definitions";
 import { useZodForm } from "@homarr/form";
 import { createModal, ModalFormFooter } from "@homarr/modals";
 import { showErrorNotification, showSuccessNotification } from "@homarr/notifications";
+
+import { oidcProviderIcon, providerTypeLabels, providerTypeOptions } from "./_oidc-provider-meta";
 
 // Kept in sync with the sentinel in oidc-provider-router.ts: sending it back on
 // save means "leave the stored client secret unchanged".
 const SECRET_SENTINEL = "__secret_unchanged__";
 
 type ProviderRow = RouterOutputs["oidcProvider"]["all"][number];
-
-const providerTypeOptions: { value: (typeof oidcProviderTypes)[number]; label: string }[] = [
-  { value: "microsoft", label: "Microsoft Entra ID" },
-  { value: "google", label: "Google" },
-  { value: "github", label: "GitHub" },
-  { value: "okta", label: "Okta" },
-  { value: "keycloak", label: "Keycloak" },
-  { value: "authentik", label: "Authentik" },
-  { value: "oidc", label: "Generic OIDC (discovery)" },
-  { value: "oauth2", label: "Manual OAuth2" },
-];
 
 const authMethodOptions = [
   { value: "client_secret_basic", label: "client_secret_basic" },
@@ -176,12 +173,50 @@ export const OidcProviderModal = createModal<{ provider?: ProviderRow }>(({ acti
     },
   });
 
+  const { mutate: verify, isPending: isVerifying } = clientApi.oidcProvider.verify.useMutation({
+    onSuccess(result) {
+      if (result.ok) {
+        showSuccessNotification({ title: "Provider verified", message: result.message });
+      } else {
+        showErrorNotification({ title: "Verification failed", message: result.message });
+      }
+    },
+    onError(error) {
+      showErrorNotification({ title: "Verification failed", message: error.message });
+    },
+  });
+
   const providerType = form.values.providerType;
   const showTenant = providerType === "microsoft";
   const showIssuer = ["okta", "keycloak", "authentik", "oidc"].includes(providerType);
   const showDiscovery = providerType === "oidc";
   const showManualEndpoints = providerType === "oauth2";
   const isPresetOnly = providerType === "google" || providerType === "github";
+
+  // Snagarr-style setType autofill: switching the type keeps a sensible display
+  // name / key without clobbering values the admin has already customized.
+  const handleTypeChange = (nextType: OidcProviderType) => {
+    const prevType = form.values.providerType;
+    if (prevType === nextType) return;
+
+    const prevLabel = providerTypeLabels[prevType] ?? "";
+    const nextLabel = providerTypeLabels[nextType] ?? "";
+
+    form.setFieldValue("providerType", nextType);
+
+    const currentName = form.values.displayName.trim();
+    if (currentName === "" || currentName === prevLabel) {
+      form.setFieldValue("displayName", nextLabel);
+    }
+
+    // The provider type value is already a valid key slug (a-z, 0-9, hyphen).
+    if (!isEditing) {
+      const currentKey = form.values.key.trim();
+      if (currentKey === "" || currentKey === prevType) {
+        form.setFieldValue("key", nextType);
+      }
+    }
+  };
 
   const callbackPath = useMemo(
     () => (form.values.key ? `/api/auth/callback/oidc-${form.values.key}` : "/api/auth/callback/oidc-<key>"),
@@ -234,13 +269,45 @@ export const OidcProviderModal = createModal<{ provider?: ProviderRow }>(({ acti
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack gap="md">
-        <Select
+        <Input.Wrapper
           label="Provider type"
           description="Presets fill in the standard endpoints; anything you set below overrides them."
-          data={providerTypeOptions}
-          allowDeselect={false}
-          {...form.getInputProps("providerType")}
-        />
+        >
+          <SimpleGrid cols={{ base: 2, xs: 4 }} spacing="xs" mt={6}>
+            {providerTypeOptions.map((option) => {
+              const OptionIcon = oidcProviderIcon(option.value);
+              const selected = providerType === option.value;
+              return (
+                <UnstyledButton
+                  key={option.value}
+                  aria-pressed={selected}
+                  onClick={() => handleTypeChange(option.value)}
+                >
+                  <Card
+                    withBorder
+                    padding="xs"
+                    radius="md"
+                    style={{
+                      borderColor: selected ? "var(--mantine-primary-color-filled)" : undefined,
+                      backgroundColor: selected ? "var(--mantine-primary-color-light)" : undefined,
+                    }}
+                  >
+                    <Stack gap={6} align="center">
+                      <OptionIcon
+                        size={24}
+                        stroke={1.5}
+                        color={selected ? "var(--mantine-primary-color-filled)" : "currentColor"}
+                      />
+                      <Text size="xs" ta="center" lineClamp={2} fw={selected ? 600 : 400}>
+                        {option.label}
+                      </Text>
+                    </Stack>
+                  </Card>
+                </UnstyledButton>
+              );
+            })}
+          </SimpleGrid>
+        </Input.Wrapper>
 
         <Group grow align="flex-start">
           <TextInput
@@ -404,7 +471,23 @@ export const OidcProviderModal = createModal<{ provider?: ProviderRow }>(({ acti
           </Accordion.Item>
         </Accordion>
 
-        <ModalFormFooter onCancel={actions.closeModal} loading={isPending} />
+        <ModalFormFooter
+          onCancel={actions.closeModal}
+          loading={isPending}
+          leftSection={
+            <Button
+              variant="default"
+              leftSection={<IconPlugConnected size={16} stroke={1.5} />}
+              loading={isVerifying}
+              disabled={!isEditing}
+              onClick={() => {
+                if (innerProps.provider) verify({ id: innerProps.provider.id });
+              }}
+            >
+              Verify
+            </Button>
+          }
+        />
       </Stack>
     </form>
   );

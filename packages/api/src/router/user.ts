@@ -668,7 +668,16 @@ export const userRouter = createTRPCRouter({
         .where(eq(users.id, input.id));
     }),
   changePingIconsEnabled: protectedProcedure
-    .input(userPingIconsEnabledSchema.and(byIdSchema))
+    .meta({
+      openapi: {
+        method: "PATCH",
+        path: "/api/users/ping-icons",
+        tags: ["users"],
+        protect: true,
+      },
+    })
+    .input(convertIntersectionToZodObject(userPingIconsEnabledSchema.and(byIdSchema)))
+    .output(z.void())
     .mutation(async ({ input, ctx }) => {
       // Only admins can change other users ping icons enabled
       if (!ctx.session.user.permissions.includes("admin") && ctx.session.user.id !== input.id) {
