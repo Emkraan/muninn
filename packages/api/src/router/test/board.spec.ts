@@ -287,6 +287,49 @@ describe("getAllBoards should return all boards accessable to the current user",
   );
 });
 
+describe("getById returns the full board-as-code document", () => {
+  test("returns metadata, layouts, sections and items without blanking (output schema round-trips)", async () => {
+    // Arrange: create a board (seeds 1 empty section + 1 layout).
+    const db = createDb();
+    const session = {
+      ...defaultSession,
+      user: { ...defaultSession.user, permissions: ["board-create"] satisfies GroupPermissionKey[] },
+    };
+    const caller = boardRouter.createCaller({ db, deviceType: undefined, session });
+    await db.insert(users).values({ id: defaultCreatorId });
+    await caller.createBoard({ name: "boardascode", columnCount: 24, isPublic: true });
+    const created = await db.query.boards.findFirst();
+    expect(created).toBeDefined();
+
+    // Act
+    const board = await caller.getById({ id: created!.id });
+
+    // Assert: the full document survives the .output() schema (not blanked).
+    expect(board.id).toBe(created!.id);
+    expect(board.name).toBe("boardascode");
+    expect(board.isPublic).toBe(true);
+    expect(board.creatorId).toBe(defaultCreatorId);
+    expect(board.layouts.length).toBe(1);
+    expect(board.layouts[0]!.columnCount).toBe(24);
+    expect(board.sections.length).toBe(1);
+    expect(board.sections[0]!.kind).toBe("empty");
+    expect(Array.isArray(board.items)).toBe(true);
+  });
+
+  test("is view-gated: a private board owned by another user is not readable", async () => {
+    // Arrange
+    const db = createDb();
+    const otherUserId = await createRandomUserAsync(db);
+    const boardId = createId();
+    await db.insert(boards).values({ id: boardId, name: "secretboard", isPublic: false, creatorId: otherUserId });
+    // A different user with no permissions and no grant on the board.
+    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+
+    // Act + Assert
+    await expect(caller.getById({ id: boardId })).rejects.toThrow();
+  });
+});
+
 describe("createBoard should create a new board", () => {
   test("should create a new board with permission board-create", async () => {
     // Arrange

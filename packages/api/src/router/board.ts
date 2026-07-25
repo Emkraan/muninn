@@ -63,6 +63,75 @@ import { createTRPCRouter, permissionRequiredProcedure, protectedProcedure, publ
 import { throwIfActionForbiddenAsync } from "./board/board-access";
 import { generateResponsiveGridFor } from "./board/grid-algorithm";
 
+// ---- Board-as-code output shapes + REST metadata (shared by GET / PUT / layouts) ----
+// Defined above the router so the REST procedures can reference them; parseItem
+// (below) reuses outputItemSchema.
+const forKind = <T extends WidgetKind>(kind: T) =>
+  z.object({ kind: z.literal(kind), options: z.record(z.string(), z.unknown()) });
+
+// A board item as returned to clients: a per-widget-kind union + the shared item
+// fields (id, per-layout grid position, integrations, advanced options).
+const outputItemSchema = zodUnionFromArray(widgetKinds.map((kind) => forKind(kind))).and(sharedItemSchema);
+
+const boardBreakpointLayoutSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  columnCount: z.number(),
+  breakpoint: z.number(),
+});
+
+// The full "board as code" document: board metadata + settings (loose, so every
+// board column passes through without enumerating them) + responsive breakpoint
+// layouts + sections (category/empty/dynamic) + items with per-layout positions.
+// Permission fields use z.string() (not z.enum) so a legacy value can never blank
+// the whole response.
+const fullBoardOutputSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    isPublic: z.boolean(),
+    creatorId: z.string().nullable(),
+    creator: z
+      .object({
+        id: z.string(),
+        name: z.string().nullable(),
+        image: z.string().nullable(),
+        email: z.string().nullable(),
+      })
+      .nullable(),
+    layouts: z.array(boardBreakpointLayoutSchema),
+    sections: z.array(sectionSchema),
+    items: z.array(outputItemSchema),
+    userPermissions: z.array(z.object({ permission: z.string() }).loose()),
+    groupPermissions: z.array(z.object({ permission: z.string() }).loose()),
+  })
+  .loose();
+
+const getBoardByIdMeta = {
+  openapi: { method: "GET" as const, path: "/api/boards/{id}" as const, tags: ["boards"], protect: true },
+  mcp: {
+    enabled: true,
+    description:
+      "Get a board's full content by ID: metadata, settings, responsive breakpoint layouts, sections (category/empty/dynamic), and items with their per-layout grid positions (x/y/width/height/section). Read this before customizing a board, then send the modified document back with board_saveBoard.",
+  },
+};
+const saveBoardMeta = {
+  openapi: { method: "PUT" as const, path: "/api/boards/{id}" as const, tags: ["boards"], protect: true },
+  mcp: {
+    enabled: true,
+    description:
+      "Replace a board's full content (sections + items with per-layout grid positions). The whole board is saved atomically - add, move, or remove elements by sending the desired full state. Read with board_getById first, modify, then send it here. Returns the saved board.",
+  },
+};
+const saveLayoutsMeta = {
+  openapi: { method: "PATCH" as const, path: "/api/boards/{id}/layouts" as const, tags: ["boards"], protect: true },
+  mcp: {
+    enabled: true,
+    description:
+      "Replace a board's responsive breakpoint layouts (each: id, name, columnCount, breakpoint width). Adding a breakpoint clones item/section positions from the nearest existing one. Returns the saved board.",
+  },
+};
+
 export const boardRouter = createTRPCRouter({
   exists: permissionRequiredProcedure
     .requiresPermission("board-create")
@@ -682,7 +751,18 @@ export const boardRouter = createTRPCRouter({
 
     return await getFullBoardWithWhereAsync(ctx.db, boardWhere, ctx.session?.user.id ?? null);
   }),
-  saveLayouts: protectedProcedure.input(boardSaveLayoutsSchema).mutation(async ({ ctx, input }) => {
+  // Board-as-code: read a board's full content by id (metadata + settings +
+  // responsive layouts + sections + items with per-layout grid positions).
+  getById: publicProcedure
+    .input(byIdSchema)
+    .output(fullBoardOutputSchema)
+    .meta(getBoardByIdMeta)
+    .query(async ({ input, ctx }) => {
+      const boardWhere = eq(boards.id, input.id);
+      await throwIfActionForbiddenAsync(ctx, boardWhere, "view");
+      return await getFullBoardWithWhereAsync(ctx.db, boardWhere, ctx.session?.user.id ?? null);
+    }),
+  saveLayouts: protectedProcedure.input(boardSaveLayoutsSchema).output(fullBoardOutputSchema).meta(saveLayoutsMeta).mutation(async ({ ctx, input }) => {
     await throwIfActionForbiddenAsync(ctx, eq(boards.id, input.id), "modify");
 
     const board = await getFullBoardWithWhereAsync(ctx.db, eq(boards.id, input.id), ctx.session.user.id);
@@ -806,6 +886,8 @@ export const boardRouter = createTRPCRouter({
     if (removedLayoutIds.length > 0) {
       await ctx.db.delete(layouts).where(inArray(layouts.id, removedLayoutIds));
     }
+
+    return await getFullBoardWithWhereAsync(ctx.db, eq(boards.id, input.id), ctx.session.user.id);
   }),
   savePartialBoardSettings: protectedProcedure
     .meta({
@@ -851,7 +933,7 @@ export const boardRouter = createTRPCRouter({
         })
         .where(eq(boards.id, input.id));
     }),
-  saveBoard: protectedProcedure.input(boardSaveSchema).mutation(async ({ input, ctx }) => {
+  saveBoard: protectedProcedure.input(boardSaveSchema).output(fullBoardOutputSchema).meta(saveBoardMeta).mutation(async ({ input, ctx }) => {
     await throwIfActionForbiddenAsync(ctx, eq(boards.id, input.id), "modify");
 
     const dbBoard = await getFullBoardWithWhereAsync(ctx.db, eq(boards.id, input.id), ctx.session.user.id);
@@ -1266,6 +1348,8 @@ export const boardRouter = createTRPCRouter({
         });
       },
     });
+
+    return await getFullBoardWithWhereAsync(ctx.db, eq(boards.id, input.id), ctx.session.user.id);
   }),
   getBoardPermissions: protectedProcedure.input(byIdSchema).query(async ({ input, ctx }) => {
     await throwIfActionForbiddenAsync(ctx, eq(boards.id, input.id), "full");
@@ -1853,14 +1937,6 @@ const getFullBoardWithWhereAsync = async (db: Database, where: SQL<unknown>, use
       .filter((item): item is NonNullable<typeof item> => item !== null),
   };
 };
-
-const forKind = <T extends WidgetKind>(kind: T) =>
-  z.object({
-    kind: z.literal(kind),
-    options: z.record(z.string(), z.unknown()),
-  });
-
-const outputItemSchema = zodUnionFromArray(widgetKinds.map((kind) => forKind(kind))).and(sharedItemSchema);
 
 const boardLogger = createLogger({ module: "board" });
 
