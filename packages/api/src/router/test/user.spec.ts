@@ -4,7 +4,7 @@ import type { Session } from "@homarr/auth";
 import { createId } from "@homarr/common";
 import type { Database } from "@homarr/db";
 import { eq } from "@homarr/db";
-import { invites, onboarding, users } from "@homarr/db/schema";
+import { groupMembers, groupPermissions, groups, invites, onboarding, users } from "@homarr/db/schema";
 import { createDb } from "@homarr/db/test";
 import type { GroupPermissionKey, OnboardingStep } from "@homarr/definitions";
 import { getPermissionsWithChildren } from "@homarr/definitions";
@@ -433,6 +433,63 @@ describe("changeEnableRightClickOnWidgets should toggle the right-click preferen
       columns: { enableRightClickOnWidgets: true },
     });
     expect(target?.enableRightClickOnWidgets).toBe(false);
+  });
+});
+
+describe("create should guard against group-based privilege escalation", () => {
+  test("delegate with other-manage-users cannot create a user in a group holding permissions beyond their own", async () => {
+    // Arrange
+    const db = createDb();
+    const delegateSession = createSession(getPermissionsWithChildren(["other-manage-users"]));
+    const caller = userRouter.createCaller({ db, deviceType: undefined, session: delegateSession });
+
+    const groupId = createId();
+    await db.insert(groups).values({ id: groupId, name: "Admins", position: 1 });
+    // The target group carries `admin`, which the delegate does not hold.
+    await db.insert(groupPermissions).values({ groupId, permission: "admin" });
+
+    // Act
+    const actAsync = async () =>
+      await caller.create({
+        username: "escalated",
+        password: "123ABCdef+/-",
+        confirmPassword: "123ABCdef+/-",
+        groupIds: [groupId],
+      });
+
+    // Assert: rejected, and the guard runs before user creation so no orphan
+    // account or membership is left behind.
+    await expect(actAsync()).rejects.toThrow("Cannot assign a group with permissions you do not have");
+    const createdUser = await db.query.users.findFirst({ where: eq(users.name, "escalated") });
+    expect(createdUser).toBeUndefined();
+    const memberships = await db.query.groupMembers.findMany({ where: eq(groupMembers.groupId, groupId) });
+    expect(memberships.length).toBe(0);
+  });
+
+  test("delegate with other-manage-users can create a user in a group whose permissions they hold", async () => {
+    // Arrange
+    const db = createDb();
+    const delegateSession = createSession(getPermissionsWithChildren(["other-manage-users"]));
+    const caller = userRouter.createCaller({ db, deviceType: undefined, session: delegateSession });
+
+    const groupId = createId();
+    await db.insert(groups).values({ id: groupId, name: "Viewers", position: 1 });
+    // A permission the delegate itself holds - the assignment is allowed.
+    await db.insert(groupPermissions).values({ groupId, permission: "other-manage-users" });
+
+    // Act
+    await caller.create({
+      username: "scoped",
+      password: "123ABCdef+/-",
+      confirmPassword: "123ABCdef+/-",
+      groupIds: [groupId],
+    });
+
+    // Assert
+    const createdUser = await db.query.users.findFirst({ where: eq(users.name, "scoped") });
+    expect(createdUser).toBeDefined();
+    const memberships = await db.query.groupMembers.findMany({ where: eq(groupMembers.groupId, groupId) });
+    expect(memberships.length).toBe(1);
   });
 });
 

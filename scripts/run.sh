@@ -5,6 +5,20 @@ mkdir -p /appdata/db
 mkdir -p /appdata/redis
 mkdir -p /appdata/trusted-certificates
 
+# Derive the migration dialect from the driver so the two can never diverge.
+# DB_DRIVER is the single documented switch; if DB_DIALECT were left at its
+# default while DB_DRIVER was changed, the wrong migrator would run against the
+# database (e.g. the sqlite migrator against Postgres). Deriving it here removes
+# that footgun - operators only ever set DB_DRIVER.
+case "$DB_DRIVER" in
+    node-postgres|pg|postgres) DB_DIALECT='postgresql' ;;
+    mysql2|mysql)              DB_DIALECT='mysql' ;;
+    better-sqlite3|"")         DB_DIALECT='sqlite' ;;
+    *) echo "WARNING: unknown DB_DRIVER '$DB_DRIVER'; using DB_DIALECT='$DB_DIALECT'" ;;
+esac
+export DB_DIALECT
+echo "Using DB_DRIVER='$DB_DRIVER' -> DB_DIALECT='$DB_DIALECT'"
+
 # Run migrations
 if [ "$DB_MIGRATIONS_DISABLED" = "true" ]; then
   echo "DB migrations are disabled, skipping"

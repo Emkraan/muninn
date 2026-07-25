@@ -1,8 +1,11 @@
+import { lookup } from "node:dns/promises";
+import net from "node:net";
 import { z } from "zod/v4";
 
 import { invalidateOidcProvidersCache } from "@homarr/auth";
 import { createId } from "@homarr/common";
 import { encryptSecret } from "@homarr/common/server";
+import { fetchWithTrustedCertificatesAsync } from "@homarr/core/infrastructure/http";
 import { db, eq, ne } from "@homarr/db";
 import { oidcProviders } from "@homarr/db/schema";
 import { oidcProviderTypes } from "@homarr/definitions";
@@ -18,6 +21,48 @@ const SECRET_SENTINEL = "__secret_unchanged__";
 const VERIFY_TIMEOUT_MS = 5000;
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
+
+// SSRF guard for the admin verify probe. Self-hosted IdPs legitimately live on
+// private LAN addresses (the real sign-in flow reaches them via
+// fetchWithTrustedCertificatesAsync), so private ranges are intentionally NOT
+// blocked. What is blocked are the addresses that are never a real IdP and are
+// the high-value SSRF targets: loopback and link-local (incl. the cloud
+// metadata endpoint 169.254.169.254) plus the unspecified address.
+const isBlockedProbeAddress = (address: string): boolean => {
+  const normalized = address.toLowerCase();
+  const v4 = normalized.startsWith("::ffff:") ? normalized.slice(7) : normalized;
+  if (net.isIPv4(v4)) {
+    return v4.startsWith("127.") || v4.startsWith("169.254.") || v4 === "0.0.0.0";
+  }
+  if (normalized === "::1" || normalized === "::") return true;
+  // fe80::/10 (link-local): first hextet 0xfe80-0xfebf.
+  return /^fe[89ab]/.test(normalized);
+};
+
+// Validate a discovery URL before probing: only http(s), and its host must not
+// resolve to a loopback/link-local/unspecified address. Returns an error
+// message on rejection, or null when the URL is safe to fetch.
+const validateDiscoveryUrlSafetyAsync = async (rawUrl: string): Promise<string | null> => {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return "Discovery URL is not a valid URL.";
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return `Unsupported URL scheme "${parsed.protocol}". Only http and https are allowed.`;
+  }
+  let addresses: { address: string }[];
+  try {
+    addresses = await lookup(parsed.hostname, { all: true });
+  } catch {
+    return `Could not resolve discovery host "${parsed.hostname}".`;
+  }
+  if (addresses.length === 0 || addresses.some(({ address }) => isBlockedProbeAddress(address))) {
+    return "Discovery host resolves to a loopback or link-local address, which is not allowed.";
+  }
+  return null;
+};
 
 // Resolve the effective OIDC discovery URL for a stored provider, mirroring the
 // preset derivation in @homarr/auth. Returns null when the type has no discovery
@@ -205,10 +250,21 @@ export const oidcProviderRouter = createTRPCRouter({
       }
       checks.push({ name: "Discovery URL resolved", ok: true });
 
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), VERIFY_TIMEOUT_MS);
+      const unsafeReason = await validateDiscoveryUrlSafetyAsync(discoveryUrl);
+      if (unsafeReason) {
+        checks.push({ name: "Discovery URL is safe to probe", ok: false });
+        return { ok: false, message: unsafeReason, checks };
+      }
+      checks.push({ name: "Discovery URL is safe to probe", ok: true });
+
       try {
-        const response = await fetch(discoveryUrl, { redirect: "follow", signal: controller.signal });
+        // Mirror the real sign-in flow's fetch (trusted certs for self-signed
+        // homelab IdPs); redirect: "manual" so a 3xx can't bounce the probe into
+        // an internal address after the pre-flight host check.
+        const response = await fetchWithTrustedCertificatesAsync(discoveryUrl, {
+          redirect: "manual",
+          timeout: VERIFY_TIMEOUT_MS,
+        });
         if (!response.ok) {
           checks.push({ name: "Discovery document reachable", ok: false });
           return {
@@ -235,13 +291,10 @@ export const oidcProviderRouter = createTRPCRouter({
         return { ok: true, message: "Provider configuration verified. The discovery document looks valid.", checks };
       } catch (error) {
         checks.push({ name: "Discovery document reachable", ok: false });
-        const reason = controller.signal.aborted
-          ? `timed out after ${VERIFY_TIMEOUT_MS / 1000}s`
-          : "could not be reached";
-        const detail = !controller.signal.aborted && error instanceof Error ? `: ${error.message}` : "";
+        const timedOut = error instanceof Error && (error.name === "AbortError" || error.name === "TimeoutError");
+        const reason = timedOut ? `timed out after ${VERIFY_TIMEOUT_MS / 1000}s` : "could not be reached";
+        const detail = !timedOut && error instanceof Error ? `: ${error.message}` : "";
         return { ok: false, message: `Discovery endpoint ${reason}${detail}.`, checks };
-      } finally {
-        clearTimeout(timeout);
       }
     }),
 });
