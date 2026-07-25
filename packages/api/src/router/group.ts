@@ -28,7 +28,7 @@ import { nextOnboardingStepAsync } from "./onboard/onboard-queries";
 
 export const groupRouter = createTRPCRouter({
   getAll: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .meta({
       openapi: {
         method: "GET",
@@ -69,7 +69,7 @@ export const groupRouter = createTRPCRouter({
     }),
 
   getPaginated: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .input(paginatedSchema)
     .query(async ({ input, ctx }) => {
       const whereQuery = input.search ? like(groups.name, `%${input.search.trim()}%`) : undefined;
@@ -104,7 +104,7 @@ export const groupRouter = createTRPCRouter({
       };
     }),
   getById: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .meta({
       openapi: {
         method: "GET",
@@ -183,7 +183,7 @@ export const groupRouter = createTRPCRouter({
   selectable: protectedProcedure
     .input(z.object({ withPermissions: z.boolean().default(false) }).optional())
     .query(async ({ ctx, input }) => {
-      const withPermissions = input?.withPermissions && ctx.session.user.permissions.includes("admin");
+      const withPermissions = input?.withPermissions && ctx.session.user.permissions.includes("other-manage-groups");
 
       if (!withPermissions) {
         return await ctx.db.query.groups.findMany({
@@ -208,7 +208,7 @@ export const groupRouter = createTRPCRouter({
       }));
     }),
   search: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .input(
       z.object({
         query: z.string(),
@@ -248,7 +248,7 @@ export const groupRouter = createTRPCRouter({
       await nextOnboardingStepAsync(ctx.db, undefined);
     }),
   createGroup: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .input(groupCreateSchema)
     .mutation(async ({ input, ctx }) => {
       await checkSimilarNameAndThrowAsync(ctx.db, input.name);
@@ -266,7 +266,7 @@ export const groupRouter = createTRPCRouter({
       return id;
     }),
   updateGroup: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .input(groupUpdateSchema)
     .mutation(async ({ input, ctx }) => {
       await throwIfGroupNotFoundAsync(ctx.db, input.id);
@@ -282,7 +282,7 @@ export const groupRouter = createTRPCRouter({
         .where(eq(groups.id, input.id));
     }),
   savePartialSettings: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .input(groupSavePartialSettingsSchema)
     .mutation(async ({ input, ctx }) => {
       await throwIfGroupNotFoundAsync(ctx.db, input.id);
@@ -296,7 +296,7 @@ export const groupRouter = createTRPCRouter({
         .where(eq(groups.id, input.id));
     }),
   savePositions: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .input(groupSavePositionsSchema)
     .mutation(async ({ input, ctx }) => {
       const positions = input.positions.map((id, index) => ({ id, position: index + 1 }));
@@ -319,7 +319,7 @@ export const groupRouter = createTRPCRouter({
       });
     }),
   savePermissions: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .input(groupSavePermissionsSchema)
     .mutation(async ({ input, ctx }) => {
       await throwIfGroupNotFoundAsync(ctx.db, input.groupId);
@@ -336,7 +336,7 @@ export const groupRouter = createTRPCRouter({
       }
     }),
   transferOwnership: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .input(groupUserSchema)
     .mutation(async ({ input, ctx }) => {
       await throwIfGroupNotFoundAsync(ctx.db, input.groupId);
@@ -350,7 +350,7 @@ export const groupRouter = createTRPCRouter({
         .where(eq(groups.id, input.groupId));
     }),
   deleteGroup: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .input(byIdSchema)
     .mutation(async ({ input, ctx }) => {
       await throwIfGroupNotFoundAsync(ctx.db, input.id);
@@ -359,7 +359,7 @@ export const groupRouter = createTRPCRouter({
       await ctx.db.delete(groups).where(eq(groups.id, input.id));
     }),
   addMember: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .input(groupUserSchema)
     .mutation(async ({ input, ctx }) => {
       await throwIfGroupNotFoundAsync(ctx.db, input.groupId);
@@ -390,7 +390,7 @@ export const groupRouter = createTRPCRouter({
       });
     }),
   removeMember: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-groups")
     .input(groupUserSchema)
     .mutation(async ({ input, ctx }) => {
       await throwIfGroupNotFoundAsync(ctx.db, input.groupId);

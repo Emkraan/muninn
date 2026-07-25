@@ -10,7 +10,7 @@ import { TasksTable } from "./_components/tasks-table";
 
 export async function generateMetadata() {
   const session = await auth();
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-tasks")) {
     return {};
   }
   const t = await getScopedI18n("management");
@@ -22,7 +22,7 @@ export async function generateMetadata() {
 
 export default async function TasksPage() {
   const session = await auth();
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-tasks")) {
     notFound();
   }
 

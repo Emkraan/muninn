@@ -56,7 +56,7 @@ function getMcpToolGroups(): McpToolGroup[] {
 
 export async function generateMetadata() {
   const session = await auth();
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-api-keys")) {
     return {};
   }
 
@@ -69,7 +69,7 @@ export async function generateMetadata() {
 
 export default async function ApiPage() {
   const session = await auth();
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-api-keys")) {
     notFound();
   }
   const requestHeaders = await headers();

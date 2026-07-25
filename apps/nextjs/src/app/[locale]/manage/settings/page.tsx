@@ -26,7 +26,7 @@ export async function generateMetadata() {
 export default async function SettingsPage() {
   const session = await auth();
 
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-settings")) {
     notFound();
   }
 

@@ -8,7 +8,7 @@ import { KubernetesClient } from "../kubernetes-client";
 
 export const secretsRouter = createTRPCRouter({
   getSecrets: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-kubernetes")
     .concat(kubernetesMiddleware())
     .query(async (): Promise<KubernetesSecret[]> => {
       const { coreApi } = KubernetesClient.getInstance();

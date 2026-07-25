@@ -14,7 +14,7 @@ export default async function AuthenticationPage() {
     redirect("/auth/login");
   }
 
-  if (!session.user.permissions.includes("admin")) {
+  if (!session.user.permissions.includes("other-manage-authentication")) {
     notFound();
   }
 

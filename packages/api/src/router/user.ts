@@ -142,7 +142,7 @@ export const userRouter = createTRPCRouter({
       });
     }),
   create: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-users")
     .meta({
       openapi: {
         method: "POST",
@@ -190,7 +190,7 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       // Only admins can change other users profile images
-      if (ctx.session.user.id !== input.userId && !ctx.session.user.permissions.includes("admin")) {
+      if (ctx.session.user.id !== input.userId && !ctx.session.user.permissions.includes("other-manage-users")) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You are not allowed to change other users profile images",
@@ -221,7 +221,7 @@ export const userRouter = createTRPCRouter({
         .where(eq(users.id, input.userId));
     }),
   getAll: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-users")
     .input(z.void())
     .output(
       z.array(
@@ -298,7 +298,7 @@ export const userRouter = createTRPCRouter({
       });
     }),
   search: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-users")
     .input(
       z.object({
         query: z.string(),
@@ -374,7 +374,7 @@ export const userRouter = createTRPCRouter({
     })
     .query(async ({ input, ctx }) => {
       // Only admins can view other users details
-      if (ctx.session.user.id !== input.userId && !ctx.session.user.permissions.includes("admin")) {
+      if (ctx.session.user.id !== input.userId && !ctx.session.user.permissions.includes("other-manage-users")) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You are not allowed to view other users details",
@@ -424,7 +424,7 @@ export const userRouter = createTRPCRouter({
     })
     .mutation(async ({ input, ctx }) => {
       // Only admins can view other users details
-      if (ctx.session.user.id !== input.id && !ctx.session.user.permissions.includes("admin")) {
+      if (ctx.session.user.id !== input.id && !ctx.session.user.permissions.includes("other-manage-users")) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You are not allowed to edit other users details",
@@ -476,7 +476,7 @@ export const userRouter = createTRPCRouter({
     })
     .mutation(async ({ input, ctx }) => {
       // Only admins and user itself can delete a user
-      if (ctx.session.user.id !== input.userId && !ctx.session.user.permissions.includes("admin")) {
+      if (ctx.session.user.id !== input.userId && !ctx.session.user.permissions.includes("other-manage-users")) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You are not allowed to delete other users",
@@ -499,7 +499,7 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const user = ctx.session.user;
       // Only admins can change other users' passwords
-      if (!user.permissions.includes("admin") && user.id !== input.userId) {
+      if (!user.permissions.includes("other-manage-users") && user.id !== input.userId) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "User not found",
@@ -571,7 +571,7 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const user = ctx.session.user;
       // Only admins can change other users passwords
-      if (!user.permissions.includes("admin") && user.id !== input.userId) {
+      if (!user.permissions.includes("other-manage-users") && user.id !== input.userId) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "User not found",
@@ -653,7 +653,7 @@ export const userRouter = createTRPCRouter({
     .input(convertIntersectionToZodObject(userEnableRightClickOnWidgetsSchema.and(byIdSchema)))
     .output(z.void())
     .mutation(async ({ input, ctx }) => {
-      if (!ctx.session.user.permissions.includes("admin") && ctx.session.user.id !== input.id) {
+      if (!ctx.session.user.permissions.includes("other-manage-users") && ctx.session.user.id !== input.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "User not found",
@@ -680,7 +680,7 @@ export const userRouter = createTRPCRouter({
     .output(z.void())
     .mutation(async ({ input, ctx }) => {
       // Only admins can change other users ping icons enabled
-      if (!ctx.session.user.permissions.includes("admin") && ctx.session.user.id !== input.id) {
+      if (!ctx.session.user.permissions.includes("other-manage-users") && ctx.session.user.id !== input.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "User not found",
@@ -707,7 +707,7 @@ export const userRouter = createTRPCRouter({
     })
     .mutation(async ({ input, ctx }) => {
       // Only admins can change other users first day of week
-      if (!ctx.session.user.permissions.includes("admin") && ctx.session.user.id !== input.id) {
+      if (!ctx.session.user.permissions.includes("other-manage-users") && ctx.session.user.id !== input.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "User not found",

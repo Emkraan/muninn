@@ -13,7 +13,7 @@ const logger = createLogger({ module: "podsRouter" });
 
 export const podsRouter = createTRPCRouter({
   getPods: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-manage-kubernetes")
     .concat(kubernetesMiddleware())
     .query(async (): Promise<KubernetesPod[]> => {
       const { coreApi, kubeConfig } = KubernetesClient.getInstance();

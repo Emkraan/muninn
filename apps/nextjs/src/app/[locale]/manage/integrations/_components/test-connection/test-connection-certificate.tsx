@@ -21,7 +21,7 @@ interface CertificateErrorDetailsProps {
 export const CertificateErrorDetails = ({ error, url }: CertificateErrorDetailsProps) => {
   const tError = useScopedI18n("integration.testConnection.error");
   const { data: session } = useSession();
-  const isAdmin = session?.user.permissions.includes("admin") ?? false;
+  const canManageCertificates = session?.user.permissions.includes("other-manage-certificates") ?? false;
   const [showRetryButton, setShowRetryButton] = useState(false);
 
   const { openModal: openUploadModal } = useModalAction(AddCertificateModal);
@@ -98,7 +98,7 @@ export const CertificateErrorDetails = ({ error, url }: CertificateErrorDetailsP
 
   const description = <Text size="md">{tError(`certificate.description.${error.data.reason}`)}</Text>;
 
-  if (!isAdmin) {
+  if (!canManageCertificates) {
     return (
       <>
         {description}

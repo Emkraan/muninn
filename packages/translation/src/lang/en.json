@@ -474,6 +474,46 @@
           "view-logs": {
             "label": "View logs",
             "description": "Allow members to view logs"
+          },
+          "manage-users": {
+            "label": "Manage users",
+            "description": "Create, edit, and delete user accounts"
+          },
+          "manage-groups": {
+            "label": "Manage groups",
+            "description": "Create groups, edit members, and assign permissions"
+          },
+          "manage-authentication": {
+            "label": "Manage authentication",
+            "description": "Add, edit, and remove SSO identity providers"
+          },
+          "manage-api-keys": {
+            "label": "Manage API keys",
+            "description": "View and delete API keys for all users"
+          },
+          "manage-certificates": {
+            "label": "Manage certificates",
+            "description": "Add and remove trusted certificates and hostnames"
+          },
+          "manage-backup": {
+            "label": "Manage backup",
+            "description": "Export and import the server backup"
+          },
+          "manage-docker": {
+            "label": "Manage Docker",
+            "description": "View and control Docker containers"
+          },
+          "manage-kubernetes": {
+            "label": "Manage Kubernetes",
+            "description": "View the Kubernetes cluster and its resources"
+          },
+          "manage-tasks": {
+            "label": "Manage tasks",
+            "description": "View, trigger, and schedule background tasks"
+          },
+          "manage-settings": {
+            "label": "Manage settings",
+            "description": "View and change global server settings"
           }
         }
       },

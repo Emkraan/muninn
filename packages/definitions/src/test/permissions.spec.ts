@@ -45,3 +45,31 @@ describe("getPermissionsWithChildren should return the correct permissions", () 
     expect(getPermissionsWithChildren(input)).toEqual(expect.arrayContaining(expectedOutput));
   });
 });
+
+describe("admin keeps every fine-grained management capability", () => {
+  // Security invariant: each granular "other-manage-*" capability MUST be a child
+  // of "admin" so a full admin session (permissions expanded via
+  // getPermissionsWithChildren) still passes every repointed gate. If any key is
+  // missing here, admins silently lose access to that surface.
+  const fineGrainedManageKeys = [
+    "other-manage-users",
+    "other-manage-groups",
+    "other-manage-authentication",
+    "other-manage-api-keys",
+    "other-manage-certificates",
+    "other-manage-backup",
+    "other-manage-docker",
+    "other-manage-kubernetes",
+    "other-manage-tasks",
+    "other-manage-settings",
+  ] satisfies GroupPermissionKey[];
+
+  test("getPermissionsWithChildren(['admin']) includes all 10 other-manage-* keys and view-logs", () => {
+    const adminPermissions = getPermissionsWithChildren(["admin"]);
+    expect(adminPermissions).toEqual(expect.arrayContaining([...fineGrainedManageKeys, "other-view-logs"]));
+  });
+
+  test.each(fineGrainedManageKeys)("admin implies %s", (key) => {
+    expect(getPermissionsWithChildren(["admin"])).toContain(key);
+  });
+});

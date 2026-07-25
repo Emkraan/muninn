@@ -9,7 +9,7 @@ export const canAccessUserEditPage = (session: Session | null, userId: string) =
     return true;
   }
 
-  if (session.user.permissions.includes("admin")) {
+  if (session.user.permissions.includes("other-manage-users")) {
     return true;
   }
 

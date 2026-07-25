@@ -14,7 +14,7 @@ import { UserListComponent } from "./_components/user-list";
 
 export async function generateMetadata() {
   const session = await auth();
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-users")) {
     return {};
   }
   const t = await getScopedI18n("management.page.user.list");
@@ -26,7 +26,7 @@ export async function generateMetadata() {
 
 export default async function UsersPage() {
   const session = await auth();
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-manage-users")) {
     return notFound();
   }
 

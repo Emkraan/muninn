@@ -100,7 +100,7 @@ export const pagesSearchGroup = createGroup<{
         icon: IconUsers,
         path: "/manage/users",
         name: t("manageUser.label"),
-        hidden: !session?.user.permissions.includes("admin"),
+        hidden: !session?.user.permissions.includes("other-manage-users"),
       },
       {
         icon: IconMailForward,
@@ -112,19 +112,19 @@ export const pagesSearchGroup = createGroup<{
         icon: IconUsersGroup,
         path: "/manage/users/groups",
         name: t("manageGroup.label"),
-        hidden: !session?.user.permissions.includes("admin"),
+        hidden: !session?.user.permissions.includes("other-manage-groups"),
       },
       {
         icon: IconBrandDocker,
         path: "/manage/tools/docker",
         name: "Manage Docker",
-        hidden: !session?.user.permissions.includes("admin"),
+        hidden: !session?.user.permissions.includes("other-manage-docker"),
       },
       {
         icon: IconPlug,
         path: "/manage/tools/api",
         name: t("manageApi.label"),
-        hidden: !session?.user.permissions.includes("admin"),
+        hidden: !session?.user.permissions.includes("other-manage-api-keys"),
       },
       {
         icon: IconLogs,
@@ -136,13 +136,13 @@ export const pagesSearchGroup = createGroup<{
         icon: IconReport,
         path: "/manage/tools/tasks",
         name: t("manageTask.label"),
-        hidden: !session?.user.permissions.includes("admin"),
+        hidden: !session?.user.permissions.includes("other-manage-tasks"),
       },
       {
         icon: IconSettings,
         path: "/manage/settings",
         name: t("manageSettings.label"),
-        hidden: !session?.user.permissions.includes("admin"),
+        hidden: !session?.user.permissions.includes("other-manage-settings"),
       },
       {
         icon: IconInfoSmall,
