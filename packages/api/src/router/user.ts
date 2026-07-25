@@ -12,7 +12,7 @@ import { getMaxGroupPositionAsync } from "@homarr/db/queries";
 import { boards, groupMembers, groupPermissions, groups, invites, users } from "@homarr/db/schema";
 import { selectUserSchema } from "@homarr/db/validationSchemas";
 import type { SupportedAuthProvider } from "@homarr/definitions";
-import { credentialsAdminGroup, supportedAuthProviders } from "@homarr/definitions";
+import { credentialsAdminGroup, getPermissionsWithChildren, supportedAuthProviders } from "@homarr/definitions";
 import { byIdSchema } from "@homarr/validation/common";
 import type { userBaseCreateSchema } from "@homarr/validation/user";
 import {
@@ -161,6 +161,29 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       throwIfCredentialsDisabled();
       await checkUsernameAlreadyTakenAndThrowAsync(ctx.db, "credentials", input.username);
+
+      // Privilege-escalation guard (BEFORE creating anything so a rejected
+      // attempt leaves no orphan account): a new user inherits the permissions
+      // of every group they are placed in. Reject if any target group holds a
+      // permission - or an implied child - the caller does not itself hold.
+      // Mirrors the scope guard in apiKeys.create / group.addMember.
+      if (input.groupIds.length >= 1) {
+        const targetGroups = await ctx.db.query.groups.findMany({
+          where: inArray(groups.id, input.groupIds),
+          with: { permissions: { columns: { permission: true } } },
+        });
+        const callerPermissionSet = new Set(ctx.session.user.permissions);
+        const grantedPermissions = getPermissionsWithChildren(
+          targetGroups.flatMap((group) => group.permissions.map(({ permission }) => permission)),
+        );
+        const escalating = grantedPermissions.filter((permission) => !callerPermissionSet.has(permission));
+        if (escalating.length > 0) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: `Cannot assign a group with permissions you do not have: ${escalating.join(", ")}`,
+          });
+        }
+      }
 
       const userId = await createUserAsync(ctx.db, input);
 

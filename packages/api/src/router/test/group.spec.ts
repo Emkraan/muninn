@@ -490,6 +490,47 @@ describe("savePermissions should save permissions for group", () => {
     // Assert
     await expect(actAsync()).rejects.toThrow("Permission denied");
   });
+
+  test("delegate with other-manage-groups cannot grant permissions beyond their own (escalation guard)", async () => {
+    // Arrange
+    const db = createDb();
+    const delegateSession = createSession(getPermissionsWithChildren(["other-manage-groups"]));
+    const caller = groupRouter.createCaller({ db, deviceType: undefined, session: delegateSession });
+
+    const groupId = createId();
+    await db.insert(groups).values({ id: groupId, name: "Group", position: 1 });
+    // Pre-existing permission proves the guard runs BEFORE the destructive delete.
+    await db.insert(groupPermissions).values({ groupId, permission: "integration-use-all" });
+
+    // Act: attempt to escalate the group to `admin`, which the delegate does not hold.
+    const actAsync = async () => await caller.savePermissions({ groupId, permissions: ["admin"] });
+
+    // Assert: rejected, and the pre-existing permission is untouched.
+    await expect(actAsync()).rejects.toThrow("Cannot assign permissions you do not have");
+    const permissions = await db.query.groupPermissions.findMany({
+      where: eq(groupPermissions.groupId, groupId),
+    });
+    expect(permissions.map(({ permission }) => permission)).toEqual(["integration-use-all"]);
+  });
+
+  test("delegate with other-manage-groups can assign a permission they do hold", async () => {
+    // Arrange
+    const db = createDb();
+    const delegateSession = createSession(getPermissionsWithChildren(["other-manage-groups"]));
+    const caller = groupRouter.createCaller({ db, deviceType: undefined, session: delegateSession });
+
+    const groupId = createId();
+    await db.insert(groups).values({ id: groupId, name: "Group", position: 1 });
+
+    // Act
+    await caller.savePermissions({ groupId, permissions: ["other-manage-groups"] });
+
+    // Assert
+    const permissions = await db.query.groupPermissions.findMany({
+      where: eq(groupPermissions.groupId, groupId),
+    });
+    expect(permissions.map(({ permission }) => permission)).toEqual(["other-manage-groups"]);
+  });
 });
 
 describe("transferOwnership should transfer ownership of group", () => {
@@ -679,6 +720,33 @@ describe("addMember should add member to group", () => {
 
     expect(members.length).toBe(1);
     expect(members[0]?.userId).toBe(userId);
+  });
+
+  test("delegate with other-manage-groups cannot add a member to a group holding permissions beyond their own (escalation guard)", async () => {
+    // Arrange
+    const db = createDb();
+    const spy = vi.spyOn(env, "env", "get");
+    spy.mockReturnValue({ AUTH_PROVIDERS: ["credentials"] } as never);
+    const delegateSession = createSession(getPermissionsWithChildren(["other-manage-groups"]));
+    const caller = groupRouter.createCaller({ db, deviceType: undefined, session: delegateSession });
+
+    const groupId = createId();
+    const userId = createId();
+    await db.insert(users).values([
+      { id: userId, name: "User" },
+      { id: defaultOwnerId, name: "Creator" },
+    ]);
+    await db.insert(groups).values({ id: groupId, name: "Admins", ownerId: defaultOwnerId, position: 1 });
+    // The target group carries `admin`, which the delegate does not hold.
+    await db.insert(groupPermissions).values({ groupId, permission: "admin" });
+
+    // Act
+    const actAsync = async () => await caller.addMember({ groupId, userId });
+
+    // Assert: rejected, and no membership was created.
+    await expect(actAsync()).rejects.toThrow("Cannot manage membership of a group with permissions you do not have");
+    const members = await db.query.groupMembers.findMany({ where: eq(groupMembers.groupId, groupId) });
+    expect(members.length).toBe(0);
   });
 
   test("with non existing group it should throw not found error", async () => {

@@ -12,7 +12,7 @@ import { and, eq, handleTransactionsAsync, like, not } from "@homarr/db";
 import { getMaxGroupPositionAsync } from "@homarr/db/queries";
 import { groupMembers, groupPermissions, groups, users } from "@homarr/db/schema";
 import { selectGroupSchema, selectUserSchema } from "@homarr/db/validationSchemas";
-import { everyoneGroup, groupPermissionKeys } from "@homarr/definitions";
+import { everyoneGroup, getPermissionsWithChildren, groupPermissionKeys } from "@homarr/definitions";
 import { byIdSchema, paginatedSchema } from "@homarr/validation/common";
 import {
   groupCreateSchema,
@@ -324,6 +324,20 @@ export const groupRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       await throwIfGroupNotFoundAsync(ctx.db, input.groupId);
 
+      // Privilege-escalation guard: a group can never be granted a permission
+      // (or its implied children) the acting user does not themselves hold.
+      // Prevents a non-admin with other-manage-groups from assigning `admin`.
+      // Mirrors the scope guard in apiKeys.create.
+      const callerPermissionSet = new Set(ctx.session.user.permissions);
+      const requestedPermissions = getPermissionsWithChildren(input.permissions);
+      const escalating = requestedPermissions.filter((permission) => !callerPermissionSet.has(permission));
+      if (escalating.length > 0) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: `Cannot assign permissions you do not have: ${escalating.join(", ")}`,
+        });
+      }
+
       await ctx.db.delete(groupPermissions).where(eq(groupPermissions.groupId, input.groupId));
 
       if (input.permissions.length > 0) {
@@ -365,6 +379,7 @@ export const groupRouter = createTRPCRouter({
       await throwIfGroupNotFoundAsync(ctx.db, input.groupId);
       await throwIfGroupNameIsReservedAsync(ctx.db, input.groupId);
       await throwIfGroupMembersCannotBeManagedLocallyAsync(ctx.db);
+      await throwIfGroupGrantsPermissionsBeyondCallerAsync(ctx.db, input.groupId, ctx.session.user.permissions);
 
       const user = await ctx.db.query.users.findFirst({
         where: eq(users.id, input.userId),
@@ -459,6 +474,35 @@ const throwIfGroupNotFoundAsync = async (db: Database, id: string) => {
     throw new TRPCError({
       code: "NOT_FOUND",
       message: "Group not found",
+    });
+  }
+};
+
+// Privilege-escalation guard: placing a member in a group grants them that
+// group's permissions. A caller must never add anyone (including themselves)
+// to a group holding a permission - or an implied child permission - that the
+// caller does not itself hold. Without this, other-manage-groups becomes a
+// direct path to `admin`. Mirrors the scope guard in apiKeys.create.
+const throwIfGroupGrantsPermissionsBeyondCallerAsync = async (
+  db: Database,
+  groupId: string,
+  callerPermissions: string[],
+) => {
+  const group = await db.query.groups.findFirst({
+    where: eq(groups.id, groupId),
+    with: { permissions: { columns: { permission: true } } },
+  });
+
+  if (!group) return; // existence is enforced separately by throwIfGroupNotFoundAsync
+
+  const callerPermissionSet = new Set(callerPermissions);
+  const grantedPermissions = getPermissionsWithChildren(group.permissions.map(({ permission }) => permission));
+  const escalating = grantedPermissions.filter((permission) => !callerPermissionSet.has(permission));
+
+  if (escalating.length > 0) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: `Cannot manage membership of a group with permissions you do not have: ${escalating.join(", ")}`,
     });
   }
 };
