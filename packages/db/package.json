@@ -15,7 +15,8 @@
     "./validationSchemas": "./validationSchemas.ts"
   },
   "scripts": {
-    "build": "pnpm run build:sqlite && pnpm run build:mysql && pnpm run build:postgresql",
+    "build": "pnpm run build:sqlite && pnpm run build:mysql && pnpm run build:postgresql && pnpm run build:copy",
+    "build:copy": "esbuild migrations/copy-sqlite-to-postgres.ts --bundle --platform=node --outfile=migrations/copy-sqlite-to-postgres.cjs",
     "build:mysql": "esbuild migrations/mysql/migrate.ts --bundle --platform=node --outfile=migrations/mysql/migrate.cjs",
     "build:postgresql": "esbuild migrations/postgresql/migrate.ts --bundle --platform=node --outfile=migrations/postgresql/migrate.cjs",
     "build:sqlite": "esbuild migrations/sqlite/migrate.ts --bundle --platform=node --outfile=migrations/sqlite/migrate.cjs",
@@ -63,6 +64,7 @@
     "superjson": "catalog:"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "catalog:",
     "@homarr/tsconfig": "workspace:^0.1.0",
     "@types/better-sqlite3": "catalog:",
     "@types/pg": "catalog:",

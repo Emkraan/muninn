@@ -67,6 +67,11 @@ COPY --from=builder /app/node_modules/better-sqlite3/build/Release/better_sqlite
 
 COPY --from=builder /app/packages/db/migrations ./db/migrations
 
+# SQLite -> Postgres one-shot data migration tool. Shipped next to the migrate
+# bundles so an operator can run, inside the container (WORKDIR /app):
+#   node ./db/copy-sqlite-to-postgres.cjs <sqlite-file-path> [--truncate]
+COPY --from=builder /app/packages/db/migrations/copy-sqlite-to-postgres.cjs ./db/copy-sqlite-to-postgres.cjs
+
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder /app/apps/nextjs/.next/standalone ./

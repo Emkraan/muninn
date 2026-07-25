@@ -13,6 +13,7 @@ catalog:
   "@dnd-kit/sortable": ^10.0.0
   "@dnd-kit/utilities": ^3.2.2
   "@drizzle-team/brocli": ^0.12.0
+  "@electric-sql/pglite": ^0.2.17
   "@extractus/feed-extractor": 7.2.1
   "@gfazioli/mantine-onboarding-tour": ^4.0.6
   "@gitbeaker/rest": ^43.8.0
