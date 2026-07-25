@@ -201,6 +201,15 @@ export const appRouter = createTRPCRouter({
       };
       await ctx.db.insert(apps).values(insertValues);
 
+      // Default stance: nothing is shared. The creator gets full control of the
+      // app they made (super admins already hold app-full-all); no one else has
+      // access until an admin grants it.
+      await ctx.db.insert(appUserPermissions).values({
+        appId: id,
+        userId: ctx.session.user.id,
+        permission: "full",
+      });
+
       // TODO: breaking change necessary for removing appId property
       return { appId: id, ...insertValues };
     }),
@@ -209,14 +218,18 @@ export const appRouter = createTRPCRouter({
     .input(appCreateManySchema)
     .output(z.void())
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.insert(apps).values(
-        input.map((app) => ({
-          id: createId(),
-          name: app.name,
-          description: app.description,
-          iconUrl: app.iconUrl ?? getIconForName(ctx.db, app.name).sync()?.url ?? defaultIcon,
-          href: app.href,
-        })),
+      const rows = input.map((app) => ({
+        id: createId(),
+        name: app.name,
+        description: app.description,
+        iconUrl: app.iconUrl ?? getIconForName(ctx.db, app.name).sync()?.url ?? defaultIcon,
+        href: app.href,
+      }));
+      await ctx.db.insert(apps).values(rows);
+
+      // Default stance: the creator gets full control of each app they made.
+      await ctx.db.insert(appUserPermissions).values(
+        rows.map((row) => ({ appId: row.id, userId: ctx.session.user.id, permission: "full" as const })),
       );
     }),
   update: protectedProcedure
