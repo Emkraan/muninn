@@ -87,6 +87,22 @@ export default async function AboutPage() {
             </Anchor>
           </Group>
         </Stack>
+        <Stack gap={2} align="center">
+          <Text size="xs" c="dimmed">
+            Free and open source. Support is optional and every feature stays free.
+          </Text>
+          <Group gap="xs">
+            <Anchor size="xs" c="dimmed" href="https://buymeacoffee.com/emkraan" target="_blank">
+              Buy Me a Coffee
+            </Anchor>
+            <Text size="xs" c="dimmed">
+              ·
+            </Text>
+            <Anchor size="xs" c="dimmed" href="https://www.paypal.com/ncp/payment/Z5LS6SWMFQGU4" target="_blank">
+              PayPal
+            </Anchor>
+          </Group>
+        </Stack>
       </Stack>
 
       <Accordion defaultValue="libraries" variant="filled" radius="md">
