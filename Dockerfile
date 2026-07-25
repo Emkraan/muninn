@@ -83,6 +83,11 @@ COPY packages/redis/redis.conf /app/redis.conf
 COPY nginx.conf /etc/nginx/templates/nginx.conf
 
 
+# App version for the OpenAPI doc + in-app display, fed from the build (the
+# VERSION file, via the workflow's app_version). Read at runtime by
+# resolveAppVersion() so the served docs never advertise a stale version.
+ARG APP_VERSION=0.0.0
+ENV HOMARR_VERSION=${APP_VERSION}
 ENV DB_URL='/appdata/db/db.sqlite'
 ENV DB_DIALECT='sqlite'
 ENV DB_DRIVER='better-sqlite3'
