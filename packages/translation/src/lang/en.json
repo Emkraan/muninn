@@ -5295,7 +5295,7 @@
       },
       "about": {
         "version": "Version {version}",
-        "text": "Muninn is a self-hosted homelab launcher - one live dashboard for your whole fleet, with per-user access control, multi-provider single sign-on, and a documented API, in the Cobalt design.",
+        "text": "Muninn is a self-hosted dashboard and app launcher - one live dashboard over all your services, with per-user access control, multi-provider single sign-on, and a documented API, in the Cobalt design.",
         "accordion": {
           "contributors": {
             "title": "Built on Homarr",
