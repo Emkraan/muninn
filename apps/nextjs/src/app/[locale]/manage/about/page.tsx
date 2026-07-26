@@ -6,6 +6,7 @@ import {
   AccordionPanel,
   Anchor,
   Badge,
+  Button,
   Card,
   Center,
   Group,
@@ -23,7 +24,7 @@ import {
   Title,
   UnstyledButton,
 } from "@mantine/core";
-import { IconKeyboard, IconLibrary, IconPackage } from "@tabler/icons-react";
+import { IconBrandPaypal, IconCoffee, IconKeyboard, IconLibrary, IconPackage } from "@tabler/icons-react";
 
 import { capitalize, objectEntries } from "@homarr/common";
 import { hotkeys } from "@homarr/definitions";
@@ -92,15 +93,30 @@ export default async function AboutPage() {
             Free and open source. Support is optional and every feature stays free.
           </Text>
           <Group gap="xs">
-            <Anchor size="xs" c="dimmed" href="https://buymeacoffee.com/emkraan" target="_blank">
+            <Button
+              component="a"
+              href="https://www.buymeacoffee.com/emkraan"
+              target="_blank"
+              rel="noreferrer"
+              size="xs"
+              radius="xl"
+              leftSection={<IconCoffee size="1rem" />}
+              styles={{ root: { backgroundColor: "#FF5F5F", color: "#ffffff" } }}
+            >
               Buy Me a Coffee
-            </Anchor>
-            <Text size="xs" c="dimmed">
-              ·
-            </Text>
-            <Anchor size="xs" c="dimmed" href="https://www.paypal.com/ncp/payment/Z5LS6SWMFQGU4" target="_blank">
+            </Button>
+            <Button
+              component="a"
+              href="https://www.paypal.com/ncp/payment/Z5LS6SWMFQGU4"
+              target="_blank"
+              rel="noreferrer"
+              size="xs"
+              radius="xl"
+              leftSection={<IconBrandPaypal size="1rem" />}
+              styles={{ root: { backgroundColor: "#00457C", color: "#ffffff" } }}
+            >
               PayPal
-            </Anchor>
+            </Button>
           </Group>
         </Stack>
       </Stack>
