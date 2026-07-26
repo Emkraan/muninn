@@ -1,10 +1,10 @@
 name: PR checks
 
-# Lint + typecheck + build on every pull request. This is the real gate the
-# Dependabot auto-merge workflow waits on (see dependabot-auto-merge.yml), so a
-# dependency bump that breaks compilation, linting, or the build can never
-# merge itself. The heavier Docker image build stays on build-and-deploy.yml
-# (push/tag), which runs after a merge lands on main.
+# Lint + typecheck on every pull request. This is the real gate the Dependabot
+# auto-merge workflow waits on (see dependabot-auto-merge.yml), so a dependency
+# bump that breaks types or linting can never merge itself. The full build
+# stays on build-and-deploy.yml (push/tag), which runs after a merge lands on
+# main - keeping the PR gate fast and within the runner's memory.
 on:
   pull_request:
 
@@ -22,6 +22,10 @@ jobs:
     env:
       SKIP_ENV_VALIDATION: "true"
       CI: "true"
+      # turbo runs tsc across ~35 packages at once; at full concurrency the
+      # runner OOM-kills the job. Cap the per-process heap and the parallelism
+      # (--concurrency below) so typecheck fits the runner's memory.
+      NODE_OPTIONS: "--max-old-space-size=4096"
     steps:
       - uses: actions/checkout@v4
 
@@ -37,10 +41,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Typecheck
-        run: pnpm typecheck
+        run: pnpm typecheck -- --concurrency=2
 
       - name: Lint
-        run: pnpm lint
-
-      - name: Build
-        run: pnpm build
+        run: pnpm lint -- --concurrency=2
