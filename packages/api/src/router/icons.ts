@@ -1,4 +1,4 @@
-import { and, like } from "@homarr/db";
+import { and, likeInsensitive } from "@homarr/db";
 import { icons } from "@homarr/db/schema";
 import { iconsFindSchema } from "@homarr/validation/icons";
 
@@ -20,7 +20,7 @@ export const iconsRouter = createTRPCRouter({
 
       let whereCondition = undefined;
       if (term.length > 0) {
-        whereCondition = and(...keywords.map((keyword) => like(icons.name, `%${keyword}%`)));
+        whereCondition = and(...keywords.map((keyword) => likeInsensitive(icons.name, keyword)));
       }
 
       return {

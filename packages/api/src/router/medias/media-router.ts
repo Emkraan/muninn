@@ -3,7 +3,7 @@ import { z } from "zod/v4";
 
 import { createId } from "@homarr/common";
 import type { InferInsertModel } from "@homarr/db";
-import { and, desc, eq, like } from "@homarr/db";
+import { and, desc, eq, likeInsensitive } from "@homarr/db";
 import { iconRepositories, icons, medias } from "@homarr/db/schema";
 import { createLocalImageUrl, LOCAL_ICON_REPOSITORY_SLUG, mapMediaToIcon } from "@homarr/icons/local";
 import { byIdSchema, paginatedSchema } from "@homarr/validation/common";
@@ -22,7 +22,7 @@ export const mediaRouter = createTRPCRouter({
       const includeFromAllUsers = ctx.session.user.permissions.includes("media-view-all") && input.includeFromAllUsers;
 
       const where = and(
-        input.search.length >= 1 ? like(medias.name, `%${input.search}%`) : undefined,
+        input.search.length >= 1 ? likeInsensitive(medias.name, input.search) : undefined,
         includeFromAllUsers ? undefined : eq(medias.creatorId, ctx.session.user.id),
       );
       const dbMedias = await ctx.db.query.medias.findMany({

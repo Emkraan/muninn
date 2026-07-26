@@ -138,6 +138,10 @@ export const apiKeysRouter = createTRPCRouter({
     .input(z.object({ apiKeyId: z.string() }))
     .output(z.void())
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.delete(apiKeys).where(eq(apiKeys.id, input.apiKeyId)).limit(1);
+      // NB: no `.limit(1)` here. `apiKeys.id` is the primary key so the WHERE
+      // already matches at most one row, and `DELETE ... LIMIT` is a syntax
+      // error on postgres (it is only tolerated by this better-sqlite3 build),
+      // which made this mutation reject on the shared-postgres deployment.
+      await ctx.db.delete(apiKeys).where(eq(apiKeys.id, input.apiKeyId));
     }),
 });
