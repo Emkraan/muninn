@@ -9,10 +9,32 @@ import { createLogger } from "@homarr/core/infrastructure/logs";
 import type { Database } from "@homarr/db";
 import { and, eq, handleTransactionsAsync, inArray, like, likeInsensitive, or } from "@homarr/db";
 import { getMaxGroupPositionAsync } from "@homarr/db/queries";
-import { boards, groupMembers, groupPermissions, groups, invites, users } from "@homarr/db/schema";
+import {
+  appGroupPermissions,
+  apps,
+  appUserPermissions,
+  boardGroupPermissions,
+  boards,
+  boardUserPermissions,
+  groupMembers,
+  groupPermissions,
+  groups,
+  integrationGroupPermissions,
+  integrations,
+  integrationUserPermissions,
+  invites,
+  users,
+} from "@homarr/db/schema";
 import { selectUserSchema } from "@homarr/db/validationSchemas";
-import type { SupportedAuthProvider } from "@homarr/definitions";
-import { credentialsAdminGroup, getPermissionsWithChildren, supportedAuthProviders } from "@homarr/definitions";
+import type { AppPermission, BoardPermission, IntegrationPermission, SupportedAuthProvider } from "@homarr/definitions";
+import {
+  appPermissions,
+  boardPermissions,
+  credentialsAdminGroup,
+  getPermissionsWithChildren,
+  integrationPermissions,
+  supportedAuthProviders,
+} from "@homarr/definitions";
 import { byIdSchema } from "@homarr/validation/common";
 import type { userBaseCreateSchema } from "@homarr/validation/user";
 import {
@@ -37,12 +59,72 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "../trpc";
-import { throwIfActionForbiddenAsync } from "./board/board-access";
+import { throwIfActionForbiddenAsync as throwIfAppActionForbiddenAsync } from "./app/app-access";
+import { throwIfActionForbiddenAsync as throwIfBoardActionForbiddenAsync } from "./board/board-access";
+import { throwIfActionForbiddenAsync as throwIfIntegrationActionForbiddenAsync } from "./integration/integration-access";
 import { throwIfCredentialsDisabled } from "./invite/checks";
 import { nextOnboardingStepAsync } from "./onboard/onboard-queries";
 import { changeSearchPreferencesAsync, changeSearchPreferencesInputSchema } from "./user/change-search-preferences";
 
 const logger = createLogger({ module: "userRouter" });
+
+// Shape of a single accessible resource in the per-user access view. `source`
+// distinguishes a direct per-user grant (editable from this view) from a grant
+// inherited through group membership (read-only here).
+const accessItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  permission: z.string(),
+  source: z.enum(["direct", "group"]),
+});
+
+const userAccessOutputSchema = z.object({
+  apps: z.array(accessItemSchema),
+  boards: z.array(accessItemSchema),
+  integrations: z.array(accessItemSchema),
+});
+
+type AccessItem = z.infer<typeof accessItemSchema>;
+
+// Higher number = stronger permission. The permission join tables key on
+// (resourceId, principalId, permission), so a principal can hold several rows
+// for one resource; these ranks collapse them to the single strongest one.
+const appPermissionRank: Record<AppPermission, number> = { use: 1, modify: 2, full: 3 };
+const boardPermissionRank: Record<BoardPermission, number> = { view: 1, modify: 2, full: 3 };
+const integrationPermissionRank: Record<IntegrationPermission, number> = { use: 1, interact: 2, full: 3 };
+
+// Merge direct (per-user) and group-inherited grants into one entry per
+// resource. A direct grant always wins over an inherited one (it is the row an
+// admin can edit from the user view); within a single source the strongest
+// permission is kept.
+function buildAccessItems(
+  direct: { resource: { id: string; name: string } | null; permission: string }[],
+  group: { resource: { id: string; name: string } | null; permission: string }[],
+  rank: Record<string, number>,
+): AccessItem[] {
+  const byId = new Map<string, AccessItem>();
+  const consider = (entries: { resource: { id: string; name: string } | null; permission: string }[], source: AccessItem["source"]) => {
+    for (const entry of entries) {
+      const resource = entry.resource;
+      if (!resource) continue;
+      const existing = byId.get(resource.id);
+      if (!existing) {
+        byId.set(resource.id, { id: resource.id, name: resource.name, permission: entry.permission, source });
+        continue;
+      }
+      if (existing.source === "group" && source === "direct") {
+        byId.set(resource.id, { id: resource.id, name: resource.name, permission: entry.permission, source });
+        continue;
+      }
+      if (existing.source === source && (rank[entry.permission] ?? 0) > (rank[existing.permission] ?? 0)) {
+        existing.permission = entry.permission;
+      }
+    }
+  };
+  consider(direct, "direct");
+  consider(group, "group");
+  return [...byId.values()].sort((itemA, itemB) => itemA.name.localeCompare(itemB.name));
+}
 
 export const userRouter = createTRPCRouter({
   initUser: onboardingProcedure
@@ -617,10 +699,10 @@ export const userRouter = createTRPCRouter({
 
       // Only allow user to select boards they have access to
       if (input.homeBoardId) {
-        await throwIfActionForbiddenAsync(ctx, eq(boards.id, input.homeBoardId), "view");
+        await throwIfBoardActionForbiddenAsync(ctx, eq(boards.id, input.homeBoardId), "view");
       }
       if (input.mobileHomeBoardId) {
-        await throwIfActionForbiddenAsync(ctx, eq(boards.id, input.mobileHomeBoardId), "view");
+        await throwIfBoardActionForbiddenAsync(ctx, eq(boards.id, input.mobileHomeBoardId), "view");
       }
 
       await ctx.db
@@ -798,6 +880,230 @@ export const userRouter = createTRPCRouter({
       completedBoardTour: user?.completedBoardTour ?? false,
     };
   }),
+  // Inverse of the per-resource access panels: every app, board and
+  // integration a single user can reach, split into direct (per-user) and
+  // group-inherited grants.
+  getAccessById: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .output(userAccessOutputSchema)
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/api/users/{userId}/access",
+        tags: ["users"],
+        protect: true,
+      },
+      mcp: {
+        enabled: true,
+        description:
+          "List every app, board and integration a user can access. REQUIRED: userId (string). Each entry is tagged source 'direct' (granted to the user) or 'group' (inherited via group membership, read-only)",
+      },
+    })
+    .query(async ({ input, ctx }) => {
+      // Only admins (or the user themselves) may view a user's access map.
+      if (ctx.session.user.id !== input.userId && !ctx.session.user.permissions.includes("other-manage-users")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You are not allowed to view other users access",
+        });
+      }
+
+      const memberships = await ctx.db.query.groupMembers.findMany({
+        where: eq(groupMembers.userId, input.userId),
+        columns: { groupId: true },
+      });
+      const groupIds = memberships.map((membership) => membership.groupId);
+
+      const [directApps, directBoards, directIntegrations] = await Promise.all([
+        ctx.db.query.appUserPermissions.findMany({
+          where: eq(appUserPermissions.userId, input.userId),
+          with: { app: { columns: { id: true, name: true } } },
+        }),
+        ctx.db.query.boardUserPermissions.findMany({
+          where: eq(boardUserPermissions.userId, input.userId),
+          with: { board: { columns: { id: true, name: true } } },
+        }),
+        ctx.db.query.integrationUserPermissions.findMany({
+          where: eq(integrationUserPermissions.userId, input.userId),
+          with: { integration: { columns: { id: true, name: true } } },
+        }),
+      ]);
+
+      const groupApps =
+        groupIds.length === 0
+          ? []
+          : await ctx.db.query.appGroupPermissions.findMany({
+              where: inArray(appGroupPermissions.groupId, groupIds),
+              with: { app: { columns: { id: true, name: true } } },
+            });
+      const groupBoards =
+        groupIds.length === 0
+          ? []
+          : await ctx.db.query.boardGroupPermissions.findMany({
+              where: inArray(boardGroupPermissions.groupId, groupIds),
+              with: { board: { columns: { id: true, name: true } } },
+            });
+      const groupIntegrations =
+        groupIds.length === 0
+          ? []
+          : await ctx.db.query.integrationGroupPermissions.findMany({
+              where: inArray(integrationGroupPermissions.groupId, groupIds),
+              with: { integration: { columns: { id: true, name: true } } },
+            });
+
+      return {
+        apps: buildAccessItems(
+          directApps.map((row) => ({ resource: row.app, permission: row.permission })),
+          groupApps.map((row) => ({ resource: row.app, permission: row.permission })),
+          appPermissionRank,
+        ),
+        boards: buildAccessItems(
+          directBoards.map((row) => ({ resource: row.board, permission: row.permission })),
+          groupBoards.map((row) => ({ resource: row.board, permission: row.permission })),
+          boardPermissionRank,
+        ),
+        integrations: buildAccessItems(
+          directIntegrations.map((row) => ({ resource: row.integration, permission: row.permission })),
+          groupIntegrations.map((row) => ({ resource: row.integration, permission: row.permission })),
+          integrationPermissionRank,
+        ),
+      };
+    }),
+  // Per-(user, app) grant. Non-destructive: only the target pair is rewritten,
+  // so other users' grants for this app are untouched.
+  grantAppToUser: permissionRequiredProcedure
+    .requiresPermission("other-manage-users")
+    .input(z.object({ userId: z.string(), appId: z.string(), permission: z.enum(appPermissions) }))
+    .output(z.void())
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/api/users/{userId}/access/apps",
+        tags: ["users"],
+        protect: true,
+      },
+    })
+    .mutation(async ({ input, ctx }) => {
+      await throwIfAppActionForbiddenAsync(ctx, eq(apps.id, input.appId), "full");
+      await ctx.db
+        .delete(appUserPermissions)
+        .where(and(eq(appUserPermissions.appId, input.appId), eq(appUserPermissions.userId, input.userId)));
+      await ctx.db.insert(appUserPermissions).values({
+        appId: input.appId,
+        userId: input.userId,
+        permission: input.permission,
+      });
+    }),
+  revokeAppFromUser: permissionRequiredProcedure
+    .requiresPermission("other-manage-users")
+    .input(z.object({ userId: z.string(), appId: z.string() }))
+    .output(z.void())
+    .meta({
+      openapi: {
+        method: "DELETE",
+        path: "/api/users/{userId}/access/apps/{appId}",
+        tags: ["users"],
+        protect: true,
+      },
+    })
+    .mutation(async ({ input, ctx }) => {
+      await throwIfAppActionForbiddenAsync(ctx, eq(apps.id, input.appId), "full");
+      await ctx.db
+        .delete(appUserPermissions)
+        .where(and(eq(appUserPermissions.appId, input.appId), eq(appUserPermissions.userId, input.userId)));
+    }),
+  grantBoardToUser: permissionRequiredProcedure
+    .requiresPermission("other-manage-users")
+    .input(z.object({ userId: z.string(), boardId: z.string(), permission: z.enum(boardPermissions) }))
+    .output(z.void())
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/api/users/{userId}/access/boards",
+        tags: ["users"],
+        protect: true,
+      },
+    })
+    .mutation(async ({ input, ctx }) => {
+      await throwIfBoardActionForbiddenAsync(ctx, eq(boards.id, input.boardId), "full");
+      await ctx.db
+        .delete(boardUserPermissions)
+        .where(and(eq(boardUserPermissions.boardId, input.boardId), eq(boardUserPermissions.userId, input.userId)));
+      await ctx.db.insert(boardUserPermissions).values({
+        boardId: input.boardId,
+        userId: input.userId,
+        permission: input.permission,
+      });
+    }),
+  revokeBoardFromUser: permissionRequiredProcedure
+    .requiresPermission("other-manage-users")
+    .input(z.object({ userId: z.string(), boardId: z.string() }))
+    .output(z.void())
+    .meta({
+      openapi: {
+        method: "DELETE",
+        path: "/api/users/{userId}/access/boards/{boardId}",
+        tags: ["users"],
+        protect: true,
+      },
+    })
+    .mutation(async ({ input, ctx }) => {
+      await throwIfBoardActionForbiddenAsync(ctx, eq(boards.id, input.boardId), "full");
+      await ctx.db
+        .delete(boardUserPermissions)
+        .where(and(eq(boardUserPermissions.boardId, input.boardId), eq(boardUserPermissions.userId, input.userId)));
+    }),
+  grantIntegrationToUser: permissionRequiredProcedure
+    .requiresPermission("other-manage-users")
+    .input(z.object({ userId: z.string(), integrationId: z.string(), permission: z.enum(integrationPermissions) }))
+    .output(z.void())
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/api/users/{userId}/access/integrations",
+        tags: ["users"],
+        protect: true,
+      },
+    })
+    .mutation(async ({ input, ctx }) => {
+      await throwIfIntegrationActionForbiddenAsync(ctx, eq(integrations.id, input.integrationId), "full");
+      await ctx.db
+        .delete(integrationUserPermissions)
+        .where(
+          and(
+            eq(integrationUserPermissions.integrationId, input.integrationId),
+            eq(integrationUserPermissions.userId, input.userId),
+          ),
+        );
+      await ctx.db.insert(integrationUserPermissions).values({
+        integrationId: input.integrationId,
+        userId: input.userId,
+        permission: input.permission,
+      });
+    }),
+  revokeIntegrationFromUser: permissionRequiredProcedure
+    .requiresPermission("other-manage-users")
+    .input(z.object({ userId: z.string(), integrationId: z.string() }))
+    .output(z.void())
+    .meta({
+      openapi: {
+        method: "DELETE",
+        path: "/api/users/{userId}/access/integrations/{integrationId}",
+        tags: ["users"],
+        protect: true,
+      },
+    })
+    .mutation(async ({ input, ctx }) => {
+      await throwIfIntegrationActionForbiddenAsync(ctx, eq(integrations.id, input.integrationId), "full");
+      await ctx.db
+        .delete(integrationUserPermissions)
+        .where(
+          and(
+            eq(integrationUserPermissions.integrationId, input.integrationId),
+            eq(integrationUserPermissions.userId, input.userId),
+          ),
+        );
+    }),
 });
 
 const createUserAsync = async (db: Database, input: Omit<z.infer<typeof userBaseCreateSchema>, "groupIds">) => {

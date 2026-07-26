@@ -4709,6 +4709,28 @@
           },
           "board": {
             "title": "Boards"
+          },
+          "access": {
+            "title": "Access",
+            "apps": {
+              "title": "Apps"
+            },
+            "boards": {
+              "title": "Boards"
+            },
+            "integrations": {
+              "title": "Integrations"
+            },
+            "viaGroup": "via group",
+            "empty": "No access granted",
+            "column": {
+              "resource": "Name",
+              "permission": "Permission"
+            },
+            "add": {
+              "resourcePlaceholder": "Select a resource",
+              "nothingFound": "Nothing found"
+            }
           }
         },
         "list": {
@@ -5780,6 +5802,7 @@
         },
         "general": "General",
         "security": "Security",
+        "access": "Access",
         "board": "Boards",
         "groups": {
           "label": "Groups"

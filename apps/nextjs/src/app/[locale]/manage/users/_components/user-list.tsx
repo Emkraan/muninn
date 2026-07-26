@@ -61,7 +61,9 @@ export const UserListComponent = ({ initialUserList }: UserListComponentProps) =
     data,
     enableRowSelection: true,
     enableColumnOrdering: true,
-    enableGlobalFilter: false,
+    // Search across the loaded users (name + email). The list loads the full
+    // user set, so client-side filtering matches every user, not just a page.
+    enableGlobalFilter: true,
     enableRowActions: false,
     enableDensityToggle: false,
     enableFullScreenToggle: false,
