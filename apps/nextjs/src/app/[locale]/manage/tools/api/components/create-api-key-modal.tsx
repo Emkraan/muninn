@@ -23,6 +23,14 @@ const formSchema = z.object({
   expiresInDays: z.number().int().positive().max(3650),
 });
 
+// The "admin" scope expands (via groupPermissionParents) to every permission,
+// so surface it as explicitly unrestricted rather than showing the bare "admin"
+// key in the picker. Shared with the edit-scopes modal.
+export const scopeOption = (permission: GroupPermissionKey) => ({
+  value: permission,
+  label: permission === "admin" ? "Full admin (unrestricted)" : permission,
+});
+
 export const CreateApiKeyModal = createModal(({ actions }) => {
   const t = useScopedI18n("management.page.tool.api.tab.apiKey");
   const { openModal: openCopyModal } = useModalAction(CopyApiKeyModal);
@@ -36,10 +44,7 @@ export const CreateApiKeyModal = createModal(({ actions }) => {
     },
   });
 
-  const scopeOptions = useMemo(
-    () => groupPermissionKeys.map((permission) => ({ value: permission, label: permission })),
-    [],
-  );
+  const scopeOptions = useMemo(() => groupPermissionKeys.map((permission) => scopeOption(permission)), []);
 
   const { mutate, isPending } = clientApi.apiKeys.create.useMutation({
     async onSuccess(data) {

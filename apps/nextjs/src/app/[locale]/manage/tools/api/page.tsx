@@ -88,7 +88,7 @@ export default async function ApiPage() {
           apiKeyLabel={t("apiKey.label")}
           mcpLabel={t("mcp.label")}
           documentationPanel={<ScalarApiReference document={document} />}
-          authenticationPanel={<ApiKeysManagement apiKeys={apiKeys} />}
+          authenticationPanel={<ApiKeysManagement apiKeys={apiKeys} currentUserId={session.user.id} />}
           baseUrl={baseUrl}
           hasApiKeys={apiKeys.length > 0}
           toolGroups={toolGroups}

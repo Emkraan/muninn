@@ -5,10 +5,10 @@ import { randomBytes } from "crypto";
 
 import { hashPasswordAsync } from "@homarr/auth";
 import { generateSecureRandomToken } from "@homarr/common/server";
-import { db, eq } from "@homarr/db";
+import { and, db, eq } from "@homarr/db";
 import { apiKeys } from "@homarr/db/schema";
 import { getPermissionsWithChildren } from "@homarr/definitions";
-import { apiKeyCreateSchema } from "@homarr/validation/api-key";
+import { apiKeyCreateSchema, apiKeyUpdateSchema } from "@homarr/validation/api-key";
 
 import { createTRPCRouter, permissionRequiredProcedure, protectedProcedure } from "../trpc";
 
@@ -120,6 +120,45 @@ export const apiKeysRouter = createTRPCRouter({
       return {
         apiKey: `${id}.${token}`,
       };
+    }),
+  // Edit the scopes of an EXISTING key. Owner-bound: a caller may only edit
+  // their own keys, and the same escalation guard as create applies, so a key
+  // can never be widened beyond what its owner holds. Only the scopes column is
+  // written; the key secret is never rotated (existing clients keep working).
+  update: protectedProcedure
+    .meta({
+      openapi: { method: "PATCH", path: "/api/api-keys/{id}", tags: ["apiKeys"], protect: true },
+      mcp: {
+        enabled: true,
+        description: "Update the scopes of one of your own API keys. Input: id (string), scopes (permission keys).",
+      },
+    })
+    .input(apiKeyUpdateSchema)
+    .output(z.void())
+    .mutation(async ({ ctx, input }) => {
+      const callerPermissions = new Set(ctx.session.user.permissions);
+      const requestedPermissions = getPermissionsWithChildren(input.scopes);
+      const escalating = requestedPermissions.filter((permission) => !callerPermissions.has(permission));
+      if (escalating.length > 0) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: `Cannot grant an API key permissions you do not have: ${escalating.join(", ")}`,
+        });
+      }
+
+      // Owner-bound: confirm the key exists AND belongs to the caller before writing.
+      const existing = await db.query.apiKeys.findFirst({
+        where: and(eq(apiKeys.id, input.id), eq(apiKeys.userId, ctx.session.user.id)),
+        columns: { id: true },
+      });
+      if (!existing) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "API key not found" });
+      }
+
+      await db
+        .update(apiKeys)
+        .set({ scopes: JSON.stringify(input.scopes) })
+        .where(eq(apiKeys.id, input.id));
     }),
   delete: permissionRequiredProcedure
     .requiresPermission("other-manage-api-keys")
