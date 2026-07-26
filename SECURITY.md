@@ -1,29 +1,41 @@
 # Security Policy
 
-This policy is relevant if you found potential vulnerabilities in an audit.
-We consider something as a vulnerability if it...
-
-1. puts users or user data at risk
-2. enables third parties to gain control or access (e.g. [RATs](https://en.wikipedia.org/wiki/Remote_desktop_software#RAT), [privilege escalation](https://en.wikipedia.org/wiki/Privilege_escalation), ...)
-3. abuses the system in an unintended way (e.g. crypto mining, proxy, ...)
-
 ## Supported Versions
 
-We only fix security issues in the [latest stable version](https://github.com/homarr-labs/homarr/releases/latest). Meaning security issues in prior versions will not be fixed and users have to upgrade to the latest version to receive them.
+Security fixes are applied to the latest release only. Older tags do not
+receive backported patches. Please upgrade to the most recent version before
+reporting an issue.
+
+| Version | Supported          |
+| ------- | ------------------ |
+| Latest  | :white_check_mark: |
+| Older   | :x:                |
 
 ## Reporting a Vulnerability
 
-We use [GitHub's system for reporting vulnerabilities](https://docs.github.com/en/enterprise-cloud@latest/code-security/security-advisories/working-with-repository-security-advisories/creating-a-repository-security-advisory).
-Click [**here to report an advisory**](https://github.com/homarr-labs/homarr/security/advisories/new). Our team will get notified and will get back to you within 1-6 business days.
+Please do NOT open a public issue for security vulnerabilities.
 
-As a general guideline; please provide as much detail as possible and provide reproduction steps / documentation regarding the re-creation.
-You may also provide a fork with a fix for the vulnerability.
-See https://cheatsheetseries.owasp.org/cheatsheets/Vulnerability_Disclosure_Cheat_Sheet.html for guidelines regarding disclosure.
+**Preferred:** use GitHub's built-in private vulnerability reporting. Open the
+repository's **Security** tab and click **Report a vulnerability** under
+Advisories. This is the primary channel on the public repository and needs no
+email address.
 
-If you're unable / unwilling (or it's not safe) to disclose vulnerabilites via GitHub, please report them with the subject "Security advisory - CVEXXX" to our email homarr-labs@proton.me.
-Please never disclose security vulnerabilits on your own publicly - we'd like to search for a dimplomatic solution that is also safe for our users.
+**Fallback:** if the Security tab is not available to you (for example while the
+repository is private, where it is reachable only by collaborators), email
+[github-admins@emkraan.com](mailto:github-admins@emkraan.com).
 
-In your initial contact with us, please provide details according to the [OWASP guidelines for initial reports](https://cheatsheetseries.owasp.org/cheatsheets/Vulnerability_Disclosure_Cheat_Sheet.html#initial-report).
+Include as much detail as you can either way:
 
-Thank you!
-We're looking forward to your report
+- a description of the vulnerability and its impact,
+- the affected version or image tag,
+- clear steps to reproduce (a proof of concept if available),
+- any suggested remediation.
+
+## What to Expect
+
+- We aim to acknowledge new reports within a few days.
+- We will work with you privately to confirm, triage, and fix the issue.
+- Once a fix is available and released, the advisory is published and credit is
+  given to the reporter unless anonymity is requested.
+
+Thank you for helping keep Muninn and its users safe.

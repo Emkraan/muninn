@@ -12,8 +12,8 @@ body:
       required: true
   - type: textarea
     attributes:
-      label: Describe what data should be consumed by Homarr
-      description: Please describe what data Homarr should fetch from the integration. Specify in what interval data should be fetched and whether the user can also perform write operations (eg. deleting a movie or adding a user).
+      label: Describe what data should be consumed by Muninn
+      description: Please describe what data Muninn should fetch from the integration. Specify in what interval data should be fetched and whether the user can also perform write operations (eg. deleting a movie or adding a user).
     validations:
       required: true
   - type: textarea
@@ -23,7 +23,7 @@ body:
   - type: dropdown
     attributes:
       label: Public API available?
-      description: Is there a public API available, that we can consume in Homarr?
+      description: Is there a public API available, that we can consume in Muninn?
       options:
         - "Yes, available on a website"
         - "Yes, available in the application itself"
