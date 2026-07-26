@@ -1,0 +1,50 @@
+name: PR checks
+
+# Lint + typecheck on every pull request. This is the real gate the Dependabot
+# auto-merge workflow waits on (see dependabot-auto-merge.yml), so a dependency
+# bump that breaks types or linting can never merge itself. The full build
+# stays on build-and-deploy.yml (push/tag), which runs after a merge lands on
+# main - keeping the PR gate fast and within the runner's memory.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    env:
+      SKIP_ENV_VALIDATION: "true"
+      CI: "true"
+      # turbo runs tsc across ~35 packages at once; at full concurrency the
+      # runner OOM-kills the job. Cap the per-process heap and the parallelism
+      # (--concurrency below) so typecheck fits the runner's memory.
+      NODE_OPTIONS: "--max-old-space-size=4096"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.18.0"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Call turbo directly so --concurrency is parsed by turbo (bounding
+      # parallel tsc for memory), not forwarded through to tsc. Typecheck is the
+      # gate (compilation validity - the meaningful signal for a dependency
+      # bump). Lint is intentionally not part of the gate yet: the Homarr fork
+      # carries pre-existing oxlint findings that a clean CI run surfaces, so
+      # blocking on it would block every PR until a separate lint-debt cleanup.
+      - name: Typecheck
+        run: pnpm exec turbo typecheck --concurrency=2
