@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from "react";
 import { ActionIcon, Badge, Button, Group, Stack, Text, Title, Tooltip } from "@mantine/core";
-import { IconTrash } from "@tabler/icons-react";
+import { IconPencil, IconTrash } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { MRT_ColumnDef } from "mantine-react-table";
@@ -16,11 +16,13 @@ import { useScopedI18n } from "@homarr/translation/client";
 import { UserAvatar } from "@homarr/ui";
 
 import { CreateApiKeyModal } from "~/app/[locale]/manage/tools/api/components/create-api-key-modal";
+import { EditApiKeyScopesModal } from "~/app/[locale]/manage/tools/api/components/edit-api-key-scopes-modal";
 
 dayjs.extend(relativeTime);
 
 interface ApiKeysManagementProps {
   apiKeys: RouterOutputs["apiKeys"]["getAll"];
+  currentUserId: string;
 }
 
 type ApiKeyRow = RouterOutputs["apiKeys"]["getAll"][number];
@@ -35,8 +37,9 @@ const parseScopes = (scopes: string | null): string[] => {
   }
 };
 
-export const ApiKeysManagement = ({ apiKeys }: ApiKeysManagementProps) => {
+export const ApiKeysManagement = ({ apiKeys, currentUserId }: ApiKeysManagementProps) => {
   const { openModal: openCreateModal } = useModalAction(CreateApiKeyModal);
+  const { openModal: openEditModal } = useModalAction(EditApiKeyScopesModal);
   const { openConfirmModal } = useConfirmModal();
   const { mutateAsync: mutateDeleteAsync, isPending: isPendingDelete } = clientApi.apiKeys.delete.useMutation({
     async onSuccess() {
@@ -136,6 +139,21 @@ export const ApiKeysManagement = ({ apiKeys }: ApiKeysManagementProps) => {
         header: t("table.header.actions"),
         Cell: ({ row }) => (
           <Group gap="xs">
+            {row.original.user.id === currentUserId && (
+              <ActionIcon
+                variant="subtle"
+                aria-label="Edit scopes"
+                onClick={() =>
+                  openEditModal({
+                    id: row.original.id,
+                    name: row.original.name || row.original.id,
+                    scopes: parseScopes(row.original.scopes),
+                  })
+                }
+              >
+                <IconPencil size="1rem" />
+              </ActionIcon>
+            )}
             <ActionIcon onClick={() => handleDelete(row.original.id)} loading={isPendingDelete} c="red">
               <IconTrash size="1rem" />
             </ActionIcon>
@@ -143,7 +161,7 @@ export const ApiKeysManagement = ({ apiKeys }: ApiKeysManagementProps) => {
         ),
       },
     ],
-    [t, handleDelete, isPendingDelete],
+    [t, handleDelete, isPendingDelete, openEditModal, currentUserId],
   );
 
   const table = useMantineReactTable({

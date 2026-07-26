@@ -25,3 +25,12 @@ export const apiKeyCreateSchema = z.object({
 });
 
 export type ApiKeyCreateInput = z.infer<typeof apiKeyCreateSchema>;
+
+// Edit an existing key's scopes after creation. Same scope vocabulary as create;
+// the secret is never rotated (only the scopes column changes).
+export const apiKeyUpdateSchema = z.object({
+  id: z.string(),
+  scopes: z.array(zodEnumFromArray(groupPermissionKeys)).min(1),
+});
+
+export type ApiKeyUpdateInput = z.infer<typeof apiKeyUpdateSchema>;

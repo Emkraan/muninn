@@ -5019,6 +5019,9 @@
                   "text": "This will permanently delete the API token. API clients using this token can no longer authenticate and perform API requests. This action cannot be undone."
                 }
               },
+              "editScopes": {
+                "title": "Edit API key scopes"
+              },
               "create": {
                 "title": "Create API key",
                 "submit": "Create",

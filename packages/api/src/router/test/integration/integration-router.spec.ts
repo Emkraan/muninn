@@ -27,6 +27,10 @@ vi.mock("@homarr/auth", () => ({ auth: () => ({}) as Session }));
 vi.mock("../../integration/integration-test-connection", () => ({
   testConnectionAsync: async () => await Promise.resolve({ success: true }),
 }));
+// Mock redis so the delete/update procedures don't try to open a real ioredis connection, which hangs and times out the tests.
+vi.mock("@homarr/redis", () => ({
+  invalidateIntegrationCacheAsync: async () => await Promise.resolve(),
+}));
 
 describe("all should return all integrations", () => {
   test("with any session should return all integrations", async () => {
