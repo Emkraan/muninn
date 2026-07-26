@@ -46,15 +46,15 @@ Muninn is a fork of [Homarr](https://github.com/homarr-labs/homarr) that inherit
 - **Documented REST API** - a served OpenAPI spec at `/api/openapi`, an in-app API console, and an MCP endpoint at `/api/mcp`. API keys are per-key scoped and optionally expiring, and a key can never exceed its owner's permissions.
 - **Board-as-code** - the whole board is customizable over REST: read and write entire boards, or make granular item and section changes. Every write uses optimistic concurrency, so a concurrent edit returns `409 Conflict` instead of silently clobbering the other change.
 - **Cobalt UI** - a dark, logo-blue design system with a live animated background and a redesigned sign-in screen. An optional deployment-set footer credit keeps the published image brand-agnostic.
-- **SQLite or Postgres** - runs zero-config on a bundled SQLite file, or points at an external Postgres or MySQL server with two variables. A one-shot SQLite-to-Postgres copy tool ships inside the image.
-- **Single container** - the image bundles the web server, a websocket service, and an in-container Redis, and serves on port 7575. Bring your own reverse proxy for HTTPS.
+- **SQLite or Postgres, bundled or external Redis** - runs zero-config on a bundled SQLite file and an in-container Redis, or points at an external Postgres or MySQL (`DB_DRIVER`) and a shared or external Redis (`REDIS_IS_EXTERNAL`) to centralize state in a homelab. A one-shot SQLite-to-Postgres copy tool ships inside the image.
+- **Single container** - the image bundles the web server, a websocket service, and Redis, and serves on port 7575. Bring your own reverse proxy for HTTPS.
 
 ## Support
 
 Muninn is free and open source, and always will be. If it is useful to you and you would like to support development:
 
 <p>
-  <a href="https://www.buymeacoffee.com/emkraan"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a drink&emoji=🍹&slug=emkraan&button_colour=FF5F5F&font_colour=ffffff&font_family=Comic&outline_colour=000000&coffee_colour=FFDD00" alt="Buy Me a Coffee" height="44" /></a>
+  <a href="https://www.buymeacoffee.com/emkraan"><img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20drink&emoji=%F0%9F%8D%B9&slug=emkraan&button_colour=FF5F5F&font_colour=ffffff&font_family=Comic&outline_colour=000000&coffee_colour=FFDD00" alt="Buy Me a Coffee" height="44" /></a>
   &nbsp;
   <a href="https://www.paypal.com/ncp/payment/Z5LS6SWMFQGU4"><img src="https://img.shields.io/badge/PayPal-Donate-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal" height="44" /></a>
 </p>
