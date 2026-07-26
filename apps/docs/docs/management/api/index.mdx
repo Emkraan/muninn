@@ -6,9 +6,9 @@ tags:
   - Interface
 ---
 
-Using the Homarr API, you can interface with the application with your own code and business logic.
-It enables you to trigger almost all actions that you can perform from the Homarr UI.
-With the API, you can build resilient systems that automatically update Homarr with data - for example syncing it with
+Using the Muninn API, you can interface with the application with your own code and business logic.
+It enables you to trigger almost all actions that you can perform from the Muninn UI.
+With the API, you can build resilient systems that automatically update Muninn with data - for example syncing it with
 your deployments in a cluster or dynamically adding integrations depending on how many replicas you run.
 
 This page is language-neutral, and you must implement the API on your own in your desired language.
@@ -18,7 +18,7 @@ You can test out API endpoints using any OpenAPI client - for example [Yaak](htt
 ## Opening the API specification
 
 The specification is implemented according to the OpenAPI standard.
-To access the documentation, you'll need to spin up an instance of Homarr.
+To access the documentation, you'll need to spin up an instance of Muninn.
 Navigate to `Management` > `Tools` > `API`.
 You can copy the JSON url into your OpenAPI client or try out the endpoints directly from your browser.
 
@@ -47,7 +47,7 @@ API key authentication works with both endpoint types:
 | OpenAPI       | `/api/...`      | ✅ Supported    |
 | tRPC          | `/api/trpc/...` | ✅ Supported    |
 
-If no API key is provided, Homarr falls back to session cookie authentication (for browser-based access).
+If no API key is provided, Muninn falls back to session cookie authentication (for browser-based access).
 
 ### Usage Examples
 

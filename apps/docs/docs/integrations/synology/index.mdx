@@ -47,7 +47,7 @@ import Alert from "@theme/Admonition";
 <Alert type="info" title="Use the correct DSM URL">
   Enter the HTTP or HTTPS URL of your Synology DSM web interface, for example <code>http://diskstation.local:5000</code>{" "}
   or <code>https://diskstation.local:5001</code>. If DSM uses a self-signed certificate, add it under{" "}
-  <a href="/docs/management/certificates">Management &gt; Tools &gt; Certificates</a> so Homarr can connect securely.
+  <a href="/docs/management/certificates">Management &gt; Tools &gt; Certificates</a> so Muninn can connect securely.
 </Alert>
 
 ### Secrets
@@ -57,8 +57,8 @@ import Alert from "@theme/Admonition";
     {
       credentials: ["username", "password"],
       steps: [
-        "Create a dedicated DSM user with a strong password for Homarr.",
-        "Add the user to the default Administrators group so Homarr can read `SYNO.Core.System` metrics.",
+        "Create a dedicated DSM user with a strong password for Muninn.",
+        "Add the user to the default Administrators group so Muninn can read `SYNO.Core.System` metrics.",
         "Under User Groups and Permissions, deny access to shared folders and most applications.",
         "Allow login to DSM only, optionally restricted by source IP address.",
         "Log in once with the service account in DSM to accept terms and conditions.",
@@ -66,7 +66,7 @@ import Alert from "@theme/Admonition";
       body: (
         <>
           <Alert type="caution" title="Administrators group required">
-            Homarr reads system, storage, and utilization data from APIs that require membership in the default
+            Muninn reads system, storage, and utilization data from APIs that require membership in the default
             Administrators group.
           </Alert>
           <Alert type="warning" title="Two-factor authentication is not supported">
@@ -75,7 +75,7 @@ import Alert from "@theme/Admonition";
           </Alert>
           <Alert type="tip" title="First-time setup">
             If login fails during testing, temporarily disable automatic blocking for invalid logins under Control Panel
-            &gt; Security &gt; Protection, then re-enable it after Homarr connects successfully.
+            &gt; Security &gt; Protection, then re-enable it after Muninn connects successfully.
           </Alert>
         </>
       ),

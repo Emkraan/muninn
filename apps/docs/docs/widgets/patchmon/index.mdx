@@ -19,12 +19,12 @@ import { patchmonIntegration } from '@site/docs/integrations/patchmon';
 
 This widget displays patch statistics from your PatchMon instance, including total hosts, hosts needing updates, and security update counts. Each stat is shown with a dedicated icon and severity-tinted card background for quick visual scanning.
 
-PatchMon does not render a built-in widget title. To add a label on your board, open **Edit item → Advanced options → Title** — the same optional overlay badge used by other Homarr widgets.
+PatchMon does not render a built-in widget title. To add a label on your board, open **Edit item → Advanced options → Title** — the same optional overlay badge used by other Muninn widgets.
 
 ### Authentication
 
 :::note
-This widget requires a **signed-in Homarr session**. Anonymous visitors cannot load PatchMon data, even when the board is [public](/docs/management/boards#access-control). Placing this widget on a public board does not expose patch or security statistics to guests.
+This widget requires a **signed-in Muninn session**. Anonymous visitors cannot load PatchMon data, even when the board is [public](/docs/management/boards#access-control). Placing this widget on a public board does not expose patch or security statistics to guests.
 
 Stat visibility toggles in the widget settings control **display only**. Authenticated users with integration query access still receive the full API payload regardless of which stats are hidden in the UI.
 :::

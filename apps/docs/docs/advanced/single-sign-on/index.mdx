@@ -15,7 +15,7 @@ import TabItem from '@theme/TabItem';
 
 # Single Sign On
 
-Homarr supports multiple authentication options, from internal userbase (credentials), to LDAP (with Active directory support), and OIDC.
+Muninn supports multiple authentication options, from internal userbase (credentials), to LDAP (with Active directory support), and OIDC.
 
 ### Auth configuration common variables
 | Environment Variable      | Description | Default Value |
@@ -23,7 +23,7 @@ Homarr supports multiple authentication options, from internal userbase (credent
 | AUTH_PROVIDERS             | Select Which provider to use between *credentials*, *ldap* and *oidc*. <br /> Multiple providers can be enabled with by separating them with `,`, (ex. `AUTH_PROVIDERS=credentials,oidc`, it is highly recommended to just enable one provider).  |  credentials  |
 | AUTH_LOGOUT_REDIRECT_URL  | URL to redirect to after clicking logging out.  | --- |
 | AUTH_SESSION_EXPIRY_TIME  | Time for the session to time out. Can be set as pure number, which will automatically be used in seconds, or followed by s, m, h or d for seconds, minutes, hours or days. (ex: "30m") | "30d"  |
-| AUTH_COOKIE_PREFIX  | Prefix used for all authentication cookies (session, csrf, callback, pkce, state, nonce). Change this if you run another Auth.js/NextAuth app on the same hostname as Homarr (browsers scope cookies by host, not by port) to avoid cookie name collisions. Only letters, numbers, hyphens and underscores are allowed. | `homarr`  |
+| AUTH_COOKIE_PREFIX  | Prefix used for all authentication cookies (session, csrf, callback, pkce, state, nonce). Change this if you run another Auth.js/NextAuth app on the same hostname as Muninn (browsers scope cookies by host, not by port) to avoid cookie name collisions. Only letters, numbers, hyphens and underscores are allowed. | `homarr`  |
 
 <Tabs>
   <TabItem value="credentials" label="Credentials Provider" default>
@@ -37,9 +37,9 @@ Homarr supports multiple authentication options, from internal userbase (credent
 
     This provider authenticates against an LDAP server.
 
-    Any user in LDAP server that signs in gets created in Homarr database.
+    Any user in LDAP server that signs in gets created in Muninn database.
 
-    Roles are fetched from LDAP groups. Groups with the same name of Homarr will be used to synchronize them.
+    Roles are fetched from LDAP groups. Groups with the same name of Muninn will be used to synchronize them.
 
 
 
@@ -67,7 +67,7 @@ Homarr supports multiple authentication options, from internal userbase (credent
         #Docker compose
         version: x
         services:
-          homarr:
+          muninn:
             environment:
               AUTH_PROVIDERS: ldap
               AUTH_LDAP_URI: ldap://example.com:3890
@@ -121,11 +121,11 @@ Homarr supports multiple authentication options, from internal userbase (credent
 
     This provider authenticates using OIDC protocol.
 
-    Users signed in using OIDC are created in Homarr.
+    Users signed in using OIDC are created in Muninn.
 
     Roles are fetched from group claims. This can also be changed to roles for example added to a azure app registration by using the `AUTH_OIDC_GROUPS_ATTRIBUTE`.
 
-    If you'd rather manage group memberships for OIDC users locally (instead of via the IdP), set `AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT=true`. While enabled, Homarr stops syncing OIDC users' group memberships from the groups claim, and admins can add/remove OIDC users on a group's members page. If you turn this back to `false`, the next login of each user resumes the regular sync and reconciles their groups with the IdP's claim again, which may remove memberships that were added manually while local management was enabled.
+    If you'd rather manage group memberships for OIDC users locally (instead of via the IdP), set `AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT=true`. While enabled, Muninn stops syncing OIDC users' group memberships from the groups claim, and admins can add/remove OIDC users on a group's members page. If you turn this back to `false`, the next login of each user resumes the regular sync and reconciles their groups with the IdP's claim again, which may remove memberships that were added manually while local management was enabled.
 
     <details>
       <summary>
@@ -139,14 +139,14 @@ Homarr supports multiple authentication options, from internal userbase (credent
 
         You also have to [enable OIDC in Authelia](https://www.authelia.com/configuration/identity-providers/open-id-connect/).
 
-        Create a client for homarr. To generate client secret you can [use authelia](https://www.authelia.com/integration/openid-connect/frequently-asked-questions/#how-do-i-generate-client-secrets). This is an example config:
+        Create a client for muninn. To generate client secret you can [use authelia](https://www.authelia.com/integration/openid-connect/frequently-asked-questions/#how-do-i-generate-client-secrets). This is an example config:
 
         ```yaml
         identity_providers:
         oidc:
         ...
         clients:
-        - id: homarr
+        - id: muninn
         secret: <secret_hash>
         public: false
         authorization_policy: one_factor
@@ -162,13 +162,13 @@ Homarr supports multiple authentication options, from internal userbase (credent
         consent_mode: implicit # self hosted
         ```
 
-        In Homarr use following env variables.
+        In Muninn use following env variables.
 
         ```
         AUTH_PROVIDERS="oidc"
         AUTH_OIDC_ISSUER="https://auth.example.com"
         AUTH_OIDC_CLIENT_SECRET="client_secret"
-        AUTH_OIDC_CLIENT_ID="homarr"
+        AUTH_OIDC_CLIENT_ID="muninn"
         AUTH_OIDC_CLIENT_NAME="Authelia"
         AUTH_OIDC_FORCE_USERINFO="true" --> from v4.39 of authelia and above this is required
         ```
@@ -208,9 +208,9 @@ Homarr supports multiple authentication options, from internal userbase (credent
 
     ### Permission System
 
-    To give a user special permissions, first create a new group in homarr and assign the permission desired.
-    For example if the group on homarr is called `homarr-admins` a new group on the oidc provider, for example authentik needs to be created with the same name, that would be `homarr-admins`.
-    After assigning the group on the oidc provider to the user, and logging again into homarr, the user should automatically get placed in that group and inherit the permissions defined.
+    To give a user special permissions, first create a new group in muninn and assign the permission desired.
+    For example if the group on muninn is called `muninn-admins` a new group on the oidc provider, for example authentik needs to be created with the same name, that would be `muninn-admins`.
+    After assigning the group on the oidc provider to the user, and logging again into muninn, the user should automatically get placed in that group and inherit the permissions defined.
 
   </TabItem>
 </Tabs>
@@ -220,9 +220,9 @@ Homarr supports multiple authentication options, from internal userbase (credent
 <Tabs>
   <TabItem value="authentik" label="Authentik (OIDC) Example" default>
 
-    This example demonstrates how to use [Authentik](https://goauthentik.io/) as an OIDC provider for Homarr.
+    This example demonstrates how to use [Authentik](https://goauthentik.io/) as an OIDC provider for Muninn.
 
-    User and group management is handled within Authentik. Homarr synchronizes group memberships based on OIDC claims provided by Authentik. To grant administrative privileges, create a group in Authentik (e.g., `homarr-admins`) and add the relevant users. Then add the group with the same name in Homarr and assign the desired permissions to it.
+    User and group management is handled within Authentik. Muninn synchronizes group memberships based on OIDC claims provided by Authentik. To grant administrative privileges, create a group in Authentik (e.g., `muninn-admins`) and add the relevant users. Then add the group with the same name in Muninn and assign the desired permissions to it.
 
     <details>
       <summary>
@@ -232,41 +232,41 @@ Homarr supports multiple authentication options, from internal userbase (credent
 
         **1. Configure Authentik:**
 
-        - Create an OIDC application in Authentik for Homarr.
+        - Create an OIDC application in Authentik for Muninn.
         - Set the redirect URIs to:
-          - `https://<your-homarr-domain>/api/auth/callback/oidc`
+          - `https://<your-muninn-domain>/api/auth/callback/oidc`
           - `http://localhost:3000/api/auth/callback/oidc` (for local development)
         - Record the client ID, client secret, and application slug.
-        - Create a group (e.g., `homarr-admins`) and assign users who require admin access.
+        - Create a group (e.g., `muninn-admins`) and assign users who require admin access.
 
         **2. Example .env file:**
         ```env
         OIDC_CLIENT_ID=identificationid #OIDC client ID
         OIDC_CLIENT_SECRET=secretsecretsecret #OIDC client secret
-        OIDC_SLUG=homarr #Application slug in Authentik
+        OIDC_SLUG=muninn #Application slug in Authentik
         AUTH_DOMAIN=auth.example.com #Authentik FQDN
-        ADMIN_GROUP=homarr-admins #Authentik group for Homarr admins
-        HOMARR_FQDN=homarr.example.com #Homarr FQDN
-        SECRET_ENCRYPTION_KEY=encryptencryptencrypt #Homarr encryption key
+        ADMIN_GROUP=muninn-admins #Authentik group for Muninn admins
+        MUNINN_FQDN=muninn.example.com #Muninn FQDN
+        SECRET_ENCRYPTION_KEY=encryptencryptencrypt #Muninn encryption key
         ```
 
         **3. Example Docker Compose configuration:**
         ```yaml {14-26}
         services:
-          homarr:
-            image: ghcr.io/homarr-labs/homarr:latest
-            container_name: homarr
+          muninn:
+            image: ghcr.io/emkraan/muninn:latest
+            container_name: muninn
             restart: unless-stopped
             ports:
               - '7575:7575'
             volumes:
-              - ./homarr:/appdata
+              - ./muninn:/appdata
               - /var/run/docker.sock:/var/run/docker.sock:ro
             environment:
               - TZ=America/Los_Angeles
               - SECRET_ENCRYPTION_KEY=${SECRET_ENCRYPTION_KEY}
-              - BASE_URL=https://${HOMARR_FQDN}
-              - NEXTAUTH_URL=https://${HOMARR_FQDN}
+              - BASE_URL=https://${MUNINN_FQDN}
+              - NEXTAUTH_URL=https://${MUNINN_FQDN}
               - AUTH_PROVIDERS=oidc #(optional: include ',credentials' to keep local accounts as fallback)
               - AUTH_OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
               - AUTH_OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
@@ -285,9 +285,9 @@ Homarr supports multiple authentication options, from internal userbase (credent
         ```
 
         **4. Additional Notes:**
-        - Ensure both Authentik and Homarr are accessible via the specified FQDNs.
+        - Ensure both Authentik and Muninn are accessible via the specified FQDNs.
         - The `AUTH_OIDC_GROUPS_ATTRIBUTE` should correspond to the claim in Authentik that contains group names (typically `groups`).
-        - Your user will automatically be placed in groups that have the same name as those of authentik. So simply create them in Homarr and give them the permissions you want.
+        - Your user will automatically be placed in groups that have the same name as those of authentik. So simply create them in Muninn and give them the permissions you want.
         - For further information, refer to the [Authentik OIDC documentation](https://goauthentik.io/docs/providers/oauth2/).
 
       </div>
@@ -298,7 +298,7 @@ Homarr supports multiple authentication options, from internal userbase (credent
   </TabItem>
   <TabItem value="google" label="Google (OIDC) Example" default>
 
-    This example demonstrates how to use [Google Auth Platform](https://console.cloud.google.com/auth/overview) as an OIDC provider for Homarr.
+    This example demonstrates how to use [Google Auth Platform](https://console.cloud.google.com/auth/overview) as an OIDC provider for Muninn.
 
     Unfortunately Google does not support synchronization of group membership. See https://issuetracker.google.com/issues/133774835?pli=1.
 
@@ -310,38 +310,38 @@ Homarr supports multiple authentication options, from internal userbase (credent
 
         **1. Setup (Google):**
 
-        - Create a Project in [Google Cloud Console](https://console.cloud.google.com/) for Homarr  and switch to that Project.
-        - Configure [Authorized Domains](https://console.cloud.google.com/auth/branding) and set it to `<your-homarr-domain>`.
+        - Create a Project in [Google Cloud Console](https://console.cloud.google.com/) for Muninn  and switch to that Project.
+        - Configure [Authorized Domains](https://console.cloud.google.com/auth/branding) and set it to `<your-muninn-domain>`.
         - Create a new [OAuth Client](https://console.cloud.google.com/auth/clients):
           - Select Application Type `Web`
-          - Set the redirect URI to `https://<your-homarr-domain>/api/auth/callback/oidc`
+          - Set the redirect URI to `https://<your-muninn-domain>/api/auth/callback/oidc`
         - Record the `Client-ID` and `Client Key` (secret).
 
-        **2. Example .env file (Homarr):**
+        **2. Example .env file (Muninn):**
         ```env
         OIDC_CLIENT_ID=identificationid #Google Client-ID
         OIDC_CLIENT_SECRET=secretsecretsecret #Google Client Key (secret)
-        HOMARR_FQDN=homarr.example.com #Homarr FQDN
-        SECRET_ENCRYPTION_KEY=encryptencryptencrypt #Homarr encryption key
+        MUNINN_FQDN=muninn.example.com #Muninn FQDN
+        SECRET_ENCRYPTION_KEY=encryptencryptencrypt #Muninn encryption key
         ```
 
-        **3. Example Docker Compose configuration (Homarr):**
+        **3. Example Docker Compose configuration (Muninn):**
         ```yaml {16-22}
         services:
-          homarr:
-            image: ghcr.io/homarr-labs/homarr:latest
-            container_name: homarr
+          muninn:
+            image: ghcr.io/emkraan/muninn:latest
+            container_name: muninn
             restart: unless-stopped
             ports:
               - '7575:7575'
             volumes:
-              - ./homarr:/appdata
+              - ./muninn:/appdata
               - /var/run/docker.sock:/var/run/docker.sock:ro
             environment:
               - TZ=Europe/Berlin
               - SECRET_ENCRYPTION_KEY=${SECRET_ENCRYPTION_KEY}
-              - BASE_URL=https://${HOMARR_FQDN}
-              - NEXTAUTH_URL=https://${HOMARR_FQDN}
+              - BASE_URL=https://${MUNINN_FQDN}
+              - NEXTAUTH_URL=https://${MUNINN_FQDN}
               - AUTH_PROVIDERS=oidc #(optional: include ',credentials' to keep local accounts as fallback)
               - AUTH_OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
               - AUTH_OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}

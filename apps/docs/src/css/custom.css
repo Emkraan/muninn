@@ -19,7 +19,7 @@
   --ifm-color-primary-lightest: #fdc3c3;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
-  --homarr-secondary-bg: #e8e8e8;
+  --muninn-secondary-bg: #e8e8e8;
 
   --aa-primary-color-rgb: #fa5252 !important;
   --aa-muted-color-rgb: #fa5252 !important;
@@ -39,7 +39,7 @@
   --ifm-color-primary-lighter: #fb8282;
   --ifm-color-primary-lightest: #fdc3c3;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
-  --homarr-secondary-bg: #181818;
+  --muninn-secondary-bg: #181818;
   --ifm-color-content-inverse: var(--ifm-color-emphasis-100);
 
 
@@ -76,7 +76,7 @@
 }
 
 .footer {
-  background-color: var(--homarr-secondary-bg) !important;
+  background-color: var(--muninn-secondary-bg) !important;
 }
 
 .footer__copyright span.copyright_text {

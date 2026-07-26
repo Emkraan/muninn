@@ -16,7 +16,7 @@ We recommend [NetworkChuck's Docker Containers 101](https://www.youtube.com/watc
 ### Installation
 
 <DockerInstallSnippet data-visual-test="blackout"/>
-Finally, run ``docker compose up -d`` in the same directory. This will start the Homarr container in the background.
+Finally, run ``docker compose up -d`` in the same directory. This will start the Muninn container in the background.
 
 :::caution
 
@@ -28,10 +28,10 @@ Docker compose creates a network by default. Some integrations may not work (spe
 
 To update, navigate to the directory with the ``docker-compose.yaml`` located.
 
-- Stop Homarr using ``docker compose down``
-- Pull the newest image of Homarr using ``docker compose pull``
-- Start Homarr again using ``docker compose up -d`` (``-d`` for detached mode - start in background)
-- Delete the old image using ``docker image prune`` (*Warning: this also removes you other unused images - not just Homarr*)
+- Stop Muninn using ``docker compose down``
+- Pull the newest image of Muninn using ``docker compose pull``
+- Start Muninn again using ``docker compose up -d`` (``-d`` for detached mode - start in background)
+- Delete the old image using ``docker image prune`` (*Warning: this also removes you other unused images - not just Muninn*)
 
 You can automate this process using [Watchtower](https://containrrr.dev/watchtower/).
 
@@ -39,12 +39,12 @@ You can automate this process using [Watchtower](https://containrrr.dev/watchtow
 
 To uninstall, navigate to the directory with the ``docker-compose.yaml`` located.
 
-- Stop Homarr using ``docker compose down``
+- Stop Muninn using ``docker compose down``
 - Delete the created directories & files on your root file system (check ``docker-compose.yaml`` file for your specific locations)
 - Delete compose file using ``rm docker-compose.yaml``
-- Prune unused Docker images using ``docker image prune`` (*Warning: this also removes you other unused images - not just Homarr*)
+- Prune unused Docker images using ``docker image prune`` (*Warning: this also removes you other unused images - not just Muninn*)
 - (Optional): Prune any network or volumes if you use any.
-- (Optional): Remove Homarr from your reverse proxy, VPNs or tunnels if you use any.
+- (Optional): Remove Muninn from your reverse proxy, VPNs or tunnels if you use any.
 
 
 ## Docker standalone
@@ -62,17 +62,17 @@ To uninstall, navigate to the directory with the ``docker-compose.yaml`` located
 
 ### Installation
 
-To install Homarr using Docker, simply run the following command.
+To install Muninn using Docker, simply run the following command.
 
 ```bash
 docker run  \
-  --name homarr \
+  --name muninn \
   --restart unless-stopped \
   -p 7575:7575 \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v <your-path>/homarr/appdata:/appdata \
+  -v <your-path>/muninn/appdata:/appdata \
   -e SECRET_ENCRYPTION_KEY='your_64_character_hex_string' \
-  -d ghcr.io/homarr-labs/homarr:latest
+  -d ghcr.io/emkraan/muninn:latest
 ```
 
 :::note
@@ -82,11 +82,11 @@ Docker will mount the configuration files and icons to your host machine. Please
 :::
 
 ### Updating
-To update Homarr, you must remove your container first. Make sure that you've mounted your data and that you have access to it, so your configuration doesn't get lost.
+To update Muninn, you must remove your container first. Make sure that you've mounted your data and that you have access to it, so your configuration doesn't get lost.
 
-1. Run ``docker rm homarr`` to remove the container.
-2. Pull the latest Homarr image ``docker pull ghcr.io/homarr-labs/homarr:latest``.
-3. Re-run the command you used to install Homarr.
+1. Run ``docker rm muninn`` to remove the container.
+2. Pull the latest Muninn image ``docker pull ghcr.io/emkraan/muninn:latest``.
+3. Re-run the command you used to install Muninn.
 
 This process can get tideous, if you update frequently. Thus, we recommend [using docker-compose](#docker-compose)
 
@@ -98,8 +98,8 @@ Want to update all your containers automatically? Checkout [Watchtower](https://
 
 ### Uninstalling
 
-1. Obtain the container ID of your Homarr container using ``docker ps | grep homarr``.
+1. Obtain the container ID of your Muninn container using ``docker ps | grep muninn``.
 2. Delete the container using ``docker rm <your-container-id>``
-3. Prune unused Docker images using ``docker image prune`` (*Warning: this also removes you other unused images - not just Homarr*)
+3. Prune unused Docker images using ``docker image prune`` (*Warning: this also removes you other unused images - not just Muninn*)
 4. (Optional): Prune any network or volumes if you use any.
-5. (Optional): Remove Homarr from your reverse proxy, VPNs or tunnels if you use any.
+5. (Optional): Remove Muninn from your reverse proxy, VPNs or tunnels if you use any.

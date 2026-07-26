@@ -9,13 +9,13 @@ tags:
 
 # Users
 
-Each person accessing Homarr is a user. Using the users management you can configure who has access to certain resources.
+Each person accessing Muninn is a user. Using the users management you can configure who has access to certain resources.
 A user may have multiple sessions on different devices and can log in from multiple locations at the same time.
 A user can be assigned to multiple groups.
 
 :::tip
 
-Homarr supports [single sign on for easier and seamless authentication](/docs/advanced/single-sign-on) (e.g. Authelia).
+Muninn supports [single sign on for easier and seamless authentication](/docs/advanced/single-sign-on) (e.g. Authelia).
 
 :::
 
@@ -50,7 +50,7 @@ This field is optional.
 #### Language
 This is the currently selected language of the user.
 Changing the language will change all text & the right to left (RTL) feature in some languages.
-By default, Homarr will choose English as the default language. Here you can override the language for this specific user.
+By default, Muninn will choose English as the default language. Here you can override the language for this specific user.
 The user may choose a different language by themselves afterward.
 
 #### Home board
@@ -78,7 +78,7 @@ This action is **irreversible** and cannot be undone. All data is permanently lo
 
 #### Change password
 Here the password for this user can be changed.
-It must also meet the password requirements of Homarr.
+It must also meet the password requirements of Muninn.
 The password is stored as an encrypted value with a salt in the database - this means the value cannot be read out from the database afterward.
 You must take care of sending the new password to the user.
 This functionality can also be useful to lock out a bad actor without tampering with any data (except the password hash).
@@ -96,7 +96,7 @@ However, you can create as many groups as you'd like.
 
 ### Creating a group
 Click on the button ``New group`` to create a new one.
-Homarr will prompt you for a group name.
+Muninn will prompt you for a group name.
 
 ### Managing a group
 #### General tab
@@ -158,7 +158,7 @@ When you changed permissions, you must confirm your changes by clicking the bann
 ![](./img/changing-group-permissions.png)
 
 #### Special groups
-Currently one special group exists. This group is `everyone`. It automatically adds every user that is known to Homarr to its members. Neither its name nor its members can be changed.
+Currently one special group exists. This group is `everyone`. It automatically adds every user that is known to Muninn to its members. Neither its name nor its members can be changed.
 
 ## Invites
 Invites are an easy-to-use system to allow users to onboard themselves.

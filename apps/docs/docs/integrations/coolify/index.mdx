@@ -27,20 +27,20 @@ import { coolifyWidget } from '../../widgets/coolify';
 <AddingIntegration />
 
 :::info URL configuration
-Use the root URL of your Coolify instance, for example `https://coolify.example.com`. Homarr calls Coolify endpoints under `/api` and `/api/v1` automatically.
+Use the root URL of your Coolify instance, for example `https://coolify.example.com`. Muninn calls Coolify endpoints under `/api` and `/api/v1` automatically.
 :::
 
 ### Secrets
 <IntegrationSecrets secrets={[{
   credentials: ['apiKey'],
   steps: [
-    'Open your Coolify instance and make sure you are in the team you want Homarr to monitor.',
+    'Open your Coolify instance and make sure you are in the team you want Muninn to monitor.',
     (<span>Enable API access under <strong>Settings &gt; Advanced</strong> if it is disabled.</span>),
     (<span>Go to <strong>Security &gt; API Tokens</strong>.</span>),
-    'Enter a name, e.g. "Homarr".',
+    'Enter a name, e.g. "Muninn".',
     (<span>Select the <code>read</code> permission. The Coolify widget only reads version, server, project, application, and service data.</span>),
     'Click "Create".',
     'Copy the generated token immediately. Coolify only shows it once.',
-    'Paste the token into the API Key field in Homarr.'
+    'Paste the token into the API Key field in Muninn.'
   ]
 }]} />

@@ -17,14 +17,14 @@ export const calendarWidget: WidgetDefinition = {
       {
         name: "Start from",
         description:
-          "Amount of months in past that Homarr should load in background. Higher number means more memory usage.",
+          "Amount of months in past that Muninn should load in background. Higher number means more memory usage.",
         values: "2-9999",
         defaultValue: "2",
       },
       {
         name: "End at",
         description:
-          "Amount of months in future that Homarr should load in background. Higher number means more memory usage.",
+          "Amount of months in future that Muninn should load in background. Higher number means more memory usage.",
         values: "2-9999",
         defaultValue: "2",
       },

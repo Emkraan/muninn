@@ -3,8 +3,8 @@ authors:
   - manuel-rw
 ---
 
-# Homarr 1.0 - complete rewrite of all systems
-We proudly present to you - Homarr ``1.0``.
+# Muninn 1.0 - complete rewrite of all systems
+We proudly present to you - Muninn ``1.0``.
 We have started work on this new version back in 2023 and have worked tirelessly for months on this brand-new dashboard.
 
 This isn't our usual update. ``1.0`` doesn't use the same code from previous versions, but has been written from the ground up.
@@ -13,7 +13,7 @@ This will be a one time occurrence and version > ``1.0`` will have less breaking
 This time more important than every; **read the breaking changes** list and **create a backup** before updating.
 Some third party installation methods may take multiple days or weeks to update to the new version.
 
-See [this guide on how to import your previous Homarr dashboard](/docs/getting-started/after-the-installation#importing-a-zip-from-version-before-100)
+See [this guide on how to import your previous Muninn dashboard](/docs/getting-started/after-the-installation#importing-a-zip-from-version-before-100)
 
 ## Changes at a glance
 - **Asynchronous integrations system**: In versions prior to ``1.0``, we fetched data upon each request synchronously.
@@ -27,7 +27,7 @@ For easier management, you can organize users into groups and manage them all at
 This guarantees that you've configured your integration correctly and helps you find errors faster.
 - **Re-imagined widgets**: All widgets have been rewritten & improved. They offer much better performance,
 reliability and scalability compared to < ``1.0``.
-- **Improved performance**: We have upgraded the underlying framework of Homarr and take advantage
+- **Improved performance**: We have upgraded the underlying framework of Muninn and take advantage
 of an in-memory message bus and websockets to deliver data near realtime to you.
 
 <!-- truncate -->
@@ -57,7 +57,7 @@ Please consult the breaking changes list & upgrade guide if you used third-party
 - Mounts
   - Removed ``/app/data/configs`` -> JSON configs have been removed in favour of relation databases
   - Removed ``/app/public/icons`` -> Images can not be uploaded via the [media management](/docs/management/media/) in the UI
-  - Moved ``/data`` to ``/appdata`` and restructured contents (not backwards compatible!) -> Create a backup before migration of the entire directory to copy data to new Homarr
+  - Moved ``/data`` to ``/appdata`` and restructured contents (not backwards compatible!) -> Create a backup before migration of the entire directory to copy data to new Muninn
 - Widgets:
   - Calendar:
     - Removed option ``Use Sonarr v4 API``
@@ -67,8 +67,8 @@ Please consult the breaking changes list & upgrade guide if you used third-party
   - Download speed: We have removed this widget in favour of the brand new download widget which will also display this data.
   - Dash. widget: We have removed this widget in favour of the System Health Widget. It will also display all data and some more than the old widget.
 - Database:
-  - Changed schema of the database to a completely new schema. They are not backwards compatible. Please export the data from old Homarr in the UI and import it in ``1.0``
-  - Removed all usage of JSON files to store data. Import JSON files in Homarr ``1.0`` to import your dashboards.
+  - Changed schema of the database to a completely new schema. They are not backwards compatible. Please export the data from old Muninn in the UI and import it in ``1.0``
+  - Removed all usage of JSON files to store data. Import JSON files in Muninn ``1.0`` to import your dashboards.
   - Removed ``schemaVersion`` from JSON and use the drizzle migrations to keep track of schema versions and take care of migrations.
 - Web Server:
   - Added an internal Nginx proxy to forward requests to two servers inside the container for technical reasons.
@@ -83,6 +83,6 @@ Please consult the breaking changes list & upgrade guide if you used third-party
   - TrueNAS
     - The TrueCharts app chart is permanently deprecated and no longer maintained / supported. Please migrate to Electric Eel or a different Kubernetes platform.
   - Unraid
-    - The Homarr app must be reinstalled. The existing directories on your disk are not compatible with Homarr 1.0. Export your old data in < `` 1.0`` and install using different file system locations.
+    - The Muninn app must be reinstalled. The existing directories on your disk are not compatible with Muninn 1.0. Export your old data in < `` 1.0`` and install using different file system locations.
   - Kubernetes
     - The official Helm chart has moved from https://github.com/oben01/charts to https://github.com/homarr-labs/charts

@@ -8,9 +8,9 @@ tags:
 
 # Model Context Protocol (MCP)
 
-Homarr exposes a [Model Context Protocol](https://modelcontextprotocol.io) server at `/api/mcp/mcp`, enabling AI assistants like Claude, Cursor, VS Code Copilot, and Claude Code to interact with your Homarr instance using natural language.
+Muninn exposes a [Model Context Protocol](https://modelcontextprotocol.io) server at `/api/mcp/mcp`, enabling AI assistants like Claude, Cursor, VS Code Copilot, and Claude Code to interact with your Muninn instance using natural language.
 
-With MCP, you can ask your AI assistant to manage apps, integrations, users, boards, Docker containers, media servers, DNS settings, and more - all through Homarr's existing tRPC API, now exposed as 50+ AI-callable tools.
+With MCP, you can ask your AI assistant to manage apps, integrations, users, boards, Docker containers, media servers, DNS settings, and more - all through Muninn's existing tRPC API, now exposed as 50+ AI-callable tools.
 
 ## Getting Started
 
@@ -27,7 +27,7 @@ You can also create one directly from the MCP tab if you don't have any keys yet
 
 | Transport           | Best For                                                     | Requirements                   |
 | ------------------- | ------------------------------------------------------------ | ------------------------------ |
-| **Streamable HTTP** | Cursor, Claude Desktop, VS Code Copilot, Claude Code         | Direct HTTP access to Homarr   |
+| **Streamable HTTP** | Cursor, Claude Desktop, VS Code Copilot, Claude Code         | Direct HTTP access to Muninn   |
 | **STDIO**           | Firewall-restricted environments, offline-compatible clients | `npx` and `mcp-remote` package |
 
 **Streamable HTTP** is recommended for most setups. It works with all major AI clients.
@@ -41,8 +41,8 @@ Add the following to your client's MCP configuration file:
 ```json
 {
   "mcpServers": {
-    "homarr": {
-      "url": "https://your-homarr-instance.com/api/mcp/mcp",
+    "muninn": {
+      "url": "https://your-muninn-instance.com/api/mcp/mcp",
       "headers": {
         "ApiKey": "<your-api-key>"
       }
@@ -57,7 +57,7 @@ Where to place this config:
 | --------------- | ----------------------------------------------- |
 | Cursor          | `.cursor/mcp.json`                              |
 | Claude Desktop  | `claude_desktop_config.json`                    |
-| Claude Code     | `.claude/mcp.json` (or `claude mcp add homarr`) |
+| Claude Code     | `.claude/mcp.json` (or `claude mcp add muninn`) |
 | VS Code Copilot | `.vscode/mcp.json`                              |
 
 :::warning
@@ -71,12 +71,12 @@ Replace `<your-api-key>` with your actual API key. Never commit API keys to vers
 ```json
 {
   "mcpServers": {
-    "homarr": {
+    "muninn": {
       "command": "npx",
       "args": [
         "-y",
         "mcp-remote",
-        "https://your-homarr-instance.com/api/mcp/mcp",
+        "https://your-muninn-instance.com/api/mcp/mcp",
         "--header",
         "ApiKey:<your-api-key>"
       ]
@@ -94,7 +94,7 @@ MCP supports two authentication methods:
 | Method               | Description                                           | Best For                                                         |
 | -------------------- | ----------------------------------------------------- | ---------------------------------------------------------------- |
 | **API Key**          | Include `ApiKey: <id>.<token>` header in all requests | Scripts, CI/CD, direct client configs                            |
-| **OAuth 2.1 + PKCE** | Full OAuth flow with dynamic client registration      | MCP clients with OAuth support (e.g. `opencode mcp auth homarr`) |
+| **OAuth 2.1 + PKCE** | Full OAuth flow with dynamic client registration      | MCP clients with OAuth support (e.g. `opencode mcp auth muninn`) |
 
 API key authentication is simpler and recommended for most setups. The API key inherits the permissions of the user who created it. Tools that require higher privileges will return permission errors if the key lacks access.
 
@@ -108,7 +108,7 @@ curl -s -X POST \
   -H "Accept: application/json, text/event-stream" \
   -H "ApiKey: <your-api-key>" \
   -d '{"jsonrpc":"2.0","method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}},"id":1}' \
-  https://your-homarr-instance.com/api/mcp/mcp
+  https://your-muninn-instance.com/api/mcp/mcp
 ```
 
 A successful response includes the server capabilities and available tools. Use `tools/list` to see all available tools:
@@ -119,12 +119,12 @@ curl -s -X POST \
   -H "Accept: application/json, text/event-stream" \
   -H "ApiKey: <your-api-key>" \
   -d '{"jsonrpc":"2.0","method":"tools/list","id":1}' \
-  https://your-homarr-instance.com/api/mcp/mcp
+  https://your-muninn-instance.com/api/mcp/mcp
 ```
 
 ## Available Tools
 
-Homarr exposes 50+ tools organized by namespace. Each tool is either a **query** (GET, read-only) or **mutation** (POST, write action).
+Muninn exposes 50+ tools organized by namespace. Each tool is either a **query** (GET, read-only) or **mutation** (POST, write action).
 
 | Namespace          | Example Tools                                            | Type       |
 | ------------------ | -------------------------------------------------------- | ---------- |
@@ -146,7 +146,7 @@ Homarr exposes 50+ tools organized by namespace. Each tool is either a **query**
 | `mediaServer`      | Media server sessions and stats                          | GET        |
 | `smartHome`        | Execute automations, device states                       | GET + POST |
 
-The tools table on the MCP tab is dynamically generated - it always reflects the latest available procedures from your Homarr instance.
+The tools table on the MCP tab is dynamically generated - it always reflects the latest available procedures from your Muninn instance.
 
 ## Security
 
@@ -158,10 +158,10 @@ The tools table on the MCP tab is dynamically generated - it always reflects the
 
 ## Use Cases
 
-- **"Show me all apps on my Homarr dashboard"** - AI lists all apps with their names and URLs
+- **"Show me all apps on my Muninn dashboard"** - AI lists all apps with their names and URLs
 - **"Restart the Plex Docker container"** - AI finds and restarts the container via Docker integration
 - **"What's downloading right now?"** - AI fetches active download status across all download integrations
 - **"Create a new app pointing to my Grafana instance"** - AI creates an app with the correct icon and URL
-- **"How many users are on my Homarr instance?"** - AI lists all users (admin only)
+- **"How many users are on my Muninn instance?"** - AI lists all users (admin only)
 - **"Toggle Pi-hole blocking for 5 minutes"** - AI interacts with DNS controls
 - **"How are my servers doing?"** - AI fetches Beszel system stats including CPU, memory, disk, and alerts

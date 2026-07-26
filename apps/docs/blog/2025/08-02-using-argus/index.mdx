@@ -3,9 +3,9 @@ authors:
   - meierschlumpf
 ---
 
-# How to use Argus with Homarr
+# How to use Argus with Muninn
 
-In `v1.32.0` we added the endpoint `/api/info` which returns the current version of Homarr and can therefore be used in Argus to watch for updates.
+In `v1.32.0` we added the endpoint `/api/info` which returns the current version of Muninn and can therefore be used in Argus to watch for updates.
 This guide will show you how to set up a user with apiKey to access the endpoint without providing admin access through it.
 
 <!-- truncate -->
@@ -41,12 +41,12 @@ Now we can create a user which will be used by Argus to access the `/api/info` e
 
 Now we want to create therefore we have to log in with the user we just created.
 
-1. Log out of Homarr
+1. Log out of Muninn
 2. Log in with the user we just created
 3. Go to `Management` > `Tools` > `API Keys`
 4. Click on `Create API Key`
 5. Copy the generated API key and save it somewhere, you will not be able to see it again
-6. Logout of Homarr
+6. Logout of Muninn
 
 ## Reduce permissions of the user
 
@@ -64,4 +64,4 @@ Now you can configure Argus to use the user and apiKey we created.
 
 ![Argus configuration](./img/argus-configuration.png)
 
-Replace the `<secret>` with the apiKey you created and the deployed version url with the url of your Homarr instance.
+Replace the `<secret>` with the apiKey you created and the deployed version url with the url of your Muninn instance.

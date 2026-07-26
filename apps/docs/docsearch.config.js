@@ -1,4 +1,4 @@
-// Algolia DocSearch crawler for homarr.dev
+// Algolia DocSearch crawler for muninn.dev
 // Crawler ID: cd77a285-2756-4557-bf21-ee703748df15
 // Paste this in the Algolia crawler editor.
 
@@ -8,22 +8,22 @@ new Crawler({
   indexPrefix: "",
   rateLimit: 32,
   maxDepth: 4,
-  startUrls: ["https://homarr.dev/"],
-  sitemaps: ["https://homarr.dev/sitemap.xml"],
+  startUrls: ["https://muninn.dev/"],
+  sitemaps: ["https://muninn.dev/sitemap.xml"],
   ignoreCanonicalTo: true,
-  discoveryPatterns: ["https://homarr.dev/**"],
+  discoveryPatterns: ["https://muninn.dev/**"],
   exclusionPatterns: [
-    "https://homarr.dev/docs/tags/**",
-    "https://homarr.dev/blog/tags/**",
-    "https://homarr.dev/blog/authors/**",
-    "https://homarr.dev/blog/archive/**",
-    "https://homarr.dev/search/**",
-    "https://homarr.dev/docs/category/**",
+    "https://muninn.dev/docs/tags/**",
+    "https://muninn.dev/blog/tags/**",
+    "https://muninn.dev/blog/authors/**",
+    "https://muninn.dev/blog/archive/**",
+    "https://muninn.dev/search/**",
+    "https://muninn.dev/docs/category/**",
   ],
   actions: [
     {
       indexName: "Docusaurus",
-      pathsToMatch: ["https://homarr.dev/**"],
+      pathsToMatch: ["https://muninn.dev/**"],
       recordExtractor: ({ $, helpers }) => {
         const lvl0 =
           $(".menu__link.menu__link--sublist.menu__link--active, .navbar__item.navbar__link--active").last().text() ||
@@ -51,7 +51,7 @@ new Crawler({
     },
     {
       indexName: "markdown",
-      pathsToMatch: ["https://homarr.dev/**"],
+      pathsToMatch: ["https://muninn.dev/**"],
       recordExtractor: ({ $, url, helpers }) => {
         const text = helpers.markdown("article > *:not(nav):not(header):not(.breadcrumb)");
 

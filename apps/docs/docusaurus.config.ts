@@ -135,7 +135,7 @@ const config: Config = {
           position: "right",
         },
         {
-          to: "https://opencollective.com/homarr",
+          to: "https://www.buymeacoffee.com/emkraan",
           label: "💴 Donate",
           position: "right",
         },
@@ -145,32 +145,12 @@ const config: Config = {
           position: "right",
           items: [
             {
-              to: "https://discord.com/invite/aCsmEV5RgA",
-              label: "Discord",
-            },
-            {
               to: "https://github.com/Emkraan/muninn",
               label: "GitHub",
             },
             {
-              to: "https://www.answeroverflow.com/c/972958686051962910",
-              label: "Answer Overflow",
-            },
-            {
-              to: "https://crowdin.com/project/homarr_labs",
-              label: "Community translations (Crowdin)",
-            },
-            {
-              to: "https://www.reddit.com/r/homarr/",
-              label: "Reddit",
-            },
-            {
-              to: "https://opencollective.com/homarr",
-              label: "OpenCollective",
-            },
-            {
-              to: "https://x.com/homarr_labs",
-              label: "X / Twitter",
+              to: "https://www.buymeacoffee.com/emkraan",
+              label: "Donate",
             },
           ],
         },
@@ -208,16 +188,12 @@ const config: Config = {
           title: "Community",
           items: [
             {
-              label: "Discord",
-              to: "https://discord.com/invite/aCsmEV5RgA",
-            },
-            {
               label: "GitHub",
               to: "https://github.com/Emkraan/muninn",
             },
             {
               label: "Donate",
-              to: "https://opencollective.com/homarr",
+              to: "https://www.buymeacoffee.com/emkraan",
             },
           ],
         },

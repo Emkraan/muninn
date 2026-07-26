@@ -14,27 +14,27 @@ import manageBoardHeaderEditMode from "./img/manage-board-header-edit-mode.png";
 import manageBoardHeaderAddItem from "./img/manage-board-header-add-item-menu.png";
 import manageBoardHeaderChooseItem from "./img/manage-board-header-choose-item.png";
 import manageBoardNoApp from "./img/manage-board-no-app.png";
-import manageExportOldHomarr from "./img/old-homarr-export-data.png";
-import manageImportOldHomarrDropzone from "./img/old-homarr-import-dropzone.png";
-import manageImportOldHomarrChooseData from "./img/old-homarr-import-choose-imported-data.png";
+import manageExportOldMuninn from "./img/old-homarr-export-data.png";
+import manageImportOldMuninnDropzone from "./img/old-homarr-import-dropzone.png";
+import manageImportOldMuninnChooseData from "./img/old-homarr-import-choose-imported-data.png";
 import manageImportDecryptionToken from "./img/old-homarr-import-decryption-token.png";
 
 :::tip
 
-Read our [glossary](/docs/getting-started/glossary) if you are new to Homarr.
+Read our [glossary](/docs/getting-started/glossary) if you are new to Muninn.
 
 :::
 
-Congratulations on installing Homarr. Now it's time to get yourself familiar with the concepts of Homarr and how to use it.
+Congratulations on installing Muninn. Now it's time to get yourself familiar with the concepts of Muninn and how to use it.
 
 ## Onboarding
 
-The onboard will show the first time you start Homarr.
+The onboard will show the first time you start Muninn.
 This process will help you with your first steps and adding some initial data, such as the administrator account.
 
 :::note
 
-If you see this screen repeatitly after you restarted the Homarr container, your Docker mounting paths may be missing,
+If you see this screen repeatitly after you restarted the Muninn container, your Docker mounting paths may be missing,
 incorrect or read-only. Read [our installation instructions](/docs/getting-started/installation/docker) again to fix this issue.
 
 :::
@@ -48,8 +48,8 @@ You may refresh anytime and continue from a different device - the onboarding is
 ### Starting from scratch
 
 Depending on your auth provider configuration you will either first see the admin user creation form or the external group creation form.
-If the credentials provider was selected, you'll be prompted to create an admin user for Homarr.
-This user cannot be deleted and has full control over Homarr and all of its boards.
+If the credentials provider was selected, you'll be prompted to create an admin user for Muninn.
+This user cannot be deleted and has full control over Muninn and all of its boards.
 You must choose a username and password (both can later be changed).
 We enforce strict password requirements when you enter your password to protect your instance if you accidentally
 expose it to the internet.
@@ -61,8 +61,8 @@ expose it to the internet.
 />
 
 If you selected external providers (such as LDAP or OIDC), you'll be prompted to create an admin group.
-This group will be used to synchronize users from your provider to Homarr.
-When a user logs in through the provider, any of their groups that match groups in Homarr will be assigned to the user.
+This group will be used to synchronize users from your provider to Muninn.
+When a user logs in through the provider, any of their groups that match groups in Muninn will be assigned to the user.
 The name of the group must match exactly the name of the group in the provider.
 
 <img
@@ -71,7 +71,7 @@ The name of the group must match exactly the name of the group in the provider.
   width={300}
 />
 
-Next, you can configure some basic settings for Homarr. We recommend to leave all settings at default for most users.
+Next, you can configure some basic settings for Muninn. We recommend to leave all settings at default for most users.
 Here you can also disable analytics. Please note that our analytics are completly anonymous and is fully compliant with GDPR and PECR.
 
 <img
@@ -86,7 +86,7 @@ After configuring server settings, the onboarding guides you through setting up 
 
 #### Docker service discovery
 
-If Docker is available (socket mounted), Homarr automatically detects running containers and matches them to known integration types.
+If Docker is available (socket mounted), Muninn automatically detects running containers and matches them to known integration types.
 Matching integrations are pre-selected in the integration list, saving you from manually picking each one.
 
 #### URL templating
@@ -124,31 +124,31 @@ We recommend you to continue with the section [creating your first board on this
 
 ### Importing a ZIP from version before 1.0.0
 
-This is recommended when you used Homarr before and want to re-import your data.
+This is recommended when you used Muninn before and want to re-import your data.
 It is important that you first migrate correctly using [the list of breaking changes for 1.0](/blog/2024/09/23/version-1.0).
 
 <img
-  src={manageExportOldHomarr}
-  alt="Export from old Homarr"
+  src={manageExportOldMuninn}
+  alt="Export from old Muninn"
   style={{ maxWidth: 500 }}
 />
 
 **How to export and import data**
 
-1. Navigate to your old Homarr, open your management pages, open the tools submenu and open `Migrate to 1.0`.
+1. Navigate to your old Muninn, open your management pages, open the tools submenu and open `Migrate to 1.0`.
 2. Check the contents that you want to export. We recommend you to export all data.
 3. Click on the export data button
 4. Save the ZIP file, that is being downloaded, on your device. If you selected "integrations" or "users", you also get an encryption / decryption key.
    Copy it and do not loose it!
-5. Go to your new >1.0.0 Homarr instance and start the onboarding. Choose `Import from Homarr before 1.0`
-6. Drag and drop your previously downloaded ZIP archive into the file upload: <br/><img src={manageImportOldHomarrDropzone} style={{ maxWidth: 500 }} />
-7. Next, choose the data that you want to import and how to import it. Since screen sizes were removed in 1.0, we create a new board for every screen size by default. We recommend you to only keep the best layout and adjust it later in 1.0.0 - but you can also import all of them and pick later.<br/><img src={manageImportOldHomarrChooseData} style={{ maxWidth: 500 }} />
+5. Go to your new >1.0.0 Muninn instance and start the onboarding. Choose `Import from Muninn before 1.0`
+6. Drag and drop your previously downloaded ZIP archive into the file upload: <br/><img src={manageImportOldMuninnDropzone} style={{ maxWidth: 500 }} />
+7. Next, choose the data that you want to import and how to import it. Since screen sizes were removed in 1.0, we create a new board for every screen size by default. We recommend you to only keep the best layout and adjust it later in 1.0.0 - but you can also import all of them and pick later.<br/><img src={manageImportOldMuninnChooseData} style={{ maxWidth: 500 }} />
 8. If you previously exported integrations or users, you will be asked to decrypt the data safely using your obtained encryption token. Paste into the modal and confirm your action.<br/><img src={manageImportDecryptionToken} style={{ maxWidth: 500 }} />
 9. Next, you can [follow the same setup as when starting from scratch](#starting-from-scratch). After you completed the onboarding, all of your data will be migrated and available.
 
 ## Creating your first board
 
-In Homarr, you organize your apps and widgets on boards.
+In Muninn, you organize your apps and widgets on boards.
 Boards can be organized using the interactive drag and drop.
 Let's create your first board by navigating here: `Manage` > `Boards` > `New board`:
 ![](./img/manage-create-board-button.png)
@@ -162,7 +162,7 @@ Congratulations - you've just created your first board. You can see boards, that
 
 ![](./img/manage-view-board.png)
 
-## Add your first app to Homarr
+## Add your first app to Muninn
 
 To add links to your dashboard, you must first add them as an "app".
 Navigate to this page to add an app:
@@ -171,7 +171,7 @@ Navigate to this page to add an app:
 
 Next, click on the `New app` button. You'll need to provide a name and an icon to create an app.
 The name must be at least one character long but you can provide any image URL for the icon.
-Homarr ships with over 11K icons - so you can just search by entering a search text instead.
+Muninn ships with over 11K icons - so you can just search by entering a search text instead.
 
 ![](./img/manage-add-app-form.png)
 
@@ -230,7 +230,7 @@ As soon as you chose the app, the modal will close and you'll get the following 
   alt="Screenshot of the No app element on the board"
 />
 
-This is expected, because you haven't told Homarr what app it should show in this item.
+This is expected, because you haven't told Muninn what app it should show in this item.
 To configure this, click on the small 3 dots at the top of the item in the edit mode and choose "Edit item" in the menu.
 
 ![](./img/manage-board-edit-app.gif)
@@ -261,7 +261,7 @@ To move items to the bottom, you must add more items or resize items.
 :::tip
 
 We recommend you to experiment for a few minutes, before you start building your actual dashboard.
-This helps you to explore the capabilities of Homarr before you build your board in a suboptimal way.
+This helps you to explore the capabilities of Muninn before you build your board in a suboptimal way.
 
 :::
 
@@ -278,7 +278,7 @@ Be sure to save your changes by exiting edit mode!
 
 Now it's time to integrate some basic data into your board.
 To do this, we first need to create an integration.
-An integration is a connection between Homarr and a third party application - usually something that you run and deploy yourself.
+An integration is a connection between Muninn and a third party application - usually something that you run and deploy yourself.
 
 Navigate to `Manage` > `Integrations` (for example via your user menu).
 As an example, we are going to use the public demo instance of **Dash.** - a popular application to monitor CPU / hardware usage.
@@ -296,7 +296,7 @@ Now let's embed it to your board (see next section).
 :::note
 
 Some integrations may require additional configuration, such as a username, password or API tokens.
-Depending on your networking setup and applications, the connection from Homarr might also get blocked by firewalls,
+Depending on your networking setup and applications, the connection from Muninn might also get blocked by firewalls,
 the target application or your router.
 
 :::
@@ -378,11 +378,11 @@ You cannot reduce their horizontal width.
 
 ## Guided tours
 
-After completing the onboarding, Homarr provides interactive guided tours to help you discover key features.
+After completing the onboarding, Muninn provides interactive guided tours to help you discover key features.
 
 ### Management tour
 
-When you first visit the management area (`/manage`), Homarr walks you through the main pages: boards, apps, integrations, and users (admin only).
+When you first visit the management area (`/manage`), Muninn walks you through the main pages: boards, apps, integrations, and users (admin only).
 Each page highlights the list view and the create action so you know where to find and add things.
 
 ### Board tour
@@ -407,10 +407,10 @@ See these curated pages for your next steps:
 - Integrate software that you use using the [integrations management](/docs/management/integrations/)
 - Choose from our beautiful and interactive [widgets](/docs/category/widgets)
 - See [all supported integrations](/docs/category/integrations)
-- Integrate with Homarr with your own application using [the API](/docs/management/api/)
+- Integrate with Muninn with your own application using [the API](/docs/management/api/)
 
 :::danger
 
-The Homarr Team will never ask for your credentials. Do not send people your credentials, as they manage the access to your applications and can cause harm to your device if they are abused.
+The Muninn Team will never ask for your credentials. Do not send people your credentials, as they manage the access to your applications and can cause harm to your device if they are abused.
 
 :::
