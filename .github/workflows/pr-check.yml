@@ -1,0 +1,46 @@
+name: PR checks
+
+# Lint + typecheck + build on every pull request. This is the real gate the
+# Dependabot auto-merge workflow waits on (see dependabot-auto-merge.yml), so a
+# dependency bump that breaks compilation, linting, or the build can never
+# merge itself. The heavier Docker image build stays on build-and-deploy.yml
+# (push/tag), which runs after a merge lands on main.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, typecheck, build
+    runs-on: ubuntu-latest
+    env:
+      SKIP_ENV_VALIDATION: "true"
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.18.0"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
