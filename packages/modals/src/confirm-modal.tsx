@@ -60,18 +60,24 @@ export const ConfirmModal = createModal<Omit<ConfirmModalProps, "title">>(({ act
     async (event: React.MouseEvent<HTMLButtonElement>) => {
       setLoading(true);
 
-      if (typeof confirmProps?.onClick === "function") {
-        confirmProps.onClick(event);
-      }
+      // Always clear the loading state and close, even if onConfirm rejects.
+      // Otherwise a throwing/rejecting confirm handler leaves the button
+      // spinning forever and the modal stuck open (the failure the api-key
+      // delete hit). The rejection still propagates for the caller to surface.
+      try {
+        if (typeof confirmProps?.onClick === "function") {
+          confirmProps.onClick(event);
+        }
 
-      if (typeof onConfirm === "function") {
-        await onConfirm();
+        if (typeof onConfirm === "function") {
+          await onConfirm();
+        }
+      } finally {
+        if (closeOnConfirm) {
+          actions.closeModal();
+        }
+        setLoading(false);
       }
-
-      if (closeOnConfirm) {
-        actions.closeModal();
-      }
-      setLoading(false);
     },
     [confirmProps, onConfirm, closeOnConfirm, actions],
   );

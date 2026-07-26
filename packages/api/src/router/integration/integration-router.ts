@@ -7,7 +7,7 @@ import { createId, objectEntries } from "@homarr/common";
 import { decryptSecret, encryptSecret } from "@homarr/common/server";
 import { createLogger } from "@homarr/core/infrastructure/logs";
 import type { Database } from "@homarr/db";
-import { and, asc, eq, handleTransactionsAsync, inArray, like, or } from "@homarr/db";
+import { and, asc, eq, handleTransactionsAsync, inArray, likeInsensitive, or } from "@homarr/db";
 import { selectAppSchema } from "@homarr/db/validationSchemas";
 import {
   apps,
@@ -250,7 +250,7 @@ export const integrationRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       return await ctx.db.query.integrations.findMany({
-        where: like(integrations.name, `%${input.query}%`),
+        where: likeInsensitive(integrations.name, input.query),
         orderBy: asc(integrations.name),
         limit: input.limit,
       });

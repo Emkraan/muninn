@@ -11,3 +11,4 @@ export type Database = typeof db;
 
 export { handleDiffrentDbDriverOperationsAsync as handleTransactionsAsync } from "./transactions";
 export { isMysql, isPostgresql } from "./collection";
+export { likeInsensitive, startsWithInsensitive } from "./search";

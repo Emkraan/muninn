@@ -7,7 +7,7 @@ import { comparePasswordsAsync, hashPasswordAsync } from "@homarr/auth";
 import { createId } from "@homarr/common";
 import { createLogger } from "@homarr/core/infrastructure/logs";
 import type { Database } from "@homarr/db";
-import { and, eq, handleTransactionsAsync, inArray, like, or } from "@homarr/db";
+import { and, eq, handleTransactionsAsync, inArray, like, likeInsensitive, or } from "@homarr/db";
 import { getMaxGroupPositionAsync } from "@homarr/db/queries";
 import { boards, groupMembers, groupPermissions, groups, invites, users } from "@homarr/db/schema";
 import { selectUserSchema } from "@homarr/db/validationSchemas";
@@ -354,7 +354,7 @@ export const userRouter = createTRPCRouter({
           image: true,
           email: true,
         },
-        where: like(users.name, `%${input.query}%`),
+        where: likeInsensitive(users.name, input.query),
         limit: input.limit,
       });
       return dbUsers.map((user) => ({

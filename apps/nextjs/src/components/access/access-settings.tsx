@@ -3,7 +3,8 @@ import { Group, Stack, Tabs } from "@mantine/core";
 import { IconUser, IconUserDown, IconUsersGroup } from "@tabler/icons-react";
 
 import type { GroupPermissionKey } from "@homarr/definitions";
-import { useScopedI18n } from "@homarr/translation/client";
+import { showErrorNotification, showSuccessNotification } from "@homarr/notifications";
+import { useI18n, useScopedI18n } from "@homarr/translation/client";
 import type { TablerIcon } from "@homarr/ui";
 import { CountBadge } from "@homarr/ui";
 
@@ -34,7 +35,7 @@ interface UserAccessPermission<TPermission extends string> {
 interface SimpleMutation<TPermission extends string> {
   mutate: (
     props: { entityId: string; permissions: { principalId: string; permission: TPermission }[] },
-    options: { onSuccess: () => void },
+    options: { onSuccess: () => void; onError?: () => void },
   ) => void;
   isPending: boolean;
 }
@@ -81,6 +82,7 @@ export const AccessSettings = <TPermission extends string>({
   entity,
   translate,
 }: Props<TPermission>) => {
+  const tRoot = useI18n();
   const [counts, setCounts] = useState({
     user: query.data.users.length + (entity.owner ? 1 : 0),
     group: query.data.groups.length,
@@ -94,7 +96,11 @@ export const AccessSettings = <TPermission extends string>({
       },
       {
         onSuccess() {
+          showSuccessNotification({ message: tRoot("common.notification.update.success") });
           void query.invalidate();
+        },
+        onError() {
+          showErrorNotification({ message: tRoot("common.notification.update.error") });
         },
       },
     );
@@ -108,7 +114,11 @@ export const AccessSettings = <TPermission extends string>({
       },
       {
         onSuccess() {
+          showSuccessNotification({ message: tRoot("common.notification.update.success") });
           void query.invalidate();
+        },
+        onError() {
+          showErrorNotification({ message: tRoot("common.notification.update.error") });
         },
       },
     );

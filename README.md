@@ -119,6 +119,24 @@ To use an external Postgres server instead of the bundled SQLite file:
       - SECRET_ENCRYPTION_KEY_FILE=/run/secrets/secret_encryption_key
 ```
 
+### External Redis
+
+Muninn bundles a Redis instance and uses it by default (zero-config). To point at
+an external or centralized Redis instead of the bundled one:
+
+```yaml
+    environment:
+      - REDIS_IS_EXTERNAL=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      # optional: isolate Muninn's keys on a dedicated logical database
+      - REDIS_DATABASE_INDEX=0
+      # optional auth (supports the _FILE convention for Docker secrets)
+      # - REDIS_PASSWORD_FILE=/run/secrets/redis_password
+```
+
+The bundled Redis is skipped when `REDIS_IS_EXTERNAL=true`.
+
 ## Data Volume
 
 State lives under `/appdata`:

@@ -3,7 +3,7 @@ import { z } from "zod/v4";
 
 import { createId } from "@homarr/common";
 import { encryptSecret } from "@homarr/common/server";
-import { eq, like, or } from "@homarr/db";
+import { eq, likeInsensitive, or } from "@homarr/db";
 import { placeAllWidgetsAsync } from "@homarr/db/queries";
 import {
   apps,
@@ -183,7 +183,7 @@ export const onboardRouter = createTRPCRouter({
         return { status: "empty" as const, ...emptyResult };
       }
 
-      const likeQueries = containers.map((c) => like(icons.name, `%${extractContainerImageName(c.Image)}%`));
+      const likeQueries = containers.map((c) => likeInsensitive(icons.name, extractContainerImageName(c.Image)));
       const dbIcons = likeQueries.length > 0 ? await ctx.db.query.icons.findMany({ where: or(...likeQueries) }) : [];
 
       const seenKinds = new Set<IntegrationKind>();

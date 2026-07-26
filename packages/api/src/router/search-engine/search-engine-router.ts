@@ -3,7 +3,7 @@ import { z } from "zod/v4";
 
 import { createId } from "@homarr/common";
 import { createLogger } from "@homarr/core/infrastructure/logs";
-import { and, asc, eq, like } from "@homarr/db";
+import { and, asc, eq, likeInsensitive, startsWithInsensitive } from "@homarr/db";
 import { getServerSettingByKeyAsync, updateServerSettingByKeyAsync } from "@homarr/db/queries";
 import { searchEngines, users } from "@homarr/db/schema";
 import { byIdSchema, paginatedSchema, searchSchema } from "@homarr/validation/common";
@@ -15,7 +15,7 @@ const logger = createLogger({ module: "searchEngineRouter" });
 
 export const searchEngineRouter = createTRPCRouter({
   getPaginated: protectedProcedure.input(paginatedSchema).query(async ({ input, ctx }) => {
-    const whereQuery = input.search ? like(searchEngines.name, `%${input.search.trim()}%`) : undefined;
+    const whereQuery = input.search ? likeInsensitive(searchEngines.name, input.search) : undefined;
     const searchEngineCount = await ctx.db.$count(searchEngines, whereQuery);
 
     const dbSearachEngines = await ctx.db.query.searchEngines.findMany({
@@ -136,7 +136,7 @@ export const searchEngineRouter = createTRPCRouter({
       // (non-integration) engines so custom search engines work there too (#4132),
       // while integration-backed engines stay available only when signed in.
       where: and(
-        like(searchEngines.short, `${input.query.toLowerCase().trim()}%`),
+        startsWithInsensitive(searchEngines.short, input.query),
         ctx.session?.user ? undefined : eq(searchEngines.type, "generic"),
       ),
       with: {

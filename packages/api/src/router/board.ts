@@ -8,7 +8,7 @@ import { createId } from "@homarr/common";
 import type { DeviceType } from "@homarr/common/server";
 import type { Session } from "@homarr/auth";
 import type { Database, InferInsertModel, InferSelectModel, SQL } from "@homarr/db";
-import { and, asc, eq, handleTransactionsAsync, inArray, isNull, isPostgresql, like, not, or, sql } from "@homarr/db";
+import { and, asc, eq, handleTransactionsAsync, inArray, isNull, isPostgresql, likeInsensitive, not, or, sql } from "@homarr/db";
 import { createDbInsertCollectionWithoutTransaction } from "@homarr/db/collection";
 import { getServerSettingByKeyAsync } from "@homarr/db/queries";
 import {
@@ -324,7 +324,7 @@ export const boardRouter = createTRPCRouter({
 
       const foundBoards = await ctx.db.query.boards.findMany({
         where: and(
-          like(boards.name, `%${input.query}%`),
+          likeInsensitive(boards.name, input.query),
           ctx.session?.user.permissions.includes("board-view-all")
             ? undefined
             : or(

@@ -8,7 +8,7 @@ import {
 } from "@homarr/auth/server";
 import { createId } from "@homarr/common";
 import type { Database } from "@homarr/db";
-import { and, eq, handleTransactionsAsync, like, not } from "@homarr/db";
+import { and, eq, handleTransactionsAsync, like, likeInsensitive, not } from "@homarr/db";
 import { getMaxGroupPositionAsync } from "@homarr/db/queries";
 import { groupMembers, groupPermissions, groups, users } from "@homarr/db/schema";
 import { selectGroupSchema, selectUserSchema } from "@homarr/db/validationSchemas";
@@ -72,7 +72,7 @@ export const groupRouter = createTRPCRouter({
     .requiresPermission("other-manage-groups")
     .input(paginatedSchema)
     .query(async ({ input, ctx }) => {
-      const whereQuery = input.search ? like(groups.name, `%${input.search.trim()}%`) : undefined;
+      const whereQuery = input.search ? likeInsensitive(groups.name, input.search) : undefined;
       const groupCount = await ctx.db.$count(groups, whereQuery);
 
       const dbGroups = await ctx.db.query.groups.findMany({
@@ -217,7 +217,7 @@ export const groupRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       return await ctx.db.query.groups.findMany({
-        where: like(groups.name, `%${input.query}%`),
+        where: likeInsensitive(groups.name, input.query),
         columns: {
           id: true,
           name: true,
