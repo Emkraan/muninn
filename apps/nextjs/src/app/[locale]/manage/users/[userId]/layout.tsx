@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { notFound } from "next/navigation";
 import { Grid, GridCol, Group, Stack, Text, Title } from "@mantine/core";
-import { IconSettings, IconShieldLock } from "@tabler/icons-react";
+import { IconKey, IconSettings, IconShieldLock } from "@tabler/icons-react";
 
 import { api } from "@homarr/api/server";
 import { auth } from "@homarr/auth/next";
@@ -42,6 +42,7 @@ export default async function Layout(props: PropsWithChildren<LayoutProps>) {
             [params.userId, user.name ?? ""],
             ["general", t("navigationStructure.manage.users.general")],
             ["security", t("navigationStructure.manage.users.security")],
+            ["access", t("navigationStructure.manage.users.access")],
           ])
         }
       />
@@ -70,6 +71,11 @@ export default async function Layout(props: PropsWithChildren<LayoutProps>) {
                   icon={<IconShieldLock size="1rem" stroke={1.5} />}
                 />
               )}
+              <NavigationLink
+                href={`/manage/users/${params.userId}/access`}
+                label={tUser("setting.access.title")}
+                icon={<IconKey size="1rem" stroke={1.5} />}
+              />
             </Stack>
           </Stack>
         </GridCol>
