@@ -47,7 +47,10 @@ export async function GET() {
     zip.addFile("db.sqlite", dbBuffer);
     zip.addFile("metadata.json", Buffer.from(JSON.stringify(metadata, null, 2)));
 
-    const zipBuffer = zip.toBuffer();
+    // adm-zip 0.6.0 ships bundled types whose toBuffer() returns the generic
+    // Buffer<ArrayBufferLike>, which is not assignable to BodyInit. The runtime
+    // buffer is always ArrayBuffer-backed, so narrow it back to Buffer<ArrayBuffer>.
+    const zipBuffer = zip.toBuffer() as Buffer<ArrayBuffer>;
 
     const date = new Date().toISOString().split("T")[0];
     const filename = `muninn-backup-${date}.zip`;
