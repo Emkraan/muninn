@@ -3,7 +3,6 @@ import React from "react";
 import Layout from "@theme/Layout";
 
 import HomepageFeatures from "../components/pages/home/features/features";
-import HomepageUserReviews from "../components/pages/home/review-list/review-list";
 import HomeHero from "../components/pages/home/hero/hero";
 
 import styles from "./index.module.css";
@@ -41,9 +40,6 @@ export default function Home() {
       </BrowserOnly>
       <DragAndDropShowcase />
       <AvailableIntegrations />
-      <SectionContainer>
-        <HomepageUserReviews />
-      </SectionContainer>
     </Layout>
   );
 }

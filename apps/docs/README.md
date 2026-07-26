@@ -1,6 +1,6 @@
 # Muninn Documentation (`@homarr/docs`)
 
-The official [muninn.dev](https://muninn.dev) documentation site, built with [Docusaurus 3](https://docusaurus.io/) and living inside the Muninn monorepo.
+The official [Muninn](https://github.com/Emkraan/muninn) documentation site, built with [Docusaurus 3](https://docusaurus.io/) and living inside the Muninn monorepo.
 
 ## Why it's in the monorepo
 
