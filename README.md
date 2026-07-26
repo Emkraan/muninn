@@ -5,7 +5,7 @@
 <h1 align="center">Muninn</h1>
 
 <p align="center">
-  <b>A self-hosted dashboard and app launcher for your homelab.</b><br>
+  <b>A self-hosted dashboard and app launcher for your homelab, server, or business.</b><br>
   One tile board over your services, with strict per-user access, multi-provider sign-in, and a documented REST API.
 </p>
 
@@ -46,7 +46,7 @@ Muninn is a fork of [Homarr](https://github.com/homarr-labs/homarr) that inherit
 - **Documented REST API** - a served OpenAPI spec at `/api/openapi`, an in-app API console, and an MCP endpoint at `/api/mcp`. API keys are per-key scoped and optionally expiring, and a key can never exceed its owner's permissions.
 - **Board-as-code** - the whole board is customizable over REST: read and write entire boards, or make granular item and section changes. Every write uses optimistic concurrency, so a concurrent edit returns `409 Conflict` instead of silently clobbering the other change.
 - **Cobalt UI** - a dark, logo-blue design system with a live animated background and a redesigned sign-in screen. An optional deployment-set footer credit keeps the published image brand-agnostic.
-- **SQLite or Postgres, bundled or external Redis** - runs zero-config on a bundled SQLite file and an in-container Redis, or points at an external Postgres or MySQL (`DB_DRIVER`) and a shared or external Redis (`REDIS_IS_EXTERNAL`) to centralize state in a homelab. A one-shot SQLite-to-Postgres copy tool ships inside the image.
+- **SQLite or Postgres, bundled or external Redis** - runs zero-config on a bundled SQLite file and an in-container Redis, or points at an external Postgres or MySQL (`DB_DRIVER`) and a shared or external Redis (`REDIS_IS_EXTERNAL`) to centralize state in a larger or multi-service deployment. A one-shot SQLite-to-Postgres copy tool ships inside the image.
 - **Single container** - the image bundles the web server, a websocket service, and Redis, and serves on port 7575. Bring your own reverse proxy for HTTPS.
 
 ## Support
