@@ -40,8 +40,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Call turbo directly so --concurrency is parsed by turbo (bounding
+      # parallel tsc for memory), not forwarded through to tsc.
       - name: Typecheck
-        run: pnpm typecheck -- --concurrency=2
+        run: pnpm exec turbo typecheck --concurrency=2
 
       - name: Lint
-        run: pnpm lint -- --concurrency=2
+        run: pnpm exec turbo lint --concurrency=2
