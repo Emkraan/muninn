@@ -18,6 +18,13 @@ updates:
     schedule: { interval: "weekly", day: "monday" }
     open-pull-requests-limit: 5
     commit-message: { prefix: "deps" }
+    ignore:
+      # The Node base image is pinned deliberately (native-module ABI:
+      # better-sqlite3, sharp, argon2) and the fleet runs PIN-TO-LIVE with no
+      # auto-updater. A Node major is taken by hand, build-tested, never
+      # automatically. Minor/patch security bumps still flow.
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule: { interval: "weekly", day: "monday" }
