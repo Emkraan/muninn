@@ -9,20 +9,20 @@ tags:
 ---
 
 # Settings
-The settings page has a few options that will be applied to the entire Homarr application.
+The settings page has a few options that will be applied to the entire Muninn application.
 They may require a full page reload for changes to apply.
 
 ## Analytics
-By default, Homarr is collecting anonymous analytics to identify issues and prioritize bugfixes and improvements.
+By default, Muninn is collecting anonymous analytics to identify issues and prioritize bugfixes and improvements.
 The data is never shared with any third-parties and is fully GDPR & CCPA compliant.
 The software being used is [Umami Analytics](https://umami.is/) which is fully open source.
 The main server software can be found [here](https://github.com/umami-software/umami) and [this node library](https://github.com/umami-software/node) to perform server side calls to the API.
 
 A full list of the collected data by default can be found here: https://umami.is/docs/metric-definitions.
 
-We understand that you might not want Homarr to communicate with our services.
+We understand that you might not want Muninn to communicate with our services.
 By unchecking the ``Send anonymous analytics`` checkbox and reloading the full page, all communication by Umami will be disabled and no data will be collected.
-If you are paranoid, you can permanently block ``umami.homarr.dev`` from your DNS / firewall.
+If you are paranoid, you can permanently block the analytics endpoint from your DNS / firewall.
 
 Additionally, you opt in to more data collection to help us provide more useful data.
 
@@ -42,12 +42,12 @@ This is disabled by default.
 ## Search Engine Optimization (SEO)
 Big companies [like Google, Microsoft, Baidu and Yandex](https://de.wikipedia.org/wiki/Web-Index) will use [web crawlers](https://de.wikipedia.org/wiki/Webcrawler) to index the Internet for new websites & pages.
 This is desirable in many cases (for example when selling products in an online shop) but can lead to unwanted traffic and attention to your personal dashboard.
-Homarr is requesting the crawlers to not index Homarr instances by default for this reason.
-If you use Homarr as a public website and want it to be searchable on these search engines, you can disable these settings.
-Please note that Homarr doesn't have control over what the crawlers do; it is a mere request to them to not perform these actions but will not guarantee that your website doesn't land on some index.
+Muninn is requesting the crawlers to not index Muninn instances by default for this reason.
+If you use Muninn as a public website and want it to be searchable on these search engines, you can disable these settings.
+Please note that Muninn doesn't have control over what the crawlers do; it is a mere request to them to not perform these actions but will not guarantee that your website doesn't land on some index.
 
 ### No index
-This will ask crawlers to not index your Homarr instance on any indexes.
+This will ask crawlers to not index your Muninn instance on any indexes.
 It is up to the crawler to properly respect this request.
 By default, this setting is enabled. Disabling it will allow indexing.
 
@@ -78,7 +78,7 @@ Note that the board must be public to be used as a global home board.
 
 ### Global mobile board
 
-You can set a global mobile board. It will be shown instead of the global home board on mobile devices that can be detected by Homarr. (Using the User-Agent header).
+You can set a global mobile board. It will be shown instead of the global home board on mobile devices that can be detected by Muninn. (Using the User-Agent header).
 It will similar to the global home board be as fallback for normal users and for any anonymous users.
 It also has to be public.
 

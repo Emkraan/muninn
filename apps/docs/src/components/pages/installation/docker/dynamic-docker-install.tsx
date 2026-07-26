@@ -26,16 +26,16 @@ export const DockerInstallSnippet: React.FC = () => {
       </p>
       <CodeBlock language="yml" title="docker-compose.yml" className={"argos-ignore"}>
         {`#---------------------------------------------------------------------#
-#     Homarr - A simple, yet powerful dashboard for your server.      #
+#     Muninn - A simple, yet powerful dashboard for your server.      #
 #---------------------------------------------------------------------#
 services:
-  homarr:
-    container_name: homarr
-    image: ghcr.io/homarr-labs/homarr:latest
+  muninn:
+    container_name: muninn
+    image: ghcr.io/emkraan/muninn:latest
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # Optional, only if you want docker integration
-      - ./homarr/appdata:/appdata
+      - ./muninn/appdata:/appdata
     environment:
       - SECRET_ENCRYPTION_KEY=${randomHex}
     ports:

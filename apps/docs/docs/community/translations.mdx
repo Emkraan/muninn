@@ -5,46 +5,24 @@ tags:
   - Translations
 ---
 
-We want to make Homarr accessible for everyone. 
-But to do that, we need your help. 
-We are running a community program that enables everyone to translate Homarr into their language – no programming required. 
-We are using [Crowdin](https://crowdin.com/) to manage our translations. 
-You can find the translations [here](https://translate.homarr.dev/).
+We want to make Muninn accessible for everyone.
+But to do that, we need your help.
+Translations are contributed directly through our
+[GitHub repository](https://github.com/Emkraan/muninn) - no dedicated translation platform required.
 
 ## How to translate
 
+Translation files live in the repository. To add or improve a translation:
 
-### Using crowdin's online platform
-Go to the [Crowdin translations](https://translate.homarr.dev/) and select a language you want to translate. 
-You can then enter the translation mode and start translating. 
-After you've submitted your translations, a Proofreader will review your changes. 
-After a translation has been approved, it will be merged to the language development branch. 
-We merge this one periodically to the development branch. 
-After the next update of Homarr, all changes from the development branch will be merged, including the changes in the translations.
+1. Fork the [Muninn repository](https://github.com/Emkraan/muninn) on GitHub.
+2. Locate the translation files and add or update the strings for your language.
+3. Open a pull request with your changes.
 
-### Using live translate
-You can also help translate homarr directly from the app!
-For this you can simply change your language to "Crowdin (live translations)"
+A maintainer will review your changes. After a translation has been approved, it will be
+merged and included in the next release of Muninn.
 
-![](./img/crowdin-language-select.png)
-
-Then you'll be prompted to connect to your Crowdin account and choose the language in which you want to transalte. 
-You can then start translating directly from the app by selecting some text on the app.
-If some text cannot be selected to be edited with the live translation tool, you can still translate it inside of the In-Context popup at the Home tab, it will be red if it's not translated yet.
-
-![](./img/crowdin-live-translate.png)
-
-:::caution
-Although you are translating directly from the app, your translations will not be directly be available inside of your language, they will be in the next update of Homarr, because we have to push the new translations to a new docker image.
-
-If you really want to use them you can enable the "preview transaltions" option in the live translate settings, but be aware that this is not recommended for performance reasons.
-:::
-
-:::tip
-
-Do you want to become a proofreader? [Let us know on our Discord](/docs/community/get-in-touch#discord)! We will add you to the proofreader team. You can then review the translations and approve them. **Note:** You must speak the language fluently, have it as your native language or lots of experience with it.
-
-:::
+If you are unsure how to get started, open an issue on
+[GitHub](https://github.com/Emkraan/muninn/issues/new/choose) and we'll help you out.
 
 ## Guidelines
 1. Translate with context: Some translations can't be translated 1:1 - they need context. Ensure that your translations make sense in the context.

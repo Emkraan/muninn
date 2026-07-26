@@ -60,7 +60,7 @@ export const releasesWidget: WidgetDefinition = {
               },
               {
                 name: "Identifier",
-                description: 'The identifier of the repository or package, e.g. "homarr-labs/homarr".',
+                description: 'The identifier of the repository or package, e.g. "Emkraan/muninn".',
                 values:
                   'Any valid provider identifier. GHCR also accepts full image refs like "ghcr.io/owner/package:tag".',
                 defaultValue: "-",

@@ -4,7 +4,7 @@ import BrowserOnly from "@docusaurus/BrowserOnly";
 
 export default function ApiReferencePage() {
   return (
-    <Layout title="API Reference" description="Homarr OpenAPI Reference">
+    <Layout title="API Reference" description="Muninn OpenAPI Reference">
       <BrowserOnly fallback={<div style={{ height: "100vh" }} />}>
         {() => {
           const { ThemedApiReference } = require("@site/src/components/themed-api-reference");

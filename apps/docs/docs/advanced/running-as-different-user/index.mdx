@@ -22,15 +22,15 @@ To run your container as a different user, you can use the `PUID` and `PGID` env
 
 ```yml title="docker-compose.yml"
 #---------------------------------------------------------------------#
-#     Homarr - A simple, yet powerful dashboard for your server.      #
+#     Muninn - A simple, yet powerful dashboard for your server.      #
 #---------------------------------------------------------------------#
 services:
-  homarr:
-    container_name: homarr
-    image: ghcr.io/homarr-labs/homarr:latest
+  muninn:
+    container_name: muninn
+    image: ghcr.io/emkraan/muninn:latest
     restart: unless-stopped
     volumes:
-      - ./homarr/appdata:/appdata
+      - ./muninn/appdata:/appdata
     environment:
         - SECRET_ENCRYPTION_KEY=your_64_character_hex_string # <--- can be generated with `openssl rand -hex 32`
         - PUID=1000
@@ -42,8 +42,8 @@ services:
 After that you'll need to create the appdata directory and set the correct permissions:
 
 ```bash title="On host"
-mkdir -p ./homarr/appdata
-chown -R 1000:1000 ./homarr/appdata
+mkdir -p ./muninn/appdata
+chown -R 1000:1000 ./muninn/appdata
 ```
 
 ## With mounted Docker socket
@@ -65,16 +65,16 @@ After that you can set the `PUID` and `PGID` environment variables in your `dock
 
 ```yml title="docker-compose.yml"
 #---------------------------------------------------------------------#
-#     Homarr - A simple, yet powerful dashboard for your server.      #
+#     Muninn - A simple, yet powerful dashboard for your server.      #
 #---------------------------------------------------------------------#
 services:
-  homarr:
-    container_name: homarr
-    image: ghcr.io/homarr-labs/homarr:latest
+  muninn:
+    container_name: muninn
+    image: ghcr.io/emkraan/muninn:latest
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./homarr/appdata:/appdata
+      - ./muninn/appdata:/appdata
     environment:
         - SECRET_ENCRYPTION_KEY=your_64_character_hex_string # <--- can be generated with `openssl rand -hex 32`
         - PUID=1000
@@ -86,8 +86,8 @@ services:
 And set the permissions for the mounted directories:
 
 ```bash title="On host"
-mkdir -p ./homarr/appdata
-chown -R 1000:999 ./homarr/appdata
+mkdir -p ./muninn/appdata
+chown -R 1000:999 ./muninn/appdata
 ```
 
 Important here is that the group ID is set to `999` as we created the `docker` group with this ID.

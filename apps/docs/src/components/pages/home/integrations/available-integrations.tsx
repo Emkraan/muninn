@@ -19,9 +19,9 @@ export const AvailableIntegrations = () => {
           <div className={"md:w-1/2 w-full"}>
             <h2 className={"lg:text-5xl text-3xl font-extrabold "}>Many integrations built in</h2>
             <p className={"text-xl text-gray-500 dark:text-gray-400"}>
-              Homarr has support for tons of your favourite applications, tools and websites. It integrates seamlessly
+              Muninn has support for tons of your favourite applications, tools and websites. It integrates seamlessly
               and tests proper connectivity and configuration for you. Using the tasks system, it scales efficiently
-              with tons of users, making Homarr reliable in big scale deployments too.
+              with tons of users, making Muninn reliable in big scale deployments too.
             </p>
           </div>
           <div className={"rotate-12 w-1/2 hidden md:block argos-ignore"}>

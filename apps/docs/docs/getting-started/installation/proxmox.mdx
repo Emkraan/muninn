@@ -1,6 +1,6 @@
 # Proxmox
 
-This guide covers how to install homarr inside of a linux-container in ProxmoxVE, using a fully automated approach.
+This guide covers how to install Muninn inside of a linux-container in ProxmoxVE, using a fully automated approach.
 
 # What is community-scripts?
 
@@ -27,7 +27,7 @@ Never trust any script directly injected from the web, without prior looking thr
 After executing this command, you will get asked, if you want to accept defaults or would like to specify things like IP-Adress, DNS etc, then choose advanced.
 
 After confirming the installation, the script will install the required dependencies, which may take a few minutes. Do not interrupt the installation.
-After you've installed Homarr, you can find a new LXC "homarr".
+After you've installed Muninn, you can find a new LXC "homarr".
 
 # Updating
 
@@ -45,7 +45,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/Proxmo
 
 # Configuration
 
-Some Homarr features require setting environment variables. When installing Homarr on Proxmox using the community-scripts installer, these can be configured in the file /opt/homarr.env. This path is also documented on the community-scripts website as the configuration path.
+Some Muninn features require setting environment variables. When installing Muninn on Proxmox using the community-scripts installer, these can be configured in the file /opt/homarr.env. This path is also documented on the community-scripts website as the configuration path.
 
 # Troubleshooting
 
@@ -57,16 +57,16 @@ systemctl restart homarr
 
 # Getting help
 - If you are looking for help with the script, updating the LXC or troubleshooting the installer, please get in contact with the support of the community scripts. They provide support on their [Discord](https://discord.gg/2wvnMDgdnU). If you found vulnerabilities, bugs or have a request for the script, [create a new issue here](https://github.com/community-scripts/ProxmoxVE/issues/new/choose).
-- If you are looking to report a bug, vulnerability or request a new feature, use https://github.com/homarr-labs/homarr . You can ask for help on our Discord.
+- If you are looking to report a bug, vulnerability or request a new feature, use https://github.com/Emkraan/muninn . You can ask for help on our Discord.
 
 # How to find logs
-Homarr runs under a system service called `homarr`, so getting the logs is a simple as using the following command inside the LXC (Container) Shell
+Muninn runs under a system service called `homarr`, so getting the logs is a simple as using the following command inside the LXC (Container) Shell
 
 ```bash
 systemctl status homarr
 ```
 
-As Homarr logs really a log, it sometimes feels like the log is endless till you get the bottom, so a command like this only shows the latest 100 lines:
+As Muninn logs really a log, it sometimes feels like the log is endless till you get the bottom, so a command like this only shows the latest 100 lines:
 
 ```bash
 journalctl -u homarr | tail -n 100

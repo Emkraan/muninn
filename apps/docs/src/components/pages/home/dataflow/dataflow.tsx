@@ -3,7 +3,7 @@ import React, { useRef } from "react";
 import LeaderLine, { SocketType } from "leader-line-new";
 
 export const DataflowVisualizationComponent = () => {
-  const homarrRef = useRef<HTMLImageElement>(null);
+  const muninnRef = useRef<HTMLImageElement>(null);
   const sonarrRef = useRef<HTMLImageElement>(null);
   const lidarrRef = useRef<HTMLImageElement>(null);
   const radarrRef = useRef<HTMLImageElement>(null);
@@ -21,10 +21,10 @@ export const DataflowVisualizationComponent = () => {
 
       <div className="relative max-w-128 h-80 mx-auto animated-dataflow mx-5">
         <img
-          ref={homarrRef}
+          ref={muninnRef}
           className={"absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 aspect-square object-contain"}
           src={"/img/logo.png"}
-          alt={"Homarr Logo"}
+          alt={"Muninn Logo"}
           width={100}
           height={50}
         />
@@ -81,12 +81,12 @@ export const DataflowVisualizationComponent = () => {
           height={50}
         />
 
-        <LineTree start={sonarrRef} end={homarrRef} startSocket={"right"} endSocket={"left"} />
-        <LineTree start={radarrRef} end={homarrRef} startSocket={"right"} endSocket={"left"} />
-        <LineTree start={lidarrRef} end={homarrRef} startSocket={"right"} endSocket={"left"} />
-        <LineTree start={plexRef} end={homarrRef} startSocket={"left"} endSocket={"right"} x={100} />
-        <LineTree start={jellyfinRef} end={homarrRef} startSocket={"left"} endSocket={"right"} x={100} />
-        <LineTree start={sabnzbdRef} end={homarrRef} startSocket={"left"} endSocket={"right"} x={100} />
+        <LineTree start={sonarrRef} end={muninnRef} startSocket={"right"} endSocket={"left"} />
+        <LineTree start={radarrRef} end={muninnRef} startSocket={"right"} endSocket={"left"} />
+        <LineTree start={lidarrRef} end={muninnRef} startSocket={"right"} endSocket={"left"} />
+        <LineTree start={plexRef} end={muninnRef} startSocket={"left"} endSocket={"right"} x={100} />
+        <LineTree start={jellyfinRef} end={muninnRef} startSocket={"left"} endSocket={"right"} x={100} />
+        <LineTree start={sabnzbdRef} end={muninnRef} startSocket={"left"} endSocket={"right"} x={100} />
       </div>
     </div>
   );

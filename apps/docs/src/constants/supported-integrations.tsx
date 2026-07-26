@@ -1,5 +1,5 @@
 export const supportedIntegrations = [
-  { iconUrl: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/homarr.svg", name: "Homarr" },
+  { iconUrl: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/homarr.svg", name: "Muninn" },
   { iconUrl: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/sabnzbd.svg", name: "SABnzbd" },
   { iconUrl: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/deluge.svg", name: "Deluge" },
   { iconUrl: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/radarr.svg", name: "Radarr" },

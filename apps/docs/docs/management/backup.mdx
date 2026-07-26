@@ -8,7 +8,7 @@ tags:
 
 # Backup & Restore
 
-Homarr provides a built-in backup and restore system for **SQLite** instances. You can export your entire database - including apps, integrations, boards, users, and encryption keys - as a ZIP archive, and restore it on the same or a different Homarr instance.
+Muninn provides a built-in backup and restore system for **SQLite** instances. You can export your entire database - including apps, integrations, boards, users, and encryption keys - as a ZIP archive, and restore it on the same or a different Muninn instance.
 
 :::warning
 
@@ -27,7 +27,7 @@ Click the **Export** button in the export card. You'll be prompted to type `I un
 | File                 | Description                                                         |
 | -------------------- | ------------------------------------------------------------------- |
 | `db.sqlite`          | Full SQLite database with all entities                              |
-| `metadata.json`      | Backup metadata: Homarr version, creation timestamp, encryption key |
+| `metadata.json`      | Backup metadata: Muninn version, creation timestamp, encryption key |
 
 The backup includes everything: apps, integrations, secrets, boards, users, groups, permissions, search engines, custom widgets, and server settings. (It just backs-up the whole database)
 
@@ -39,7 +39,7 @@ Drag and drop or select a `.zip` backup file. The import card validates that the
 
 ### 2. Preview
 
-Before restoring, Homarr uses **sql.js WASM** to analyze the backup directly in your browser. You'll see:
+Before restoring, Muninn uses **sql.js WASM** to analyze the backup directly in your browser. You'll see:
 
 - **Entity counts** - how many apps, integrations, boards, users, etc. are in the backup
 - **Board names** - which boards will be restored
@@ -59,14 +59,14 @@ The backup ZIP is sent to the server, validated, and applied. After a successful
 
 ## Cross-Instance Restore
 
-You can restore a backup from one Homarr instance onto another. Homarr handles:
+You can restore a backup from one Muninn instance onto another. Muninn handles:
 
 - **Encryption key re-encryption** - If the target instance has a different `SECRET_ENCRYPTION_KEY`, integration secrets are decrypted with the old key and re-encrypted with the new one during import
-- **Version compatibility** - Backups include the Homarr version they were created with. Backward compatibility is maintained for older backup formats
+- **Version compatibility** - Backups include the Muninn version they were created with. Backward compatibility is maintained for older backup formats
 
 ## Backup During Onboarding
 
-When setting up a new SQLite Homarr instance, the onboarding flow includes a **Restore from SQLite backup** step. You can upload a backup ZIP directly during onboarding to skip manual setup.
+When setting up a new SQLite Muninn instance, the onboarding flow includes a **Restore from SQLite backup** step. You can upload a backup ZIP directly during onboarding to skip manual setup.
 
 ## Security
 

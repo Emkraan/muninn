@@ -1,6 +1,6 @@
-# Homarr Documentation (`@homarr/docs`)
+# Muninn Documentation (`@homarr/docs`)
 
-The official [homarr.dev](https://homarr.dev) documentation site, built with [Docusaurus 3](https://docusaurus.io/) and living inside the Homarr monorepo.
+The official [muninn.dev](https://muninn.dev) documentation site, built with [Docusaurus 3](https://docusaurus.io/) and living inside the Muninn monorepo.
 
 ## Why it's in the monorepo
 
@@ -102,4 +102,4 @@ pnpm verify:search
 
 ## Contributing
 
-When making changes to the homarr codebase that affect user-facing behavior, **always update the corresponding documentation in this app**. See `.cursor/rules/documentation-sync.mdc` for the complete mapping of code changes to doc locations.
+When making changes to the Muninn codebase that affect user-facing behavior, **always update the corresponding documentation in this app**. See `.cursor/rules/documentation-sync.mdc` for the complete mapping of code changes to doc locations.

@@ -6,16 +6,16 @@
 
 ### Installing
 
-To install Homarr using Portainer Stacks, simply create a new stack and paste the following code into it.
+To install Muninn using Portainer Stacks, simply create a new stack and paste the following code into it.
 
 ```yml title="docker-compose.yml"
 #---------------------------------------------------------------------#
-#     Homarr - A simple, yet powerful dashboard for your server.      #
+#     Muninn - A simple, yet powerful dashboard for your server.      #
 #---------------------------------------------------------------------#
 services:
-  homarr:
-    container_name: homarr
-    image: ghcr.io/homarr-labs/homarr:latest
+  muninn:
+    container_name: muninn
+    image: ghcr.io/emkraan/muninn:latest
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # Optional, only if you want docker integration
@@ -41,7 +41,7 @@ If you're unsure how to create a stack, checkout the [Portainer Documentation](h
 
 ### Updating
 
-To update Homarr using Docker Compose or Portainer Stacks, simply pull the latest image and restart the container.
+To update Muninn using Docker Compose or Portainer Stacks, simply pull the latest image and restart the container.
 
-1. Run ``docker pull ghcr.io/homarr-labs/homarr:latest`` to pull the latest image.
+1. Run ``docker pull ghcr.io/emkraan/muninn:latest`` to pull the latest image.
 2. Re-run ``docker-compose up -d`` or re-deploy the stack in Portainer.
