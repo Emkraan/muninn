@@ -19,6 +19,14 @@ export const integrationsSearchGroup = createGroup<{ id: string; kind: Integrati
   ),
   useInteraction: interaction.link(({ id }) => ({ href: `/manage/integrations/edit/${id}` })),
   useQueryOptions(query) {
-    return clientApi.integration.search.useQuery({ query, limit: 5 });
+    return clientApi.integration.search.useQuery(
+      { query, limit: 5 },
+      {
+        // Every hit links into the edit page, which requires full access.
+        // Offering a result that 404s on click is worse than not offering it.
+        enabled: query.length > 0,
+        select: (integrations) => integrations.filter((integration) => integration.permissions.hasFullAccess),
+      },
+    );
   },
 });

@@ -1,0 +1,78 @@
+# ===========================================================================
+# Muninn - build and publish the documentation site to GitHub Pages.
+#
+# Publishes apps/docs (Docusaurus) to https://emkraan.github.io/muninn/, which
+# is what packages/definitions/src/docs/index.ts points every in-app
+# "Read the docs" link at. Keep docusaurus.config.ts `url` + `baseUrl` and that
+# constant in sync: they are two halves of the same URL.
+#
+# The container image is built by build-and-deploy.yml and is unaffected by
+# this workflow.
+# ===========================================================================
+
+name: docs-deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/docs/**"
+      - "packages/definitions/src/docs/**"
+      - ".github/workflows/docs-deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel a Pages deploy in flight; queue instead.
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build docs
+    runs-on: ubuntu-latest
+    env:
+      SKIP_ENV_VALIDATION: "true"
+      CI: "true"
+      NODE_OPTIONS: "--max-old-space-size=4096"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.18.0"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build docs
+        run: pnpm -F @homarr/docs build
+
+      # enablement turns Pages on for the repo (build_type=workflow) on the first
+      # run, so publishing needs no manual repo-settings step.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/docs/build
+
+  deploy:
+    name: Deploy to Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

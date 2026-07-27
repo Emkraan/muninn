@@ -1,8 +1,10 @@
 import React, { useRef } from "react";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 
 import LeaderLine, { SocketType } from "leader-line-new";
 
 export const DataflowVisualizationComponent = () => {
+  const logoUrl = useBaseUrl("/img/logo.png");
   const muninnRef = useRef<HTMLImageElement>(null);
   const sonarrRef = useRef<HTMLImageElement>(null);
   const lidarrRef = useRef<HTMLImageElement>(null);
@@ -23,7 +25,7 @@ export const DataflowVisualizationComponent = () => {
         <img
           ref={muninnRef}
           className={"absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 aspect-square object-contain"}
-          src={"/img/logo.png"}
+          src={logoUrl}
           alt={"Muninn Logo"}
           width={100}
           height={50}

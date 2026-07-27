@@ -861,8 +861,8 @@
       "singleValue": "Show one extracted value with a label and unit",
       "keyValue": "Show multiple labeled values side by side",
       "table": "Show rows of data in a table format",
-      "statGrid": "Colored stat cards in a grid — like Pi-Hole or Speedtest widgets",
-      "progressBars": "Progress bars showing usage or completion — for disk, memory, quotas",
+      "statGrid": "Colored stat cards in a grid, like Pi-Hole or Speedtest widgets",
+      "progressBars": "Progress bars showing usage or completion, for disk, memory, quotas",
       "statusIndicator": "Colored status dots showing online/offline or health states",
       "countGrid": "Compact number + label counters in a tight grid",
       "raw": "Pretty-printed JSON output for debugging",
@@ -1195,7 +1195,7 @@
             },
             "dns": {
               "notFound": "The server address could not be found. Please check the URL for typos or invalid domain names.",
-              "timeout": "DNS lookup timed out. This may be a temporary issue—please try again in a few moments.",
+              "timeout": "DNS lookup timed out. This may be a temporary issue. Please try again in a few moments.",
               "noAnswer": "The DNS server didn't return a valid response. The domain may exist but has no valid records."
             },
             "timeout": {
@@ -4533,7 +4533,7 @@
     },
     "error": {
       "title": "This page couldn't load",
-      "text": "An unexpected error occurred while loading this page. Your navigation is still available — try reloading, or use another section from the sidebar.",
+      "text": "An unexpected error occurred while loading this page. Your navigation is still available: try reloading, or use another section from the sidebar.",
       "digest": "Error reference: {digest}"
     },
     "navbar": {
@@ -4849,7 +4849,7 @@
             "title": "Analytics",
             "general": {
               "title": "Help us improve Muninn",
-              "text": "This helps us figure out what people actually use so we know where to spend our time. We see stuff like how many widgets or integrations you have, your Muninn version, and what database you're on. That's it — no personal info, no URLs, no names, nothing that could identify you or your setup."
+              "text": "This helps us figure out what people actually use so we know where to spend our time. We see stuff like how many widgets or integrations you have, your Muninn version, and what database you're on. That's it: no personal info, no URLs, no names, nothing that could identify you or your setup."
             }
           },
           "crawlingAndIndexing": {
@@ -5086,7 +5086,7 @@
               "label": "AI / MCP",
               "title": "AI Integration",
               "subtitle": "Model Context Protocol (MCP) Server",
-              "description": "Connect AI assistants to your Muninn instance and control your entire homelab through natural language. Search and request media on Overseerr, manage Docker containers, toggle Pi-hole, check server health, control Home Assistant devices, and more — all from your AI assistant.",
+              "description": "Connect AI assistants to your Muninn instance and control your entire homelab through natural language. Search and request media on Overseerr, manage Docker containers, toggle Pi-hole, check server health, control Home Assistant devices, and more, all from your AI assistant.",
               "noApiKey": "You need an API key to authenticate with the MCP server.",
               "createApiKeyButton": "Create API Key",
               "endpoint": {
@@ -5101,10 +5101,10 @@
                 },
                 "oauth": {
                   "title": "OAuth (browser login)",
-                  "description": "Clients that support OAuth (such as Claude Code, opencode, or Cursor) can authenticate by opening a browser window. Run the auth command in your client, log in to Muninn in the browser, and you're connected — an API key is created automatically.",
+                  "description": "Clients that support OAuth (such as Claude Code, opencode, or Cursor) can authenticate by opening a browser window. Run the auth command in your client, log in to Muninn in the browser, and you're connected. An API key is created automatically.",
                   "hint": "OAuth tokens appear as regular API keys in the Authentication tab. You can revoke them at any time."
                 },
-                "permissions": "The API key determines the permissions available to the AI — it operates with the same access level as the key owner."
+                "permissions": "The API key determines the permissions available to the AI, which operates with the same access level as the key owner."
               },
               "clientConfig": {
                 "title": "Client Configuration",
@@ -5162,7 +5162,7 @@
               "copy": "Copy",
               "oneClick": {
                 "title": "Install in One Click",
-                "subtitle": "Uses OAuth — authenticate in your browser on first use",
+                "subtitle": "Uses OAuth: authenticate in your browser on first use",
                 "vsCode": "Install in VS Code",
                 "cursor": "Install in Cursor",
                 "copyUrl": "Copy MCP URL",
@@ -5282,7 +5282,7 @@
             },
             "complete": {
               "title": "Restore Complete",
-              "message": "Database has been restored successfully. The server is restarting — please refresh the page in a few seconds."
+              "message": "Database has been restored successfully. The server is restarting. Please refresh the page in a few seconds."
             },
             "failed": {
               "title": "Restore Failed"
@@ -6524,19 +6524,19 @@
       },
       "appsList": {
         "title": "Your Apps",
-        "description": "These are all the apps you've added — links to your self-hosted services. Each app has an icon, optional health check, and a status badge on the dashboard."
+        "description": "These are all the apps you've added: links to your self-hosted services. Each app has an icon, optional health check, and a status badge on the dashboard."
       },
       "appsCreate": {
         "title": "Add an App",
-        "description": "Register a new service here. Give it a name, URL, and icon — it will appear as a tile on your boards with live status monitoring."
+        "description": "Register a new service here. Give it a name, URL, and icon, and it will appear as a tile on your boards with live status monitoring."
       },
       "integrationsList": {
         "title": "Your Integrations",
-        "description": "These are the services connected to Muninn — Sonarr, Radarr, Plex, Jellyfin, and 50+ more. All credentials are encrypted at rest."
+        "description": "These are the services connected to Muninn: Sonarr, Radarr, Plex, Jellyfin, and 50+ more. All credentials are encrypted at rest."
       },
       "integrationsCreate": {
         "title": "Add an Integration",
-        "description": "Connect a new service here. Pick the type, enter the URL and API key — Muninn validates the connection before saving."
+        "description": "Connect a new service here. Pick the type, then enter the URL and API key. Muninn validates the connection before saving."
       },
       "usersList": {
         "title": "Your Users",
@@ -6544,7 +6544,7 @@
       },
       "usersCreate": {
         "title": "Create a User",
-        "description": "Add a new user account here. You can also use invite links for easy onboarding. That's the tour — you're all set!"
+        "description": "Add a new user account here. You can also use invite links for easy onboarding. That's the tour. You're all set!"
       }
     },
     "board": {
@@ -6554,7 +6554,7 @@
       },
       "editMode": {
         "title": "Edit Mode",
-        "description": "Click here to enter edit mode. You can then add widgets, apps, and sections — drag to reposition, resize with the corner handle. Click again to save your changes."
+        "description": "Click here to enter edit mode. You can then add widgets, apps, and sections: drag to reposition, resize with the corner handle. Click again to save your changes."
       },
       "settings": {
         "title": "Board Settings",
@@ -6562,7 +6562,7 @@
       },
       "switcher": {
         "title": "Switch Boards",
-        "description": "Jump between boards. Create separate dashboards for different purposes — media, networking, per-user, or anything you like."
+        "description": "Jump between boards. Create separate dashboards for different purposes: media, networking, per-user, or anything you like."
       },
       "userMenu": {
         "title": "Your Profile",

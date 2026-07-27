@@ -6,8 +6,12 @@ const a11yEmoji = require("@fec/remark-a11y-emoji");
 const config: Config = {
   title: "Muninn documentation",
   tagline: "A self-hosted dashboard and app launcher for your homelab.",
-  url: "https://muninn.dev",
-  baseUrl: "/",
+  // GitHub Pages for the Emkraan/muninn repo. `baseUrl` is the repo path, so
+  // every site-relative link has to go through `useBaseUrl` / `<Link>` rather
+  // than a raw "/..." href, and anything that matches on a pathname has to
+  // account for the "/muninn" prefix (see createSitemapItems below).
+  url: "https://emkraan.github.io",
+  baseUrl: "/muninn/",
   trailingSlash: undefined,
   favicon: "img/logo.png",
   organizationName: "Emkraan",
@@ -43,24 +47,13 @@ const config: Config = {
 
   themes: ["@docusaurus/theme-mermaid"],
 
-  scripts: [
-    {
-      src: "https://widget.kapa.ai/kapa-widget.bundle.js",
-      "data-website-id": "1e4656f4-abeb-4343-bbae-1d8626f52378",
-      "data-project-name": "Muninn",
-      "data-project-color": "#0B1220",
-      "data-project-logo": "/img/favicon.png",
-      async: true,
-    },
-  ],
-
   presets: [
     [
       "classic",
       {
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
-          editUrl: ({ docPath }) => `https://github.com/Emkraan/muninn/edit/dev/apps/docs/docs/${docPath}`,
+          editUrl: ({ docPath }) => `https://github.com/Emkraan/muninn/edit/main/apps/docs/docs/${docPath}`,
           remarkPlugins: [a11yEmoji],
           exclude: [],
           showLastUpdateAuthor: false,
@@ -70,7 +63,7 @@ const config: Config = {
           showReadingTime: true,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl: "https://github.com/Emkraan/muninn/edit/dev/apps/docs",
+          editUrl: "https://github.com/Emkraan/muninn/edit/main/apps/docs",
           authorsMapPath: "authors.yml",
         },
         theme: {
@@ -83,8 +76,12 @@ const config: Config = {
           filename: "sitemap.xml",
           createSitemapItems: async ({ routes, siteConfig, defaultCreateSitemapItems }) => {
             const items = await defaultCreateSitemapItems({ routes, siteConfig });
+            // Sitemap locs carry the baseUrl prefix ("/muninn"), so strip it
+            // before matching or none of the branches below ever fire.
+            const basePrefix = siteConfig.baseUrl.replace(/\/$/, "");
             return items.map((item) => {
-              const path = new URL(item.url).pathname;
+              const pathname = new URL(item.url).pathname;
+              const path = basePrefix && pathname.startsWith(basePrefix) ? pathname.slice(basePrefix.length) : pathname;
               if (path === "/" || path === "") {
                 return { ...item, priority: 1.0, changefreq: "weekly" };
               }
@@ -216,7 +213,7 @@ const config: Config = {
         src: "img/logo.png",
         height: 100,
       },
-      copyright: `<span class="copyright_text">Copyright © ${new Date().getFullYear()} Muninn<span> — <a href="/docs/community/license">License</a>`,
+      copyright: `<span class="copyright_text">Copyright © ${new Date().getFullYear()} Muninn<span> - <a href="/muninn/docs/community/license">License</a>`,
     },
     prism: {
       theme: prismThemes.github,
@@ -258,19 +255,9 @@ const config: Config = {
         },
       };
     },
-    [
-      "posthog-docusaurus",
-      {
-        apiKey: "phc_pWxeD1hbl4ip02JYReX1Crjkt5DhB3dduigirHMCtFE",
-        appUrl: "",
-        enableInDevelopment: true,
-        ui_host: "https://eu.posthog.com",
-        defaults: "2026-01-30",
-        autocapture: true,
-        disable_session_recording: true,
-        advanced_disable_feature_flags: true,
-      },
-    ],
+    // No analytics plugin here on purpose. Muninn does not phone home (see
+    // packages/analytics/src/client.ts), and the docs site is held to the same
+    // rule - upstream's PostHog project is not ours to send traffic to.
     "docusaurus-plugin-image-zoom",
     require.resolve("./plugins/validate-docs-coverage"),
     function disableExpensiveBundlerOptimizationPlugin() {

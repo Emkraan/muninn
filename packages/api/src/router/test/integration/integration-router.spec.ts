@@ -32,8 +32,41 @@ vi.mock("@homarr/redis", () => ({
   invalidateIntegrationCacheAsync: async () => await Promise.resolve(),
 }));
 
-describe("all should return all integrations", () => {
-  test("with any session should return all integrations", async () => {
+const seedTwoIntegrationsAsync = async (db: ReturnType<typeof createDb>) => {
+  await db.insert(integrations).values([
+    {
+      id: "1",
+      name: "Home assistant",
+      kind: "homeAssistant",
+      url: "http://homeassist.local",
+    },
+    {
+      id: "2",
+      name: "Home plex server",
+      kind: "plex",
+      url: "http://plex.local",
+    },
+  ]);
+};
+
+describe("all should only return integrations the caller may see", () => {
+  test("with a global integration permission should return all integrations", async () => {
+    const db = createDb();
+    const caller = integrationRouter.createCaller({
+      db,
+      deviceType: undefined,
+      session: defaultSessionWithPermissions(["integration-use-all"]),
+    });
+
+    await seedTwoIntegrationsAsync(db);
+
+    const result = await caller.all();
+    expect(result.length).toBe(2);
+    expect(result[0]!.kind).toBe("plex");
+    expect(result[1]!.kind).toBe("homeAssistant");
+  });
+
+  test("with no permissions and no grants should return nothing", async () => {
     const db = createDb();
     const caller = integrationRouter.createCaller({
       db,
@@ -41,25 +74,101 @@ describe("all should return all integrations", () => {
       session: defaultSessionWithPermissions(),
     });
 
-    await db.insert(integrations).values([
-      {
-        id: "1",
-        name: "Home assistant",
-        kind: "homeAssistant",
-        url: "http://homeassist.local",
-      },
-      {
-        id: "2",
-        name: "Home plex server",
-        kind: "plex",
-        url: "http://plex.local",
-      },
-    ]);
+    await seedTwoIntegrationsAsync(db);
+
+    // Upstream returned the whole table here, urls included, to any session.
+    const result = await caller.all();
+    expect(result.length).toBe(0);
+  });
+
+  test("with a direct grant should return only the granted integration", async () => {
+    const db = createDb();
+    const caller = integrationRouter.createCaller({
+      db,
+      deviceType: undefined,
+      session: defaultSessionWithPermissions(),
+    });
+
+    await db.insert(users).values({ id: defaultUserId, name: "grantee" });
+    await seedTwoIntegrationsAsync(db);
+    await db.insert(integrationUserPermissions).values({
+      integrationId: "2",
+      userId: defaultUserId,
+      permission: "use",
+    });
 
     const result = await caller.all();
-    expect(result.length).toBe(2);
-    expect(result[0]!.kind).toBe("plex");
-    expect(result[1]!.kind).toBe("homeAssistant");
+    expect(result.length).toBe(1);
+    expect(result[0]!.id).toBe("2");
+    expect(result[0]!.permissions.hasUseAccess).toBe(true);
+  });
+});
+
+describe("allManageable should exclude board-derived visibility", () => {
+  test("with no permissions and no grants should return nothing", async () => {
+    const db = createDb();
+    const caller = integrationRouter.createCaller({
+      db,
+      deviceType: undefined,
+      session: defaultSessionWithPermissions(),
+    });
+
+    await seedTwoIntegrationsAsync(db);
+
+    expect((await caller.allManageable()).length).toBe(0);
+    expect(await caller.hasManageable()).toBe(false);
+  });
+
+  test("with a direct grant should return the granted integration", async () => {
+    const db = createDb();
+    const caller = integrationRouter.createCaller({
+      db,
+      deviceType: undefined,
+      session: defaultSessionWithPermissions(),
+    });
+
+    await db.insert(users).values({ id: defaultUserId, name: "grantee" });
+    await seedTwoIntegrationsAsync(db);
+    await db.insert(integrationUserPermissions).values({
+      integrationId: "1",
+      userId: defaultUserId,
+      permission: "full",
+    });
+
+    const result = await caller.allManageable();
+    expect(result.length).toBe(1);
+    expect(result[0]!.id).toBe("1");
+    expect(await caller.hasManageable()).toBe(true);
+  });
+});
+
+describe("byIds should intersect the requested ids with the caller's scope", () => {
+  test("without access should return nothing even for a valid id", async () => {
+    const db = createDb();
+    const caller = integrationRouter.createCaller({
+      db,
+      deviceType: undefined,
+      session: defaultSessionWithPermissions(),
+    });
+
+    await seedTwoIntegrationsAsync(db);
+
+    expect((await caller.byIds(["1", "2"])).length).toBe(0);
+  });
+
+  test("with a global permission should resolve the requested ids", async () => {
+    const db = createDb();
+    const caller = integrationRouter.createCaller({
+      db,
+      deviceType: undefined,
+      session: defaultSessionWithPermissions(["integration-use-all"]),
+    });
+
+    await seedTwoIntegrationsAsync(db);
+
+    const result = await caller.byIds(["1"]);
+    expect(result.length).toBe(1);
+    expect(result[0]!.id).toBe("1");
   });
 });
 
@@ -300,6 +409,8 @@ describe("byId should return an integration by id", () => {
 describe("create should create a new integration", () => {
   test("with create integration access should create a new integration", async () => {
     const db = createDb();
+    // integration.create writes a creator grant, whose userId is an FK to users.
+    await db.insert(users).values({ id: defaultUserId, name: "creator" });
     const caller = integrationRouter.createCaller({
       db,
       deviceType: undefined,
@@ -335,6 +446,8 @@ describe("create should create a new integration", () => {
 
   test("with create integration access should not create a search engine for media request search integrations", async () => {
     const db = createDb();
+    // integration.create writes a creator grant, whose userId is an FK to users.
+    await db.insert(users).values({ id: defaultUserId, name: "creator" });
     const caller = integrationRouter.createCaller({
       db,
       deviceType: undefined,
@@ -373,6 +486,8 @@ describe("create should create a new integration", () => {
 
   test("with create integration access should create a new integration with new linked app", async () => {
     const db = createDb();
+    // integration.create writes a creator grant, whose userId is an FK to users.
+    await db.insert(users).values({ id: defaultUserId, name: "creator" });
     const caller = integrationRouter.createCaller({
       db,
       deviceType: undefined,
@@ -423,6 +538,8 @@ describe("create should create a new integration", () => {
 
   test("with create integration access should create a new integration with existing linked app", async () => {
     const db = createDb();
+    // integration.create writes a creator grant, whose userId is an FK to users.
+    await db.insert(users).values({ id: defaultUserId, name: "creator" });
     const appId = createId();
     await db.insert(apps).values({
       id: appId,

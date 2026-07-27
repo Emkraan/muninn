@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { OnboardingTour } from "@gfazioli/mantine-onboarding-tour";
 import { Box, Group, Menu, ScrollArea } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import {
@@ -40,6 +39,7 @@ import { CategoryEditModal } from "~/components/board/sections/category/category
 import { useDynamicSectionActions } from "~/components/board/sections/dynamic/dynamic-actions";
 import { IntegrationSelectModal } from "~/components/integration/integration-select-modal";
 import { HeaderButton } from "~/components/layout/header/button";
+import { TourTarget } from "~/components/layout/header/tour-target";
 
 export const BoardContentHeaderActions = ({ demoReadOnly }: { demoReadOnly: boolean }) => {
   const [isEditMode] = useEditMode();
@@ -57,11 +57,11 @@ export const BoardContentHeaderActions = ({ demoReadOnly }: { demoReadOnly: bool
       <EditModeMenu demoReadOnly={demoReadOnly} />
 
       {!demoReadOnly && (
-        <OnboardingTour.Target id="board-settings">
+        <TourTarget id="board-settings">
           <HeaderButton href={`/boards/${board.name}/settings`}>
             <IconSettings stroke={1.5} />
           </HeaderButton>
-        </OnboardingTour.Target>
+        </TourTarget>
       )}
 
       <SelectBoardsMenu />
@@ -197,11 +197,11 @@ const EditModeMenu = ({ demoReadOnly }: { demoReadOnly: boolean }) => {
   usePreventLeaveWithDirty(isEditMode);
 
   return (
-    <OnboardingTour.Target id="board-edit-mode">
+    <TourTarget id="board-edit-mode">
       <HeaderButton onClick={toggle} loading={isPending}>
         {isEditMode ? <IconPencilOff stroke={1.5} /> : <IconPencil stroke={1.5} />}
       </HeaderButton>
-    </OnboardingTour.Target>
+    </TourTarget>
   );
 };
 
@@ -209,7 +209,7 @@ const SelectBoardsMenu = () => {
   const { data: boards = [] } = clientApi.board.getAllBoards.useQuery();
 
   return (
-    <OnboardingTour.Target id="board-switcher">
+    <TourTarget id="board-switcher">
       <Box>
         <Menu position="bottom-end">
           <Menu.Target>
@@ -233,7 +233,7 @@ const SelectBoardsMenu = () => {
           </Menu.Dropdown>
         </Menu>
       </Box>
-    </OnboardingTour.Target>
+    </TourTarget>
   );
 };
 

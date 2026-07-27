@@ -6,6 +6,7 @@ import { Button, Group, Stack, Tabs } from "@mantine/core";
 import { schemaResolver } from "@mantine/form";
 import { z } from "zod/v4";
 
+import { clientApi } from "@homarr/api/client";
 import { objectEntries } from "@homarr/common";
 import { useSession } from "@homarr/auth/client";
 import type { WidgetKind } from "@homarr/definitions";
@@ -91,9 +92,14 @@ export const WidgetEditModal = createModal<ModalProps<WidgetKind>>(({ actions, i
   });
   const { openModal } = useModalAction(WidgetAdvancedOptionsModal);
 
-  const canModifyApps = session?.user.permissions.includes("app-modify-all") ?? false;
   const appId = innerProps.appId;
-  const showAppTab = innerProps.kind === "app" && canModifyApps && Boolean(appId);
+  // Per-app grants count here too, not only the global app-modify-all key: the
+  // app.update mutation behind this tab accepts both.
+  const { data: canModifyApp = false } = clientApi.app.canModify.useQuery(
+    { id: appId ?? "" },
+    { enabled: innerProps.kind === "app" && Boolean(appId) && Boolean(session) },
+  );
+  const showAppTab = innerProps.kind === "app" && canModifyApp && Boolean(appId);
 
   const handleSubmit = form.onSubmit(async (values) => {
     setIsSubmitting(true);

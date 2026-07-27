@@ -52,9 +52,12 @@ export default async function ManageBoardsPage() {
       }
       floatingPrimaryAction={canCreateBoards}
     >
-      {boards.length === 0 && <NoResults icon={IconLayoutDashboard} title={t("noResults.title")} />}
-      {boards.length > 0 && (
-        <TourTarget id="manage-boards-list">
+      {/* Wraps the empty state too, so the tour step always has a target to
+          anchor to. See the note in manage/apps/page.tsx. */}
+      <TourTarget id="manage-boards-list">
+        {boards.length === 0 ? (
+          <NoResults icon={IconLayoutDashboard} title={t("noResults.title")} />
+        ) : (
           <Grid>
             {boards.map((board) => (
               <GridCol span={{ base: 12, md: 6 }} key={board.id}>
@@ -62,8 +65,8 @@ export default async function ManageBoardsPage() {
               </GridCol>
             ))}
           </Grid>
-        </TourTarget>
-      )}
+        )}
+      </TourTarget>
     </ManagePageLayout>
   );
 }

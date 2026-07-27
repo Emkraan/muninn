@@ -3,7 +3,7 @@
 import type { PropsWithChildren } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import type { OnboardingTourFocusRevealProps, OnboardingTourStep } from "@gfazioli/mantine-onboarding-tour";
+import type { OnboardingTourStep } from "@gfazioli/mantine-onboarding-tour";
 import { useMediaQuery } from "@mantine/hooks";
 import {
   IconAffiliateFilled,
@@ -20,8 +20,22 @@ import { useScopedI18n } from "@homarr/translation/client";
 import { TourShell } from "./tour-shell";
 import { TourStepContent } from "./tour-step-content";
 
+// What the current user can actually reach. Every step whose target only renders
+// under a condition needs its condition here, otherwise the tour navigates to a
+// page where its target does not exist and strands the user on a dimmed,
+// click-blocked screen with no way to finish (see tour-shell.tsx).
+export interface ManageTourCapabilities {
+  canCreateBoards: boolean;
+  canSeeApps: boolean;
+  canCreateApps: boolean;
+  canSeeIntegrations: boolean;
+  canCreateIntegrations: boolean;
+  canManageUsers: boolean;
+  credentialsEnabled: boolean;
+}
+
 interface ManageTourProviderProps extends PropsWithChildren {
-  isAdmin: boolean;
+  capabilities: ManageTourCapabilities;
 }
 
 const stepRoutes: Record<string, string> = {
@@ -36,21 +50,22 @@ const stepRoutes: Record<string, string> = {
   "manage-users-create": "/manage/users",
 };
 
-const usersStepFocusRevealProps: OnboardingTourFocusRevealProps = {
-  withReveal: false,
-  popoverProps: {
-    position: "bottom",
-    middlewares: { shift: { padding: 16 }, flip: true },
-  },
-};
-
-export const ManageTourProvider = ({ children, isAdmin }: ManageTourProviderProps) => {
+export const ManageTourProvider = ({ children, capabilities }: ManageTourProviderProps) => {
   const t = useScopedI18n("onboardingTour.manage");
   const utils = clientApi.useUtils();
   const { data: tourStatus } = clientApi.user.getTourStatus.useQuery();
   const { mutate: completeTour } = clientApi.user.completeTour.useMutation({
     onSuccess() {
       void utils.user.getTourStatus.invalidate();
+    },
+    onError() {
+      // Roll the optimistic write back so the tour is not silently marked done
+      // server-side out of sync. tourDismissed stays true, so it does not
+      // immediately restart in this session.
+      utils.user.getTourStatus.setData(undefined, {
+        completedManageTour: false,
+        completedBoardTour: tourStatus?.completedBoardTour ?? false,
+      });
     },
   });
   const isMobile = useMediaQuery("(max-width: 48em)");
@@ -65,8 +80,15 @@ export const ManageTourProvider = ({ children, isAdmin }: ManageTourProviderProp
   const wasManageTourCompletedRef = useRef(tourStatus?.completedManageTour);
 
   useEffect(() => {
+    // Explicit stop branch: useMediaQuery resolves undefined on the first render,
+    // so without this a late resolution (or a resize) could leave the
+    // desktop-only tour running at a narrow width.
+    if (isMobile) {
+      setTourActive(false);
+      return;
+    }
     if (tourDismissed) return;
-    if (isManageHome && tourStatus !== undefined && !tourStatus.completedManageTour && !isMobile) {
+    if (isManageHome && tourStatus !== undefined && !tourStatus.completedManageTour) {
       setTourActive(true);
     }
   }, [isManageHome, tourStatus, isMobile, tourDismissed]);
@@ -94,11 +116,18 @@ export const ManageTourProvider = ({ children, isAdmin }: ManageTourProviderProp
       completedBoardTour: tourStatus?.completedBoardTour ?? false,
     });
     completeTour({ tour: "manage" });
-    router.push("/manage");
-  }, [completeTour, router, tourStatus?.completedBoardTour, utils.user.getTourStatus]);
+    // Wherever the tour wandered to, put the user back on the manage home rather
+    // than leaving them on the last step's page.
+    if (!isManageHome) {
+      router.push("/manage");
+    }
+  }, [completeTour, isManageHome, router, tourStatus?.completedBoardTour, utils.user.getTourStatus]);
 
   const steps = useMemo(() => {
-    const allSteps: (OnboardingTourStep & { adminOnly?: boolean })[] = [
+    // `enabled` mirrors the condition under which each step's TourTarget is
+    // actually rendered by its page. Filtering statically (rather than skipping
+    // at runtime) keeps the "n / total" counter in the popover honest.
+    const allSteps: (OnboardingTourStep & { enabled?: boolean })[] = [
       {
         id: "manage-welcome",
         title: t("welcome.title"),
@@ -123,6 +152,7 @@ export const ManageTourProvider = ({ children, isAdmin }: ManageTourProviderProp
       {
         id: "manage-boards-create",
         title: t("boardsCreate.title"),
+        enabled: capabilities.canCreateBoards,
         content: (
           <TourStepContent
             description={t("boardsCreate.description")}
@@ -134,6 +164,7 @@ export const ManageTourProvider = ({ children, isAdmin }: ManageTourProviderProp
       {
         id: "manage-apps-list",
         title: t("appsList.title"),
+        enabled: capabilities.canSeeApps,
         content: (
           <TourStepContent
             description={t("appsList.description")}
@@ -145,6 +176,7 @@ export const ManageTourProvider = ({ children, isAdmin }: ManageTourProviderProp
       {
         id: "manage-apps-create",
         title: t("appsCreate.title"),
+        enabled: capabilities.canSeeApps && capabilities.canCreateApps,
         content: (
           <TourStepContent
             description={t("appsCreate.description")}
@@ -156,6 +188,7 @@ export const ManageTourProvider = ({ children, isAdmin }: ManageTourProviderProp
       {
         id: "manage-integrations-list",
         title: t("integrationsList.title"),
+        enabled: capabilities.canSeeIntegrations,
         content: (
           <TourStepContent
             description={t("integrationsList.description")}
@@ -167,6 +200,7 @@ export const ManageTourProvider = ({ children, isAdmin }: ManageTourProviderProp
       {
         id: "manage-integrations-create",
         title: t("integrationsCreate.title"),
+        enabled: capabilities.canSeeIntegrations && capabilities.canCreateIntegrations,
         content: (
           <TourStepContent
             description={t("integrationsCreate.description")}
@@ -178,8 +212,9 @@ export const ManageTourProvider = ({ children, isAdmin }: ManageTourProviderProp
       {
         id: "manage-users-list",
         title: t("usersList.title"),
-        adminOnly: true,
-        focusRevealProps: usersStepFocusRevealProps,
+        // users/page.tsx gates on other-manage-users, not on admin: a non-admin
+        // delegate with that permission belongs on this step.
+        enabled: capabilities.canManageUsers,
         content: (
           <TourStepContent
             description={t("usersList.description")}
@@ -191,8 +226,9 @@ export const ManageTourProvider = ({ children, isAdmin }: ManageTourProviderProp
       {
         id: "manage-users-create",
         title: t("usersCreate.title"),
-        adminOnly: true,
-        focusRevealProps: usersStepFocusRevealProps,
+        // The create button only renders when the credentials provider is on, so
+        // on an SSO-only deployment this step has no target at all.
+        enabled: capabilities.canManageUsers && capabilities.credentialsEnabled,
         content: (
           <TourStepContent
             description={t("usersCreate.description")}
@@ -203,8 +239,8 @@ export const ManageTourProvider = ({ children, isAdmin }: ManageTourProviderProp
       },
     ];
 
-    return allSteps.filter((step) => !step.adminOnly || isAdmin) as OnboardingTourStep[];
-  }, [isAdmin, t]);
+    return allSteps.filter((step) => step.enabled !== false) as OnboardingTourStep[];
+  }, [capabilities, t]);
 
   return (
     <TourShell

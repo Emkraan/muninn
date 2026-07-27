@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { generateOpenApiDocument } from "trpc-to-openapi";
 
 import { API_KEY_HEADER_NAME } from "@homarr/auth/api-key";
+import { createDocumentationLink } from "@homarr/definitions";
 
 import { apiKeysRouter } from "./router/apiKeys";
 import { appRouter } from "./router/app";
@@ -79,7 +80,7 @@ export const openApiDocument = (base: string) => {
       url: "https://github.com/Emkraan/muninn/blob/main/LICENSE",
     },
     baseUrl: base,
-    docsUrl: "https://github.com/Emkraan/muninn",
+    docsUrl: createDocumentationLink("/api-reference"),
     securitySchemes: {
       apikey: {
         type: "apiKey",

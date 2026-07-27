@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 
 type Contributor = {
   login: string;
@@ -10,13 +11,14 @@ const blacklistedUsernames = ["deepsource-autofix[bot]", "deepsource-io[bot]", "
 
 export const CodeContributorList = () => {
   const [contributors, setContributors] = useState<Contributor[]>([]);
+  const dataUrl = useBaseUrl("/data/contributions.json");
 
   useEffect(() => {
-    fetch("/data/contributions.json").then(async (response) => {
+    fetch(dataUrl).then(async (response) => {
       const data = await response.json();
       setContributors(data.filter((contributor: Contributor) => !blacklistedUsernames.includes(contributor.login)));
     });
-  }, []);
+  }, [dataUrl]);
 
   return (
     <div className={"flex flex-wrap gap-3 argos-ignore"}>

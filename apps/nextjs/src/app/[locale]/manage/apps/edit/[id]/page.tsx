@@ -18,9 +18,18 @@ export default async function AppEditPage(props: AppEditPageProps) {
   const params = await props.params;
   const session = await auth();
 
-  if (!session?.user.permissions.includes("app-modify-all")) {
+  if (!session) {
     notFound();
   }
+
+  // Gate on exactly what app.update enforces: the global app-modify-all key OR a
+  // per-app modify/full grant. Checking only the global key locked a user with
+  // full access to this specific app out of the page entirely, even though the
+  // mutation behind the form would have accepted their write.
+  if (!(await api.app.canModify({ id: params.id }))) {
+    notFound();
+  }
+
   const app = await api.app.byId({ id: params.id });
   const t = await getI18n();
 
@@ -32,9 +41,7 @@ export default async function AppEditPage(props: AppEditPageProps) {
   return (
     <ManagePageLayout
       title={t("app.page.edit.title")}
-      breadcrumb={
-        <DynamicBreadcrumb dynamicMappings={new Map([[params.id, app.name]])} nonInteractable={["edit"]} />
-      }
+      breadcrumb={<DynamicBreadcrumb dynamicMappings={new Map([[params.id, app.name]])} nonInteractable={["edit"]} />}
     >
       <AppEditForm app={app} />
 

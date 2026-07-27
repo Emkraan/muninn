@@ -22,25 +22,45 @@ interface TourShellProps extends PropsWithChildren {
 
 type TourController = OnboardingTourController;
 
-const stepIndexFromController = (controller: TourController) => controller.currentStepIndex ?? 0;
+// The library renders the popover from the mounted OnboardingTour.Target whose
+// id matches the current step. When no such target exists it still keeps the
+// tour "active" and still paints the full-screen dimming overlay, but there is
+// no popover and therefore no Next, Done or Skip: the user is left staring at a
+// greyed-out, click-blocked page, and onOnboardingTourEnd never fires so the
+// tour re-arms on the next visit. Everything below exists to make sure a step
+// without a live target is never the resting state.
+const hasTarget = (targetId: string) => document.querySelector(`[data-tour-target="${targetId}"]`) !== null;
 
-const stepAtOffset = (controller: TourController, offset: number) => {
-  const index = stepIndexFromController(controller) + offset;
-  return controller.tour[index];
-};
+// The library's cutout measurement gives up 1500ms after a step becomes active,
+// so a target that shows up later than that gets a popover with no hole punched
+// for it. Stay well inside that budget.
+const TARGET_POLL_TIMEOUT_MS = 1200;
 
-const pollForElement = (targetId: string, callback: () => void) => {
-  const interval = setInterval(() => {
-    const targetElement = document.querySelector(`[data-tour-target="${targetId}"]`);
-    if (targetElement) {
-      clearInterval(interval);
-      callback();
-    }
-  }, 50);
-  const timeout = setTimeout(() => clearInterval(interval), 5000);
-  return () => {
+interface PollHandle {
+  cancel: () => void;
+}
+
+const pollForElement = (targetId: string, onFound: () => void, onTimeout: () => void): PollHandle => {
+  let settled = false;
+  const finish = (callback: () => void) => {
+    if (settled) return;
+    settled = true;
     clearInterval(interval);
     clearTimeout(timeout);
+    callback();
+  };
+
+  const interval = setInterval(() => {
+    if (hasTarget(targetId)) finish(onFound);
+  }, 50);
+  const timeout = setTimeout(() => finish(onTimeout), TARGET_POLL_TIMEOUT_MS);
+
+  return {
+    cancel: () => {
+      settled = true;
+      clearInterval(interval);
+      clearTimeout(timeout);
+    },
   };
 };
 
@@ -80,94 +100,179 @@ export const TourShell = ({ steps, started, onEnd, stepRoutes, position, childre
   const t = useI18n();
   const router = useRouter();
   const forwardActionRef = useRef<(() => void) | null>(null);
+  const endTourRef = useRef<(() => void) | null>(null);
+  const pollRef = useRef<PollHandle | null>(null);
+  // The library hands the controller to render props only. Stash it so the
+  // keyboard handler and the watchdog can drive the tour too.
+  const controllerRef = useRef<TourController | null>(null);
 
-  const navigateAndAdvance = useCallback(
-    (currentStepId: string | undefined, targetStepId: string | undefined, advance: () => void) => {
-      if (!stepRoutes || !targetStepId) {
-        advance();
-        return;
-      }
+  const cancelPendingPoll = useCallback(() => {
+    pollRef.current?.cancel();
+    pollRef.current = null;
+  }, []);
 
-      const currentRoute = currentStepId ? stepRoutes[currentStepId] : undefined;
-      const targetRoute = stepRoutes[targetStepId];
+  // Walk the step list in `direction` from `fromIndex` and settle on the first
+  // candidate whose target is actually reachable, navigating between routes as
+  // needed. Running out of candidates going forward ends the tour cleanly, which
+  // is what guarantees onEnd (and its completion write + redirect) always runs.
+  const resolveAndGo = useCallback(
+    (controller: TourController, fromIndex: number, direction: 1 | -1) => {
+      cancelPendingPoll();
 
-      if (targetRoute && targetRoute !== currentRoute) {
-        router.push(targetRoute);
-        pollForElement(targetStepId, advance);
-      } else {
-        advance();
-      }
+      const currentRoute = stepRoutes?.[controller.tour[fromIndex]?.id ?? ""];
+
+      const attempt = (index: number) => {
+        const candidate = controller.tour[index];
+        if (!candidate) {
+          // No candidate left. Forward means the tour is over; backward means we
+          // are already at the first reachable step, so stay put. Never call
+          // prevStep() at index 0 - the library ends the tour there.
+          if (direction === 1) controller.endTour();
+          return;
+        }
+
+        const goToCandidate = () => controller.setCurrentStepIndex(index);
+        const candidateRoute = stepRoutes?.[candidate.id];
+
+        if (!candidateRoute || candidateRoute === currentRoute) {
+          if (hasTarget(candidate.id)) {
+            goToCandidate();
+            return;
+          }
+          // Same route and still no target: this step does not apply here.
+          attempt(index + direction);
+          return;
+        }
+
+        router.push(candidateRoute);
+        pollRef.current = pollForElement(
+          candidate.id,
+          () => {
+            pollRef.current = null;
+            goToCandidate();
+          },
+          () => {
+            pollRef.current = null;
+            attempt(index + direction);
+          },
+        );
+      };
+
+      attempt(fromIndex + direction);
     },
-    [router, stepRoutes],
+    [cancelPendingPoll, router, stepRoutes],
   );
 
-  const bindForwardAction = useCallback((controller: TourController, action: () => void) => {
-    forwardActionRef.current = action;
-    return action;
-  }, []);
+  useEffect(() => cancelPendingPoll, [cancelPendingPoll]);
 
   useEffect(() => {
     if (!started) {
       forwardActionRef.current = null;
+      endTourRef.current = null;
+      cancelPendingPoll();
       return;
     }
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Enter" || event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) return;
       if (isTypingTarget(event.target)) return;
+
+      if (event.key === "Escape") {
+        // The Skip button lives inside the popover, so without this an
+        // overlay-only state would have no way out at all. endTourRef is only
+        // populated by a popover render, so fall back to onEnd: both providers
+        // clear their own `started` state in it, which tears the overlay down.
+        event.preventDefault();
+        (endTourRef.current ?? onEnd)();
+        return;
+      }
+
+      if (event.key !== "Enter" || event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) return;
+      // preventDefault stays inside the guard: it used to run first and swallow
+      // Enter on every button and link in the app while a tour was armed.
+      if (!forwardActionRef.current) return;
       event.preventDefault();
-      forwardActionRef.current?.();
+      forwardActionRef.current();
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [started]);
+  }, [started, cancelPendingPoll, onEnd]);
 
   return (
     <OnboardingTour
       tour={steps}
       started={started}
       onOnboardingTourEnd={onEnd}
+      onOnboardingTourChange={(step) => {
+        // Watchdog for the steps resolveAndGo did not choose: the very first
+        // step when the tour arms, and any step reached by the library itself.
+        // If its target is not mounted, wait briefly for a render still in
+        // flight and otherwise resolve forward, so a popover-less overlay is
+        // never the resting state.
+        if (!step) return;
+        const stepIndex = steps.findIndex((candidate) => candidate.id === step.id);
+        if (stepIndex === -1 || hasTarget(step.id)) return;
+        cancelPendingPoll();
+        pollRef.current = pollForElement(
+          step.id,
+          () => {
+            pollRef.current = null;
+          },
+          () => {
+            pollRef.current = null;
+            if (hasTarget(step.id)) return;
+            const controller = controllerRef.current;
+            // No controller means no popover has ever rendered, so there is
+            // nothing to advance to. End instead of leaving a bare overlay.
+            if (!controller) {
+              onEnd();
+              return;
+            }
+            resolveAndGo(controller, stepIndex, 1);
+          },
+        );
+      }}
       withStepper={false}
-      header={(controller) => (
-        <>
-          <Group justify="center" gap={4} py={4}>
-            <Text size="sm" fw={600}>
-              {stepIndexFromController(controller) + 1}
-            </Text>
-            <Text size="sm" c="dimmed">
-              /
-            </Text>
-            <Text size="sm" c="dimmed">
-              {controller.tour.length}
-            </Text>
-          </Group>
-          {stepIndexFromController(controller) === 0 && (
-            <Center py="xs">
-              <Image src={homarrLogoPath} alt="Muninn" w={64} h={64} fit="contain" />
-            </Center>
-          )}
-        </>
-      )}
+      header={(controller) => {
+        controllerRef.current = controller;
+        return (
+          <>
+            <Group justify="center" gap={4} py={4}>
+              <Text size="sm" fw={600}>
+                {(controller.currentStepIndex ?? 0) + 1}
+              </Text>
+              <Text size="sm" c="dimmed">
+                /
+              </Text>
+              <Text size="sm" c="dimmed">
+                {controller.tour.length}
+              </Text>
+            </Group>
+            {(controller.currentStepIndex ?? 0) === 0 && (
+              <Center py="xs">
+                <Image src={homarrLogoPath} alt="Muninn" w={64} h={64} fit="contain" />
+              </Center>
+            )}
+          </>
+        );
+      }}
       nextStepNavigation={(controller) => {
-        const nextStep = stepAtOffset(controller, 1);
-        const action = bindForwardAction(controller, () => {
-          navigateAndAdvance(controller.currentStep?.id, nextStep?.id, () => controller.nextStep());
-        });
+        const action = () => resolveAndGo(controller, controller.currentStepIndex ?? 0, 1);
+        forwardActionRef.current = action;
+        endTourRef.current = () => controller.endTour();
         return <TourForwardButton label={t("onboardingTour.next")} onClick={action} />;
       }}
       endStepNavigation={(controller) => {
-        const action = bindForwardAction(controller, () => controller.endTour());
+        const action = () => controller.endTour();
+        forwardActionRef.current = action;
+        endTourRef.current = action;
         return <TourDoneButton label={t("onboardingTour.done")} onClick={action} />;
       }}
       prevStepNavigation={(controller) => (
         <Button
           size="sm"
           variant="default"
-          onClick={() => {
-            const prevStep = stepAtOffset(controller, -1);
-            navigateAndAdvance(controller.currentStep?.id, prevStep?.id, () => controller.prevStep());
-          }}
+          onClick={() => resolveAndGo(controller, controller.currentStepIndex ?? 0, -1)}
         >
           {t("onboardingTour.prev")}
         </Button>
