@@ -56,11 +56,11 @@ jobs:
       - name: Build docs
         run: pnpm -F @homarr/docs build
 
-      # enablement turns Pages on for the repo (build_type=workflow) on the first
-      # run, so publishing needs no manual repo-settings step.
+      # No `enablement: true`. The default GITHUB_TOKEN cannot create a Pages
+      # site under this org ("Resource not accessible by integration"), so the
+      # site is provisioned once out of band and this step only reads it:
+      #   gh api -X POST repos/Emkraan/muninn/pages -f build_type=workflow
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
