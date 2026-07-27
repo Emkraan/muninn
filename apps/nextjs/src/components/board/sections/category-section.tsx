@@ -11,7 +11,7 @@ import { CategoryMenu } from "./category/category-menu";
 import { GridStack } from "./gridstack/gridstack";
 import classes from "./item.module.css";
 
-const localStorageKey = (sectionId: string) => `homarr-section-collapsed-${sectionId}`;
+const localStorageKey = (sectionId: string) => `muninn-section-collapsed-${sectionId}`;
 
 interface Props {
   section: CategorySection;

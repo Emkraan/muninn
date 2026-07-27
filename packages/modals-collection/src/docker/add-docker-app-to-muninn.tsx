@@ -8,11 +8,11 @@ import { createModal } from "@homarr/modals";
 import { showErrorNotification, showSuccessNotification } from "@homarr/notifications";
 import { useI18n } from "@homarr/translation/client";
 
-interface AddDockerAppToHomarrProps {
+interface AddDockerAppToMuninnProps {
   selectedContainers: RouterOutputs["docker"]["getContainers"]["containers"];
 }
 
-export const AddDockerAppToHomarrModal = createModal<AddDockerAppToHomarrProps>(({ actions, innerProps }) => {
+export const AddDockerAppToMuninnModal = createModal<AddDockerAppToMuninnProps>(({ actions, innerProps }) => {
   const t = useI18n();
   const form = useZodForm(
     z.object({

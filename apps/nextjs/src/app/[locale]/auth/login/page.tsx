@@ -10,7 +10,7 @@ import { sanitizeRedirectionUrl } from "@homarr/validation/redirection-url";
 
 import { env as appEnv } from "~/env";
 
-import { HomarrLogo } from "~/components/layout/logo/homarr-logo";
+import { MuninnLogo } from "~/components/layout/logo/muninn-logo";
 import { LoginForm } from "./_login-form";
 import { RavenMascot } from "./_raven-mascot";
 import classes from "./login.module.css";
@@ -39,7 +39,7 @@ export default async function Login(props: LoginProps) {
       <Box className={classes.authCard}>
         <div className={classes.authHead}>
           <div className={classes.logoBadge}>
-            <HomarrLogo size={46} />
+            <MuninnLogo size={46} />
           </div>
           <Title order={2} fw={700}>
             Muninn

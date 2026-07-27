@@ -55,7 +55,7 @@
           "field": {
             "token": {
               "label": "トークン",
-              "description": "以前のhomarrインスタンスから表示されたインポートトークンを入力してください"
+              "description": "以前のHomarrインスタンスから表示されたインポートトークンを入力してください"
             }
           },
           "notification": {

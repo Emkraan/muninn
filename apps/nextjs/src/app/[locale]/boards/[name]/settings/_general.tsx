@@ -10,7 +10,7 @@ import { IconPicker } from "@homarr/forms-collection";
 import { useI18n } from "@homarr/translation/client";
 import { boardSavePartialSettingsSchema } from "@homarr/validation/board";
 
-import { homarrLogoPath } from "~/components/layout/logo/homarr-logo";
+import { muninnLogoPath } from "~/components/layout/logo/muninn-logo";
 import { createMetaTitle } from "~/metadata";
 import type { Board } from "../../_types";
 import { useSavePartialSettingsMutation } from "./_shared";
@@ -75,7 +75,7 @@ export const GeneralSettingsContent = ({ board }: Props) => {
           pageTitle: values.pageTitle,
           logoImageUrl: values.logoImageUrl,
         };
-        updateFavicon(values.faviconImageUrl ?? homarrLogoPath);
+        updateFavicon(values.faviconImageUrl ?? muninnLogoPath);
         savePartialSettings({
           id: board.id,
           ...values,

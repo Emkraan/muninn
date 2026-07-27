@@ -1,5 +1,5 @@
 {
-  "name": "homarr-prebuilt-debian",
+  "name": "muninn-prebuilt-debian",
   "private": true,
   "dependencies": {
     "better-sqlite3": "^12.11.1"

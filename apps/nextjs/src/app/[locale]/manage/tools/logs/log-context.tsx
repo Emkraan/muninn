@@ -6,7 +6,7 @@ import { createContext, useContext, useMemo, useState } from "react";
 import type { LogLevel } from "@homarr/core/infrastructure/logs/constants";
 import { logLevels } from "@homarr/core/infrastructure/logs/constants";
 
-const FONT_SIZE_KEY = "homarr-log-font-size";
+const FONT_SIZE_KEY = "muninn-log-font-size";
 const DEFAULT_FONT_SIZE = 14;
 
 const readStoredFontSize = () => {

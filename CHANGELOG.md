@@ -1,3 +1,5 @@
+> This file is Homarr's own auto-generated changelog, preserved verbatim as the release history of the codebase Muninn forked from (v1.71.0). It is not Muninn's changelog. For Muninn's own changes, see [CHANGES.md](CHANGES.md).
+
 ## [1.71.0](https://github.com/homarr-labs/homarr/compare/v1.70.0...v1.71.0) (2026-07-17)
 
 ## [1.70.0](https://github.com/homarr-labs/homarr/compare/v1.69.2...v1.70.0) (2026-07-10)

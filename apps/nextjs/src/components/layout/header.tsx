@@ -8,7 +8,7 @@ import { ClientBurger } from "./header/burger";
 import { DesktopSearchInput, MobileSearchButton } from "./header/search";
 import { TourTarget } from "./header/tour-target";
 import { UserButton } from "./header/user";
-import { HomarrLogoWithTitle } from "./logo/homarr-logo";
+import { MuninnLogoWithTitle } from "./logo/muninn-logo";
 
 interface Props {
   logo?: ReactNode;
@@ -23,7 +23,7 @@ export const MainHeader = ({ logo, actions, hasNavigation = true }: Props) => {
         <Group h="100%" align="center" style={{ flex: 1 }} wrap="nowrap">
           {hasNavigation && <ClientBurger />}
           <UnstyledButton component={Link} href="/">
-            {logo ?? <HomarrLogoWithTitle size="md" />}
+            {logo ?? <MuninnLogoWithTitle size="md" />}
           </UnstyledButton>
         </Group>
         <TourTarget id="board-search">

@@ -1,9 +1,9 @@
-# Homarr Agent Rules
+# Muninn Agent Rules
 
 ## Repository Structure
 
 ```
-homarr/
+muninn/
 ├── apps/
 │   ├── nextjs/          # Main Next.js application (port 3000)
 │   ├── docs/            # Docusaurus 3 documentation site (@homarr/docs)

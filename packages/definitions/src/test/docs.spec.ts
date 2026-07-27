@@ -2,12 +2,12 @@
 import { describe, expect, test } from "vitest";
 
 import { createDocumentationLink, documentationBaseUrl } from "../docs";
-import type { HomarrDocumentationPath } from "../docs/homarr-docs-sitemap";
+import type { MuninnDocumentationPath } from "../docs/muninn-docs-sitemap";
 
 describe("createDocumentationLink should generate correct URLs", () => {
   test.each([
     ["/docs/getting-started", undefined, undefined, `${documentationBaseUrl}/docs/getting-started`],
-    ["/blog", undefined, undefined, `${documentationBaseUrl}/blog`],
+    ["/about-us", undefined, undefined, `${documentationBaseUrl}/about-us`],
     [
       "/docs/widgets/weather",
       "#configuration",
@@ -26,7 +26,7 @@ describe("createDocumentationLink should generate correct URLs", () => {
       { lang: "fr", theme: "dark" },
       `${documentationBaseUrl}/docs/widgets/bookmarks?lang=fr&theme=dark#sorting`,
     ],
-  ] satisfies [HomarrDocumentationPath, `#${string}` | undefined, Record<string, string> | undefined, string][])(
+  ] satisfies [MuninnDocumentationPath, `#${string}` | undefined, Record<string, string> | undefined, string][])(
     "should create correct URL for path %s with hash %s and params %o",
     (path, hashTag, queryParams, expected) => {
       expect(createDocumentationLink(path, hashTag, queryParams)).toBe(expected);

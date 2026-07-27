@@ -4,9 +4,9 @@ import { createLogger } from "@homarr/core/infrastructure/logs";
 
 import { dnsEnv } from "./env";
 
-// Add global type augmentation for homarr
+// Add global type augmentation for muninn
 declare global {
-  var homarr: {
+  var muninn: {
     dnsCacheManager?: DnsCacheManager;
     // add other properties if needed
   };
@@ -14,15 +14,15 @@ declare global {
 
 const logger = createLogger({ module: "dns" });
 
-// Initialize global.homarr if not present
+// Initialize global.muninn if not present
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-global.homarr ??= {};
-global.homarr.dnsCacheManager ??= new DnsCacheManager({
+global.muninn ??= {};
+global.muninn.dnsCacheManager ??= new DnsCacheManager({
   cacheMaxEntries: 1000,
   forceMinTtl: 5 * 60 * 1000, // 5 minutes
   logger,
 });
 
 if (dnsEnv.ENABLE_DNS_CACHING) {
-  global.homarr.dnsCacheManager.initialize();
+  global.muninn.dnsCacheManager.initialize();
 }

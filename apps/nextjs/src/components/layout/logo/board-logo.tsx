@@ -2,7 +2,7 @@
 
 import { useRequiredBoard } from "@homarr/boards/context";
 
-import { homarrLogoPath, homarrPageTitle } from "./homarr-logo";
+import { muninnLogoPath, muninnPageTitle } from "./muninn-logo";
 import type { LogoWithTitleProps } from "./logo";
 import { Logo, LogoWithTitle } from "./logo";
 
@@ -13,7 +13,7 @@ interface LogoProps {
 const useImageOptions = () => {
   const board = useRequiredBoard();
   return {
-    src: board.logoImageUrl ?? homarrLogoPath,
+    src: board.logoImageUrl ?? muninnLogoPath,
     alt: "Board logo",
     shouldUseNextImage: false,
   };
@@ -36,7 +36,7 @@ export const BoardLogoWithTitle = ({ size, hideTitleOnMobile }: CommonLogoWithTi
     <LogoWithTitle
       size={size}
       hideTitleOnMobile={hideTitleOnMobile}
-      title={board.pageTitle ?? homarrPageTitle}
+      title={board.pageTitle ?? muninnPageTitle}
       image={imageOptions}
     />
   );

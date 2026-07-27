@@ -23,7 +23,7 @@ import { formatBytes, useTimeAgo } from "@homarr/common";
 import type { ContainerState } from "@homarr/docker";
 import { containerStateColorMap, cpuUsageColor, memoryUsageColor, safeValue } from "@homarr/docker/shared";
 import { useModalAction } from "@homarr/modals";
-import { AddDockerAppToHomarr } from "@homarr/modals-collection";
+import { AddDockerAppToMuninn } from "@homarr/modals-collection";
 import { showErrorNotification, showSuccessNotification } from "@homarr/notifications";
 import type { TranslationFunction } from "@homarr/translation";
 import { useI18n, useScopedI18n } from "@homarr/translation/client";
@@ -256,7 +256,7 @@ const ContainerRowMenu = ({ container }: { container: DockerContainer }) => {
   const t = useScopedI18n("docker.action");
   const router = useRouter();
   const utils = clientApi.useUtils();
-  const { openModal } = useModalAction(AddDockerAppToHomarr);
+  const { openModal } = useModalAction(AddDockerAppToMuninn);
 
   const useContainerAction = (action: "start" | "stop" | "restart" | "remove") =>
     clientApi.docker[`${action}All`].useMutation({
@@ -328,7 +328,7 @@ interface ContainerActionBarProps {
 
 const ContainerActionBar = ({ selectedContainers }: ContainerActionBarProps) => {
   const t = useScopedI18n("docker.action");
-  const { openModal } = useModalAction(AddDockerAppToHomarr);
+  const { openModal } = useModalAction(AddDockerAppToMuninn);
 
   const selectedIds = selectedContainers.map((container) => container.id);
 
