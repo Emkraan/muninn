@@ -55,7 +55,7 @@
           "field": {
             "token": {
               "label": "秘钥",
-              "description": "输入您之前的 homarr 实例中显示的导入秘钥"
+              "description": "输入您之前的 Homarr 实例中显示的导入秘钥"
             }
           },
           "notification": {

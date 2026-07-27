@@ -55,7 +55,7 @@
           "field": {
             "token": {
               "label": "Token",
-              "description": "Indtast den viste import token fra din tidligere homarr instans"
+              "description": "Indtast den viste import token fra din tidligere Homarr instans"
             }
           },
           "notification": {
@@ -3855,7 +3855,7 @@
         }
       },
       "oldImport": {
-        "label": "Importer fra homarr før 1.0.0",
+        "label": "Importer fra Homarr før 1.0.0",
         "notification": {
           "success": {
             "title": "Import udført",

@@ -559,7 +559,7 @@ const seedDemoUserAsync = async (db: Database) => {
   await db.insert(integrations).values({
     id: integrationId,
     name: "Demo Integration",
-    url: "https://demo.homarr.dev",
+    url: "https://demo.muninn.example",
     kind: "mock",
     appId: null,
   });

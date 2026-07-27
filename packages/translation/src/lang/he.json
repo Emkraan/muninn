@@ -3855,7 +3855,7 @@
         }
       },
       "oldImport": {
-        "label": "יבוא מ- homarr לפני 1.0.0",
+        "label": "יבוא מ- Homarr לפני 1.0.0",
         "notification": {
           "success": {
             "title": "הייבוא הצליח",

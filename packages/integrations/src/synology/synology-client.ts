@@ -239,7 +239,7 @@ export class SynologyClient {
       const response = await fetchWithTrustedCertificatesAsync(requestUrl, {
         headers: {
           Cookie: session.cookieHeader,
-          "User-Agent": "Homarr",
+          "User-Agent": "Muninn",
         },
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
@@ -297,7 +297,7 @@ export class SynologyClient {
     const response = await fetchWithTrustedCertificatesAsync(loginUrl, {
       method: "POST",
       headers: {
-        "User-Agent": "Homarr",
+        "User-Agent": "Muninn",
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
@@ -347,7 +347,7 @@ export class SynologyClient {
 
     const response = await fetchWithTrustedCertificatesAsync(infoUrl, {
       headers: {
-        "User-Agent": "Homarr",
+        "User-Agent": "Muninn",
       },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });

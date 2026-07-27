@@ -118,9 +118,9 @@ const eventTemplates: EventTemplate[] = [
     ],
   },
   {
-    title: "Homarr Meetup",
+    title: "Muninn Meetup",
     subTitle: "",
-    description: "Yearly meetup of the Homarr community",
+    description: "Yearly meetup of the Muninn community",
     dayOffset: 14,
     hours: 14,
     location: "Mountains",
@@ -128,9 +128,9 @@ const eventTemplates: EventTemplate[] = [
     indicatorColor: "#fa5252",
     links: [
       {
-        href: "https://homarr.dev",
-        name: "Homarr",
-        logo: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/homarr.svg",
+        href: "https://github.com/Emkraan/muninn",
+        name: "Muninn",
+        logo: "/logo/logo.png",
         color: "#000000",
         isDark: true,
       },

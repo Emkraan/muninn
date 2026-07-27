@@ -147,7 +147,7 @@ const synchronizeGroupsWithExternalForUserAsync = async (db: Database, userId: s
   );
 
   if (missingExternalGroupsForUser.length > 0) {
-    logger.debug("Homarr does not have the user in certain groups.", {
+    logger.debug("Muninn does not have the user in certain groups.", {
       user: userId,
       count: missingExternalGroupsForUser.length,
     });
@@ -159,7 +159,7 @@ const synchronizeGroupsWithExternalForUserAsync = async (db: Database, userId: s
       where: inArray(groups.name, missingExternalGroupsForUser),
     });
 
-    logger.debug("Homarr has found groups in the database user is not in.", {
+    logger.debug("Muninn has found groups in the database user is not in.", {
       user: userId,
       count: groupIds.length,
     });
@@ -174,7 +174,7 @@ const synchronizeGroupsWithExternalForUserAsync = async (db: Database, userId: s
 
       logger.info("Added user to groups successfully.", { user: userId, count: groupIds.length });
     } else {
-      logger.debug("User is already in all groups of Homarr.", { user: userId });
+      logger.debug("User is already in all groups of Muninn.", { user: userId });
     }
   }
 
@@ -187,7 +187,7 @@ const synchronizeGroupsWithExternalForUserAsync = async (db: Database, userId: s
   );
 
   if (groupsUserIsNoLongerMemberOfExternally.length > 0) {
-    logger.debug("Homarr has the user in certain groups that LDAP does not have.", {
+    logger.debug("Muninn has the user in certain groups that LDAP does not have.", {
       user: userId,
       count: groupsUserIsNoLongerMemberOfExternally.length,
     });

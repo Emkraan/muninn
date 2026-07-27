@@ -8,7 +8,7 @@ import type { Database, InferSelectModel } from "@homarr/db";
 import { and, asc, eq, handleTransactionsAsync, inArray, likeInsensitive, sql } from "@homarr/db";
 import { appGroupPermissions, apps, appUserPermissions, groupMembers, groupPermissions } from "@homarr/db/schema";
 import { selectAppSchema } from "@homarr/db/validationSchemas";
-import { getPermissionsWithParents } from "@homarr/definitions";
+import { defaultAppIconUrl, getPermissionsWithParents } from "@homarr/definitions";
 import { getIconForName } from "@homarr/icons";
 import { appCreateManySchema, appEditSchema, appManageSchema, appSavePermissionsSchema } from "@homarr/validation/app";
 import { byIdSchema, paginatedSchema } from "@homarr/validation/common";
@@ -17,8 +17,6 @@ import { convertIntersectionToZodObject } from "../schema-merger";
 import { createTRPCRouter, permissionRequiredProcedure, protectedProcedure, publicProcedure } from "../trpc";
 import { throwIfActionForbiddenAsync } from "./app/app-access";
 import { AppAccessControl } from "./app/app-access-control";
-
-const defaultIcon = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@master/svg/homarr.svg";
 
 // App dedup identity = (normalized name, normalized href). Two apps are "the
 // same" only when BOTH match; same name + different URL are distinct apps.
@@ -394,7 +392,7 @@ export const appRouter = createTRPCRouter({
           id,
           name: app.name,
           description: app.description,
-          iconUrl: app.iconUrl ?? getIconForName(ctx.db, app.name).sync()?.url ?? defaultIcon,
+          iconUrl: app.iconUrl ?? getIconForName(ctx.db, app.name).sync()?.url ?? defaultAppIconUrl,
           href: app.href,
         });
         createdInBatch.set(key, id);

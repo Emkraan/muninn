@@ -109,7 +109,7 @@ export class GlancesIntegration extends Integration implements ISystemHealthMoni
 
   protected async testingAsync(_: IntegrationTestingInput): Promise<TestingResult> {
     const response = await fetchWithTrustedCertificatesAsync(this.url("/api/4/status"), {
-      headers: { "User-Agent": "Homarr" },
+      headers: { "User-Agent": "Muninn" },
     });
 
     if (!response.ok) {

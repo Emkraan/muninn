@@ -25,7 +25,7 @@ function ticksToMs(ticks: number | null | undefined): number | null {
 export class JellyfinIntegration extends Integration implements IMediaServerIntegration, IMediaReleasesIntegration {
   private readonly jellyfin: Jellyfin = new Jellyfin({
     clientInfo: {
-      name: "Homarr",
+      name: "Muninn",
       version: "0.0.1",
     },
     deviceInfo: {

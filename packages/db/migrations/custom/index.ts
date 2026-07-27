@@ -5,6 +5,7 @@ import { migrateAppWidgetShowDescriptionTooltipToDisplayModeAsync } from "./0002
 import { migrateWidgetOnlyIntegrationsToOptionsAsync } from "./0003_remove_widget_only_integrations";
 import { migrateOidcUserProviderNamespaceAsync } from "./0004_namespace_oidc_user_provider";
 import { migrateDocumentationUrlsAsync } from "./0005_repoint_documentation_urls";
+import { migrateDefaultAppIconAsync } from "./0006_repoint_default_app_icon";
 
 export const applyCustomMigrationsAsync = async (db: Database) => {
   await migrateReleaseWidgetProviderToOptionsAsync(db);
@@ -13,4 +14,5 @@ export const applyCustomMigrationsAsync = async (db: Database) => {
   await migrateWidgetOnlyIntegrationsToOptionsAsync(db);
   await migrateOidcUserProviderNamespaceAsync(db);
   await migrateDocumentationUrlsAsync(db);
+  await migrateDefaultAppIconAsync(db);
 };

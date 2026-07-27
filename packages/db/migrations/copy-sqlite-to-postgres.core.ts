@@ -158,7 +158,7 @@ export const copyAllTables = async (options: {
     if (nonEmpty.length > 0) {
       throw new Error(
         `Target Postgres is not empty; refusing to copy. Non-empty tables: ${nonEmpty.join(", ")}. ` +
-          `Re-run with --truncate to wipe the target first (a freshly-migrated Homarr DB is seeded, ` +
+          `Re-run with --truncate to wipe the target first (a freshly-migrated Muninn DB is seeded, ` +
           `so --truncate is the expected path for a real migration).`,
       );
     }

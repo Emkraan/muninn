@@ -55,7 +55,7 @@
           "field": {
             "token": {
               "label": "Token",
-              "description": "Zadejte zobrazený importní token z předchozí instance homarr"
+              "description": "Zadejte zobrazený importní token z předchozí instance Homarr"
             }
           },
           "notification": {

@@ -55,7 +55,7 @@
           "field": {
             "token": {
               "label": "Mã thông báo",
-              "description": "Nhập token nhập được hiển thị từ phiên bản homarr trước đó của bạn"
+              "description": "Nhập token nhập được hiển thị từ phiên bản Homarr trước đó của bạn"
             }
           },
           "notification": {

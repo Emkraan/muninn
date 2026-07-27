@@ -3855,7 +3855,7 @@
         }
       },
       "oldImport": {
-        "label": "Importer fra homarr før 1.0.0",
+        "label": "Importer fra Homarr før 1.0.0",
         "notification": {
           "success": {
             "title": "Importen var vellykket",
