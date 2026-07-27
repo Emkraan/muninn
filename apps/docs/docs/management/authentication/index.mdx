@@ -1,0 +1,268 @@
+---
+title: Authentication
+tags:
+  - Management
+  - Authentication
+  - SSO
+  - OIDC
+  - Identity providers
+  - Groups
+---
+
+# Authentication
+
+Muninn can authenticate people in three ways: against its own internal userbase (credentials), against an LDAP or Active Directory server, and against any number of OIDC or OAuth2 identity providers.
+
+Credentials and LDAP are switched on with environment variables. Identity providers are different: they are stored in the database and managed from ``Management`` > ``Settings`` > ``Authentication``. You can add as many as you want, and changes apply on the next sign-in without restarting the container.
+
+:::info
+
+The [Single Sign On](/docs/advanced/single-sign-on) page documents the older, environment variable driven model. In Muninn the `AUTH_OIDC_*` variables no longer configure a provider. Use this page for identity providers, and keep using that page for LDAP and for the shared authentication variables.
+
+Do not copy the redirect URI from that page's OIDC examples. They register `/api/auth/callback/oidc`, which no longer exists: every provider now has its own `/api/auth/callback/oidc-<key>` path, and the old one produces a redirect URI mismatch at the identity provider.
+
+:::
+
+## Who can manage this page
+
+The page lives at `/manage/authentication` and needs the ``Manage authentication`` permission, described in the group permission list as "Add, edit, and remove SSO identity providers". The ``Administrator`` permission includes it. Without the permission the page is not reachable and does not appear in the navigation.
+
+## The three authentication methods
+
+### Credentials
+
+The internal userbase. The first user is created during onboarding and further users are created in the user management, or by invitation. See [Users](/docs/management/users).
+
+Credentials is the default. It is enabled unless you change `AUTH_PROVIDERS`. Invitations and the user creation wizard are only available while credentials is enabled.
+
+### LDAP and Active Directory
+
+Authenticates against an LDAP server. Every LDAP user that signs in gets a user record in Muninn, and their group memberships are synchronized from LDAP groups that have a matching name in Muninn.
+
+LDAP is configured entirely with environment variables. Enable it by adding `ldap` to `AUTH_PROVIDERS` and set the `AUTH_LDAP_*` variables described on the [Single Sign On](/docs/advanced/single-sign-on) page.
+
+### Identity providers (OIDC and OAuth2)
+
+Everything else. Each provider is a row in the database with its own client credentials, endpoints, claim mapping and group rules, added from the admin UI. The client secret is encrypted with `SECRET_ENCRYPTION_KEY` before it is stored, and it is never sent back to the browser.
+
+## Adding an identity provider
+
+Open ``Management`` > ``Settings`` > ``Authentication``. If nothing is configured yet you will see "No identity providers configured yet". Click ``Add provider`` to open the ``Identity provider`` dialog.
+
+### Provider type
+
+Pick one of the eight types. The type only supplies presets: it fills in the fields you leave empty, and anything you set yourself wins.
+
+| Provider type | Flow | Endpoints supplied by the preset | Default scopes |
+|---------------|------|----------------------------------|----------------|
+| Microsoft Entra ID | OIDC | Discovery and issuer derived from the tenant | `openid profile email User.Read` |
+| Google | OIDC | Discovery `https://accounts.google.com/.well-known/openid-configuration` and issuer `https://accounts.google.com` | `openid profile email` |
+| GitHub | OAuth2 | GitHub authorize, token and `https://api.github.com/user` | `read:user user:email` |
+| Okta | OIDC | None, discovery comes from your issuer | `openid profile email groups` |
+| Keycloak | OIDC | None, discovery comes from your issuer | `openid profile email groups` |
+| Authentik | OIDC | None, discovery comes from your issuer | `openid profile email groups` |
+| Generic OIDC | OIDC | None, you supply a discovery URL or an issuer | `openid profile email` |
+| Manual OAuth2 | OAuth2 | None, you supply all three endpoints | `openid profile email` |
+
+Switching the type also fills in the display name and, on a new provider, the key, as long as you have not typed your own values.
+
+### Key
+
+The stable slug for this provider. Lowercase letters, digits and hyphens only, at most 59 characters, and unique across providers. It becomes part of the callback URL and of the identity Muninn stores for every user who signs in with this provider, so the field is disabled once the provider has been saved: "Stable slug used in the callback URL. Cannot be changed later."
+
+### Display name
+
+Shown on the sign-in button as "Login with `<display name>`", and on the provider card in the management list.
+
+### Client ID and Client secret
+
+The credentials of the application, app registration or client you created in the identity provider.
+
+When you edit an existing provider the secret field stays blank and the description reads "Leave blank to keep the current secret." Type a new value only when you want to replace it. A provider that has no stored secret is flagged with an ``Incomplete`` badge on its card.
+
+### Type specific fields
+
+Which of these appear depends on the selected type.
+
+| Field | Shown for | What to enter |
+|-------|-----------|---------------|
+| Tenant ID | Microsoft Entra ID | The directory (tenant) ID of your tenant, or `organizations` / `common` |
+| Issuer URL | Okta, Keycloak, Authentik, Generic OIDC | The base issuer, for example `https://id.example.com/realms/main`. Discovery is derived as `{issuer}/.well-known/openid-configuration` |
+| Discovery URL | Generic OIDC | The full `.well-known/openid-configuration` URL |
+| Authorization URL, Token URL, Userinfo URL | Manual OAuth2 | The three endpoints of the OAuth2 server |
+
+For Google and GitHub none of these appear: "Endpoints are preset for this provider. Only the client ID and secret are required."
+
+If you leave the tenant empty, Microsoft Entra ID falls back to `common`. A concrete tenant ID is the safer choice, because `common` and `organizations` do not resolve to a single issuer that can be validated against the token.
+
+### Enabled, Show on login page, Default
+
+Three switches control how the provider is exposed.
+
+- **Enabled**: whether Muninn loads the provider at all. A disabled provider cannot be used to sign in and gets a red ``Disabled`` badge.
+- **Show on login page**: the provider gets a button on the login page. Turning it off hides the button and marks the card ``Hidden``.
+- **Default (auto sign-in)**: the login page immediately redirects to this provider. Only one provider can be the default; saving a new default clears the flag on the others. A default provider must also be shown on the login page, otherwise saving fails with "A default (auto sign-in) provider must also be shown on the login page."
+
+Auto sign-in is skipped when the login page is opened with an error, so a rejected sign-in does not trap you in a redirect loop.
+
+### Advanced
+
+The ``Advanced`` section holds everything else.
+
+| Field | Meaning |
+|-------|---------|
+| Scopes | Space separated. Replaces the preset scopes of the provider type outright, so repeat anything you still need. |
+| Token endpoint auth method | `client_secret_basic` (default), `client_secret_post`, or `none (PKCE / public client)`. |
+| Force userinfo request | Read the profile from the userinfo endpoint instead of the ID token. |
+| Allow dangerous email account linking | Link an incoming account to an existing user with the same email address. The lookup is scoped to this provider's own users, so it never links to a credentials user or to a user from another identity provider. Only turn this on when the provider verifies email addresses. |
+| Endpoint overrides | Issuer URL, Discovery URL, Authorization URL, Token URL and Userinfo URL, for any type. Whatever you set here replaces the preset. |
+| Claim mapping | Name claim, Email claim, Picture claim, Username claim. |
+| Group mapping | Groups claim, Allowed groups, Admin groups, Manage group membership locally. |
+
+Because ``Scopes`` replaces the preset set rather than adding to it, a Microsoft Entra ID provider loses the preset `User.Read` scope as soon as you type anything in the field. That scope is what makes the returned access token a Graph token for the profile photo, so include it if you want the photo.
+
+Claim and group mapping are covered in their own sections below.
+
+### Verify
+
+``Verify`` runs a connection test against the saved provider without signing anyone in. It is available in the dialog once the provider exists, and from the plug icon on the provider card.
+
+The test reports a list of checks: `Client ID set`, `Client secret set`, `Discovery URL resolved`, `Discovery URL is safe to probe`, `Discovery document reachable`, `token_endpoint present` and `authorization_endpoint present`. Manual OAuth2 is checked for `Token URL set` instead, unless you gave it a Discovery URL under ``Endpoint overrides``, in which case it gets the same discovery probe as the other types. GitHub stops after the credentials because it publishes no discovery document.
+
+The probe gives up after 5 seconds. It accepts private LAN addresses, because self hosted identity providers legitimately live there, but it refuses to fetch a discovery URL whose host resolves to a loopback or link-local address.
+
+### Saving
+
+``Save changes`` writes the provider and shows "Changes apply on the next sign-in (no restart needed)." The provider list and the login page pick it up right away.
+
+Muninn keeps the enabled provider rows in a 30 second cache. Saving from this page clears that cache immediately, which is why your change is live at once. A row you edit directly in the database bypasses the cache invalidation and can take up to 30 seconds to take effect.
+
+## The redirect URI
+
+Register this callback with the identity provider:
+
+```
+https://<your-muninn-host>/api/auth/callback/oidc-<key>
+```
+
+The path is always `/api/auth/callback/oidc-` followed by the provider key, so a provider with the key `entra` uses `/api/auth/callback/oidc-entra`. The dialog shows the exact path with a copy button as soon as you have typed a key, and each provider card shows it under the display name.
+
+Muninn builds the absolute URI from the `x-forwarded-proto` and `x-forwarded-host` headers of the request, falling back to the `host` header and to `https`. Behind a reverse proxy this means the URI follows your public hostname, so the proxy has to forward those headers correctly. See [Proxy](/docs/advanced/proxy).
+
+## Claim mapping
+
+Every sign-in must produce a `sub` claim. Without it the sign-in fails with an error naming the provider.
+
+**Name.** The username Muninn stores is taken from the ``Name claim`` if you set one, otherwise from the ``Username claim``. If you set one of them and the provider does not send that claim, Muninn does not fall back to the standard claims: it goes straight to the email address, then to the `sub`. That is what a typo in the field looks like. When both fields are empty, Muninn uses `preferred_username`, unless that value contains an `@`, in which case it uses `name`; if `preferred_username` is absent it falls back to `name`, then to the email address, then to the `sub`. The name is re-evaluated on every sign-in, so a rename in the identity provider follows through to Muninn.
+
+**Email.** Taken from the ``Email claim`` if set, otherwise from the standard `email` claim. A user without an email is stored with no email address.
+
+:::info
+
+Unlike the name and the picture, the email address is only captured when the account is first created. Later sign-ins never update it, so a user who changes their address in the identity provider keeps the old one in Muninn until you edit it in the user management.
+
+:::
+
+**Picture.** See the next section.
+
+## Profile pictures
+
+Muninn stores the value of the ``Picture claim``, or of the standard `picture` claim when the field is empty, as the user's profile picture. It is refreshed on every sign-in, so changing the picture in the identity provider updates it in Muninn.
+
+One exception: a picture that was uploaded in Muninn is stored inline rather than as a link, and an uploaded picture is never overwritten by the identity provider.
+
+## Group to role mapping
+
+Muninn does not have roles. Permissions come from groups, so an identity provider grants permissions by putting users into Muninn groups. See [Users](/docs/management/users) for the group and permission model.
+
+### How a claim becomes a membership
+
+On every sign-in Muninn reads the ``Groups claim`` from the profile, defaulting to `groups` when the field is empty. If the claim is present and is a list, the user's Muninn memberships are reconciled against it:
+
+- For each entry in the claim, if a Muninn group with that name exists, the user is added to it.
+- Any other Muninn group the user is in, and which is not in the claim, is removed. The `everyone` group is exempt and every user is added to it.
+
+Groups are matched by name and nothing is created automatically. An entry in the claim with no matching Muninn group is silently ignored, which is the usual reason a user signs in with the right groups in the identity provider and still has no permissions. Create the group in Muninn first, with exactly the same name, then assign permissions to it and have the user sign in again.
+
+To hand out administrator rights, create a Muninn group whose name matches the identity provider group, give it the ``Administrator`` permission, and sign in. The onboarding wizard offers the same thing under ``External group``, described there as "Name has to match admin group of external provider".
+
+If the identity provider does not send the claim at all, or sends something that is not a list, no synchronization happens and existing memberships are left untouched.
+
+### Allowed groups
+
+``Allowed groups`` is a comma separated list. Leave it empty and everyone the provider authenticates may sign in. Set it and only members of at least one of those groups get in; everybody else is rejected before a session is created.
+
+:::warning
+
+The allowed groups check fails closed. If the groups claim is missing, empty, or not a list, nobody passes it. Confirm the claim actually arrives, for example by signing in once with the field empty, before you fill it in.
+
+This gate is independent of ``Manage group membership locally``. Turning local management on does not exempt anyone from it, so a provider that has a non-empty ``Allowed groups`` and does not emit the groups claim locks out every one of its users.
+
+:::
+
+### Admin groups
+
+``Admin groups`` is stored but not yet enforced, which the field description states: "Not yet enforced: to grant admin, create a Muninn group whose name matches the IdP group and give it the admin permission."
+
+### Manage group membership locally
+
+Turn on ``Manage group membership locally`` when you would rather assign groups inside Muninn. While it is on, the groups claim of that provider is ignored and memberships are edited on the group members page like any local user.
+
+Turning it back off resumes the synchronization at the next sign-in of each user, and that reconciliation removes memberships that were added by hand.
+
+The flag is stored per provider and enforced per user: adding or removing a member whose provider does not have it set fails with "User's provider is not managed locally". The group members page is coarser than that. It decides whether to offer the add and remove controls for the whole identity provider class at once, so if any enabled provider has the flag set, the controls appear for users of every provider and the rejection only arrives when you save.
+
+The page also tells you which side owns the memberships, with "Some members are from external providers and cannot be managed here" or "All members are from external providers and cannot be managed here".
+
+## Signing in
+
+The login page shows one ``Login with <display name>`` button for every provider that is both enabled and shown on the login page. The username and password fields appear above them when credentials or LDAP is enabled, separated by a ``Single sign-on`` divider.
+
+Users created by an identity provider appear in the user management like any other user, but they have no ``Security`` tab, and their general settings carry the notice "Certain fields are disabled because they are managed by an external authentication provider."
+
+## Provider keys are permanent
+
+:::warning
+
+Each provider owns its users. A user who signs in through the provider with the key `entra` is stored with the identity `oidc-entra`, and that identity is what Muninn matches on at the next sign-in.
+
+Do not change a key after people have used it, and do not delete a provider and recreate it under a different key. The old users keep the old identity, the new key produces a second set of users, and nobody can get back into their original account. This is also why the ``Key`` field is disabled when you edit a provider.
+
+:::
+
+The namespacing is deliberate. When every provider shared the single identity `oidc`, a lookup by email address could match a user that belonged to a different identity provider, which meant a user could be locked out by another provider, or an account could be taken over when email account linking was enabled.
+
+Upgrades re-key existing users automatically: a user stored with the plain `oidc` identity is moved to the namespaced identity of the OIDC account linked to them. The one case that is left alone is a legacy `oidc` user with no linked `oidc-` account at all. That user keeps the plain `oidc` identity, which no provider matches, so they need a new account.
+
+## Deleting a provider
+
+The trash icon on a provider card asks for confirmation: "Users who signed in with it will need another provider to authenticate. This does not remove their accounts."
+
+Their user records and group memberships stay. Re-adding the provider with the same key restores their ability to sign in.
+
+## Environment variables that still apply
+
+Identity providers are configured on this page, but a handful of variables still shape authentication. Full descriptions live on the [Single Sign On](/docs/advanced/single-sign-on) and [Environment variables](/docs/advanced/environment-variables) pages.
+
+| Environment Variable | Still relevant because | Default |
+|----------------------|------------------------|---------|
+| `AUTH_PROVIDERS` | Decides whether the credentials and LDAP providers are loaded | `credentials` |
+| `AUTH_LDAP_*` | The only way to configure LDAP | see the SSO page |
+| `AUTH_SESSION_EXPIRY_TIME` | Session lifetime for every provider | `30d` |
+| `AUTH_LOGOUT_REDIRECT_URL` | Where users land after signing out | none |
+| `AUTH_COOKIE_PREFIX` | Prefix for all authentication cookies | `homarr` |
+| `SECRET_ENCRYPTION_KEY` | Encrypts the stored client secrets | required |
+| `AUTH_OIDC_NAME_ATTRIBUTE_OVERWRITE` | Fallback name attribute, used only when a provider row cannot be resolved. The per-provider ``Name claim`` supersedes it | none |
+| `AUTH_OIDC_GROUPS_LOCAL_MANAGEMENT` | Fallback default behind the per-provider ``Manage group membership locally`` switch | `false` |
+
+:::danger
+
+Rotating `SECRET_ENCRYPTION_KEY` makes every stored client secret undecryptable. Muninn does not fail loudly: it skips each provider it cannot build, logs the failure, and keeps the rest of authentication working. The visible symptom is a sign-in button quietly disappearing from the login page, so check the logs before you go hunting through your reverse proxy. Re-enter the client secret on each affected provider to recover.
+
+:::
+
+`AUTH_SECRET` is generated automatically each time the container starts, so you only set it yourself when running from source.
+
+Listing `oidc` in `AUTH_PROVIDERS` no longer configures a provider and no longer demands an issuer or client credentials. The providers you add on this page load regardless of what `AUTH_PROVIDERS` contains. Listing `oidc` or `ldap` does still make the ``External group`` step of the onboarding wizard reachable. To turn off local password login entirely, set `AUTH_PROVIDERS=oidc` so that neither credentials nor LDAP is loaded.
+
+The remaining single provider variables, `AUTH_OIDC_ISSUER`, `AUTH_OIDC_CLIENT_ID`, `AUTH_OIDC_CLIENT_SECRET`, `AUTH_OIDC_CLIENT_NAME`, `AUTH_OIDC_AUTO_LOGIN`, `AUTH_OIDC_SCOPE_OVERWRITE`, `AUTH_OIDC_GROUPS_ATTRIBUTE`, `AUTH_OIDC_FORCE_USERINFO`, `AUTH_OIDC_ENABLE_DANGEROUS_ACCOUNT_LINKING` and `AUTH_OIDC_TOKEN_ENDPOINT_AUTH_METHOD`, are still accepted so that an old configuration does not break startup, but they are no longer read. Each has a per provider field on this page, with one gap: the ``Token endpoint auth method`` dropdown offers `client_secret_basic`, `client_secret_post` and `none`, so an old `AUTH_OIDC_TOKEN_ENDPOINT_AUTH_METHOD=client_secret_jwt` has no equivalent here.

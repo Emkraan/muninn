@@ -28,7 +28,9 @@ Alternatively, you can [open the full interactive API reference](/api-reference)
 
 Many endpoints will require you to authenticate. At the top of the API reference, you'll find a button to authenticate yourself with an API key.
 You can obtain API keys from the "Authentication" tab at the top of the page.
-API keys will not expire and can be used indefinitely.
+A key can be given an expiry when you create it, or left to never expire. An expired key fails authentication outright.
+
+Keys are also scoped. A key's scopes are intersected with its owner's current permissions, so a key can hold less than its owner but never more, and it loses access the moment the owner does. The intersection narrows global permissions only: grants made directly on a specific board, app or integration still apply. See [Access Control](/docs/management/access-control) for how those two layers fit together.
 
 ### API Key Format
 
@@ -83,3 +85,5 @@ The OpenAPI and MCP APIs include board management endpoints for common automatio
 - Configure global board defaults such as public home boards and status behavior
 
 Use the interactive API reference to inspect the exact request body for each endpoint under the `boards` and `settings` tags.
+
+To read and write the contents of a board itself, its breakpoint layouts, sections and items, see [Board as Code](/docs/management/api/board-as-code).

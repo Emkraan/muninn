@@ -1,8 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
 
+import type { Session } from "@homarr/auth";
 import { createId } from "@homarr/common";
 import { createLogger } from "@homarr/core/infrastructure/logs";
+import type { Database } from "@homarr/db";
 import { and, asc, eq, likeInsensitive, startsWithInsensitive } from "@homarr/db";
 import { getServerSettingByKeyAsync, updateServerSettingByKeyAsync } from "@homarr/db/queries";
 import { searchEngines, users } from "@homarr/db/schema";
@@ -13,6 +15,38 @@ import { createTRPCRouter, permissionRequiredProcedure, protectedProcedure, publ
 import { IntegrationAccessControl } from "../integration/integration-access-control";
 
 const logger = createLogger({ module: "searchEngineRouter" });
+
+// A search engine of type "fromIntegration" joins its backing integration, which
+// carries a credentialed internal url. Holding a search-engine permission is not
+// the same as being entitled to that integration, so the join is stripped for
+// callers outside the integration's visibility scope. Returns a reusable
+// stripper so one access-control instance is shared across a request.
+const createIntegrationStripper = (ctx: { db: Database; session: Session | null }) => {
+  const accessControl = new IntegrationAccessControl(ctx.db, ctx.session?.user ?? null);
+  return async <TEngine extends { integration: { id: string } | null } | undefined>(searchEngine: TEngine) => {
+    if (!searchEngine?.integration) return searchEngine;
+    const visible = await accessControl.canUserSeeIntegrationsAsync([searchEngine.integration.id]);
+    return visible ? searchEngine : { ...searchEngine, integration: null };
+  };
+};
+
+// Binding an integration to a search engine must not be a way around integration
+// permissions. The data path (integration.searchInIntegration) is separately
+// gated, so this is about not letting a user create a reference they can never
+// use, and not leaking which integrations exist.
+const throwIfIntegrationNotUsableAsync = async (
+  ctx: { db: Database; session: Session | null },
+  integrationId: string | null | undefined,
+) => {
+  if (!integrationId) return;
+  const allowed = await new IntegrationAccessControl(
+    ctx.db,
+    ctx.session?.user ?? null,
+  ).filterBindableIntegrationIdsAsync([integrationId]);
+  if (allowed.length === 0) {
+    throw new TRPCError({ code: "FORBIDDEN", message: `No access to integration: ${integrationId}` });
+  }
+};
 
 export const searchEngineRouter = createTRPCRouter({
   getPaginated: protectedProcedure.input(paginatedSchema).query(async ({ input, ctx }) => {
@@ -72,19 +106,7 @@ export const searchEngineRouter = createTRPCRouter({
         };
   }),
   getDefaultSearchEngine: publicProcedure.query(async ({ ctx }) => {
-    // The joined integration carries a credentialed internal url, so it is
-    // stripped unless the caller is actually entitled to that integration. This
-    // procedure is public (the search bar renders before sign-in), which
-    // previously handed the default engine's backing integration id, kind and
-    // url to any anonymous visitor.
-    const accessControl = new IntegrationAccessControl(ctx.db, ctx.session?.user ?? null);
-    const withVisibleIntegration = async <TEngine extends { integration: { id: string } | null } | undefined>(
-      searchEngine: TEngine,
-    ) => {
-      if (!searchEngine?.integration) return searchEngine;
-      const visible = await accessControl.canUserSeeIntegrationsAsync([searchEngine.integration.id]);
-      return visible ? searchEngine : { ...searchEngine, integration: null };
-    };
+    const withVisibleIntegration = createIntegrationStripper(ctx);
 
     const userDefaultId = ctx.session?.user.id
       ? ((await ctx.db.query.users
@@ -148,7 +170,8 @@ export const searchEngineRouter = createTRPCRouter({
     return null;
   }),
   search: publicProcedure.input(searchSchema).query(async ({ ctx, input }) => {
-    return await ctx.db.query.searchEngines.findMany({
+    const withVisibleIntegration = createIntegrationStripper(ctx);
+    const results = await ctx.db.query.searchEngines.findMany({
       // Public dashboards have no session: restrict anonymous users to generic
       // (non-integration) engines so custom search engines work there too (#4132),
       // while integration-backed engines stay available only when signed in.
@@ -167,11 +190,17 @@ export const searchEngineRouter = createTRPCRouter({
       },
       limit: input.limit,
     });
+
+    // Being signed in was the only requirement here, so any user could read the
+    // kind and internal url of every integration backing a search engine.
+    return await Promise.all(results.map(withVisibleIntegration));
   }),
   create: permissionRequiredProcedure
     .requiresPermission("search-engine-create")
     .input(searchEngineManageSchema)
     .mutation(async ({ ctx, input }) => {
+      await throwIfIntegrationNotUsableAsync(ctx, "integrationId" in input ? input.integrationId : null);
+
       await ctx.db.insert(searchEngines).values({
         id: createId(),
         name: input.name,
@@ -198,6 +227,13 @@ export const searchEngineRouter = createTRPCRouter({
         });
       }
 
+      // Only a change of binding has to be earned, so an engine bound before this
+      // rule existed keeps working when edited by someone without that grant.
+      const nextIntegrationId = "integrationId" in input ? input.integrationId : null;
+      if (nextIntegrationId !== searchEngine.integrationId) {
+        await throwIfIntegrationNotUsableAsync(ctx, nextIntegrationId);
+      }
+
       await ctx.db
         .update(searchEngines)
         .set({
@@ -205,7 +241,7 @@ export const searchEngineRouter = createTRPCRouter({
           iconUrl: input.iconUrl,
           urlTemplate: "urlTemplate" in input ? input.urlTemplate : null,
           description: input.description,
-          integrationId: "integrationId" in input ? input.integrationId : null,
+          integrationId: nextIntegrationId,
           type: input.type,
         })
         .where(eq(searchEngines.id, input.id));

@@ -119,6 +119,14 @@ Muninn supports multiple authentication options, from internal userbase (credent
   </TabItem>
   <TabItem value="oidc" label="OIDC provider">
 
+    :::warning[Configured in the admin UI, not here]
+
+    Identity providers now live in the database and are managed at ``Management`` &gt; ``Settings`` &gt; ``Authentication``, where you can add as many as you like. The `AUTH_OIDC_ISSUER`, `AUTH_OIDC_CLIENT_ID` and `AUTH_OIDC_CLIENT_SECRET` variables below no longer configure a provider, and listing `oidc` in `AUTH_PROVIDERS` no longer requires them.
+
+    See [Authentication](/docs/management/authentication) for the current setup. The examples below are kept for the claim and group mapping concepts, which still apply.
+
+    :::
+
     This provider authenticates using OIDC protocol.
 
     Users signed in using OIDC are created in Muninn.

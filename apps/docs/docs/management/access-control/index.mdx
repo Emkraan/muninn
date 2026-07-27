@@ -1,0 +1,296 @@
+---
+title: Access Control
+tags:
+  - Management
+  - Permissions
+  - Access control
+  - Sharing
+---
+
+# Access Control
+
+Muninn shares nothing by default.
+A board, an app or an integration is reachable only by the people you allow, either through a permission on a group or through a grant on the resource itself.
+
+Read this before you onboard your second user.
+
+## Nothing is shared by default
+
+A signed in user can reach an app or an integration only when one of these is true:
+
+- They hold a global permission that covers it, granted through one of their groups.
+- The resource was granted to them directly, or to a group they are a member of.
+- The resource sits on a board they are allowed to view.
+
+Boards work the same way.
+A private board with no grants is invisible to everyone except its creator, who always keeps full access to the boards they created, and holders of the global board permissions.
+
+:::warning
+
+A public board is readable by anyone who opens its link, signed in or not.
+The apps placed on it are readable too, and the integrations bound to its items resolve for anonymous visitors so the widgets keep rendering.
+Whatever those widgets display is public as well.
+Check the board visibility under ``Danger zone`` before you put an internal link or a live service widget on a board.
+
+:::
+
+### The everyone group
+
+Every user is added to a group called ``everyone`` the first time they sign in.
+Its name and its membership cannot be changed by hand.
+
+That makes it the shortest route to sharing something with the whole server, deliberately or not:
+
+- A permission ticked on ``everyone`` is held by every account.
+- A grant to ``everyone`` in a resource's ``Groups`` tab reaches every account.
+
+Neither is blocked, so check which group you have open before you save.
+
+## Global permissions versus per-resource grants
+
+There are two ways to hand out access, and they solve different problems.
+
+### Global permissions on a group
+
+Navigate to ``Management`` > ``Settings`` > ``Groups``, open a group and go to ``Permissions``.
+This page needs the **Manage groups** permission; without it the URL returns a not found page.
+
+The permissions are grouped under **Boards**, **Apps**, **Integrations**, **Search engines**, **Medias**, **Other** and **Admin**.
+
+These are sweeping.
+**Use all apps** covers every app that exists today and every app anybody creates tomorrow.
+Use them for role shaped decisions: a group of trusted operators, a group that may create its own boards, an administrator.
+
+Nothing is written when you flip a switch.
+A banner reading ``You have unsaved changes!`` slides up at the bottom of the page with ``Discard`` and ``Save changes``.
+The change lands only when you press ``Save changes``.
+
+:::info
+
+You cannot give a group a permission you do not hold yourself.
+The save is rejected and the response names the permissions that were refused.
+
+:::
+
+See [Users](/docs/management/users) for how to create groups and assign members.
+
+### Per-resource grants
+
+Every board, app and integration has its own access panel.
+The panel has three tabs: **Users**, **Groups** and **Inherited groups**.
+
+| Resource | Where the panel lives |
+|----------|-----------------------|
+| Board | The board's own settings page, section ``Access control``, or ``Management`` > ``Library`` > ``Boards``, open the board settings, tab ``Access control`` |
+| App | ``Management`` > ``Library`` > ``Apps``, edit the app, section ``Permissions`` |
+| Integration | ``Management`` > ``Library`` > ``Integrations``, edit the integration, section ``Permissions`` |
+
+Only a user with full access on that resource can reach the panel, but the surrounding page opens at a lower level.
+
+- Board settings open with modify access. ``Access control`` and ``Danger zone`` are rendered only with full access, in both the accordion on the board's own settings page and the tabs in the management area.
+- The app edit form opens with modify access. The ``Permissions`` section is simply not rendered when you lack full access.
+- The integration edit page needs full access in its entirety, because it exposes the integration's URL and secrets.
+
+Changes in the **Users** and **Groups** tabs are held in the form until you press ``Save user permission`` or ``Save group permission``.
+If you navigate away first, nothing is written.
+The **Inherited groups** tab is read only: it lists the groups that already reach this resource through a global permission, with the equivalent level shown next to them.
+
+On a board, the **Users** tab starts with the board creator on a fixed **Full access** row.
+That row cannot be edited or removed.
+App and integration panels have no owner row.
+
+Use per-resource grants for exceptions: this one person needs this one dashboard, this one group needs to pause downloads on this one Sonarr.
+
+### The per-user Access tab
+
+The same grants seen from the other side.
+Open ``Management`` > ``Settings`` > ``Manage``, click a user, then ``Access``.
+It is described in detail [further down](#the-access-tab-on-a-user).
+
+## Permission levels per resource
+
+Each resource type has three levels.
+
+### Boards
+
+| Level | Allows |
+|-------|--------|
+| **View board** | Open the board and see its content |
+| **Modify board** | Everything above, plus edit mode and the board settings. Not access control, not the danger zone |
+| **Full access** | Everything above, plus access control, rename, visibility and delete |
+
+### Apps
+
+| Level | Allows |
+|-------|--------|
+| **Select apps in items** | See the app and select it for an item on a board |
+| **Edit apps** | Everything above, plus editing the name, URL, icon and description |
+| **Full app access** | Everything above, plus the app's own access settings and deleting it |
+
+### Integrations
+
+| Level | Allows |
+|-------|--------|
+| **Select integrations in items** | Select the integration for an item on a board and show its data |
+| **Interact with integrations** | Everything above, plus actions such as pausing a download |
+| **Full integration access** | Everything above, plus editing the integration, including its URL and secrets, and its access settings |
+
+On a single resource the levels stack.
+Any grant at all counts as at least the lowest level, so a user with **Edit apps** on one app can also select that app in an item, and a user with **Interact with integrations** on one integration can also select it in an item.
+
+## How inheritance works
+
+Global permissions imply other global permissions.
+Muninn expands them when it builds the session, so a member of a group with **Full board access** really does carry **View all boards**, and you do not need to tick both.
+
+| Granting this | Also grants |
+|---------------|-------------|
+| **Modify all boards** | View all boards |
+| **Full board access** | Modify all boards, Create boards, and through them View all boards |
+| **Modify all apps** | Create apps |
+| **Full app access** | Modify all apps, Use all apps, and through them Create apps |
+| **Interact with any integration** | Use all integrations |
+| **Full integration access** | Interact with any integration, Create integrations, and through them Use all integrations |
+| **Modify all search engines** | Create search engines |
+| **Full search engine access** | Modify all search engines, and through it Create search engines |
+| **Full media access** | Upload medias, View all medias |
+| **Administrator** | Full board access, Full app access, Full integration access, Full search engine access, Full media access, and every permission under **Other** |
+
+The expansion is recursive, so **Administrator** ends up holding every key in the list.
+
+Two places where people guess wrong:
+
+- **Create boards** does not grant viewing.
+  It is implied by **Full board access**, but on its own it only lets someone make new boards, which they then own.
+- **Modify all apps** implies **Create apps**, not **Use all apps**.
+  In practice it still exposes every app, because the check that decides what a user may see accepts modify as sufficient.
+
+:::info
+
+API key scopes are expanded with the same rules and then intersected with the live permissions of the key's owner, so a scoped key can never exceed what its owner may do.
+A key created without any scopes is the exception: it carries the owner's whole permission set unfiltered and only logs a deprecation warning when it is used.
+Re-issue those with explicit scopes.
+See [API](/docs/management/api).
+
+:::
+
+## The Access tab on a user
+
+The Access tab inverts the per-resource panels: instead of asking who can reach this board, it asks what this person can reach.
+
+Opening someone else's Access tab needs the **Manage users** permission.
+Without it the page is a not found, except for your own user, which you can always open.
+
+The page shows three sections, **Apps**, **Boards** and **Integrations**, each a table with a ``Name`` column and a ``Permission`` column.
+A section with nothing in it shows ``No access granted``.
+
+Rows come from two sources:
+
+- **Direct** grants, made to this user.
+  These are editable: change the level in the dropdown, or press ``Remove`` to revoke.
+- **Group** grants, inherited from a group the user belongs to.
+  They carry a ``via group`` badge and are read only here.
+  To change one, edit the group or the resource.
+
+Where a user has both a direct and an inherited grant on the same resource, the row shows the direct one, because that is the row you can act on.
+
+To add a grant, pick a resource in the ``Select a resource`` dropdown, pick a level, and press ``Add``.
+
+:::info
+
+Editing is available only to users with the **Manage users** permission.
+A user who opens their own Access tab sees the same tables read only, with no dropdowns and no ``Add`` row.
+
+:::
+
+Holding **Manage users** is not enough on its own.
+Every grant and revoke on this page also requires **full access on the target resource**, so someone who holds **Manage users** but only **Edit apps** on an app cannot share that app from here.
+The request is rejected as if the resource did not exist.
+
+The ``Select a resource`` dropdown is also filtered to the resources you can see.
+A private board that you did not create, and that was never granted to you or to one of your groups, will not appear there.
+
+## Boards carry their apps and integrations
+
+Sharing a board is usually all you need to do.
+
+- An app placed on a board you can view becomes visible and selectable for you, even if the app itself was never shared with you.
+  This covers both the app widget and apps referenced from a bookmarks widget.
+- An integration bound to an item on a board you can view stays usable for you, so the widgets on a shared board keep rendering.
+
+Holding **View all boards** has the same effect for apps: it makes every app visible.
+
+There is one deliberate exception.
+
+:::warning
+
+Board access does **not** put an integration on the ``Integrations`` management list.
+
+:::
+
+That list, and the search results that link into the integration edit page, use a narrower scope: global integration permissions and explicit grants only, with no board component.
+An integration's URL is a credentialed internal endpoint, so being able to view a public board that happens to carry a Sonarr widget does not put that Sonarr instance's URL into an administration page.
+
+The same narrower scope decides what you may **bind** to a board item.
+Being able to modify a board is not enough to attach a new integration to a widget on it: you need an explicit grant or a global integration permission.
+Saving a board with a newly added integration you are not entitled to bind is rejected rather than silently dropped.
+Bindings that were already on the board are left alone, so an older board keeps working when someone else saves it.
+
+The navigation follows the same split.
+The ``Apps`` entry appears when you may create apps or when anything is visible to you, including through a board.
+The ``Integrations`` entry appears when you may create integrations, when you hold a global integration permission, or when an integration was granted to you or to one of your groups.
+
+:::note
+
+Duplicating a board copies neither its access grants nor the integrations the duplicating user cannot access.
+See [Boards](/docs/management/boards).
+
+:::
+
+## Troubleshooting
+
+### I granted access but they cannot see it
+
+Work through these in order.
+
+1. **Check the change was saved.**
+   The **Users** and **Groups** tabs only write when you press ``Save user permission`` or ``Save group permission``.
+   A group's ``Permissions`` page only writes when you press ``Save changes`` in the banner at the bottom.
+2. **Check the level.**
+   A grant of **Select apps in items** lets someone pick the app, not edit it.
+   A grant of **Select integrations in items** lets someone show data, not pause a download.
+3. **Check the board too.**
+   Granting an app does not grant the board it sits on.
+   If they should see it on a dashboard, they need view access on that board as well.
+4. **For integrations, check which list you mean.**
+   A user can be fully able to use an integration on a shared board and still not see it under ``Integrations``.
+   That is expected, see the section above.
+5. **Ask them to reload.**
+   The access panels and the user Access tab do not refetch on window focus, so a stale tab keeps showing the old state.
+
+### A user can see an app I did not share with them
+
+Almost always the app is on a board they can view.
+Apps are visible through boards by design, so the app widget on a shared dashboard actually works.
+
+Check, in this order:
+
+- Is the app placed on a **public** board? Then anyone opening that board sees it.
+- Is it on a board that was shared with the user, or with one of their groups?
+- Is it on a board **they** created? Creators keep full access to their own boards.
+- Does one of their groups hold **View all boards**, **Use all apps**, **Modify all apps**, **Full app access** or **Administrator**?
+  Any of those makes every app visible.
+- Is the grant on the ``everyone`` group? Then it applies to every account.
+
+Removing the per-app grant will not help in any of those cases.
+Remove the app from the board, or narrow the board access, or narrow the group permission.
+
+### The Integrations page is missing for a user
+
+The ``Integrations`` entry in the navigation is hidden when there would be nothing to show.
+It appears only when the user can create integrations, when they hold a global integration permission, or when at least one integration is granted to them or to one of their groups.
+
+Board access does not count here, on purpose.
+If the user needs the management page, either give their group **Create integrations**, or grant them an integration explicitly from its ``Permissions`` panel or from their [Access tab](#the-access-tab-on-a-user).
+
+The ``Apps`` entry uses the looser rule and will appear as soon as any app is visible to them, including through a board.

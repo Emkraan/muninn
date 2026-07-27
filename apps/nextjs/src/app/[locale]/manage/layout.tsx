@@ -101,7 +101,6 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
           label: t("items.boards"),
           icon: IconLayoutDashboardFilled,
           href: "/manage/boards",
-          "data-onboarding-tour-id": "manage-boards",
         },
         {
           label: t("items.apps"),
@@ -120,14 +119,12 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
           icon: IconSearch,
           href: "/manage/search-engines",
           hidden: !session,
-          "data-onboarding-tour-id": "manage-search-engines",
         },
         {
           label: t("items.medias"),
           icon: IconPhotoFilled,
           href: "/manage/medias",
           hidden: !session,
-          "data-onboarding-tour-id": "manage-medias",
         },
         {
           label: t("items.customWidgets"),
@@ -141,7 +138,6 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
       label: t("items.settings.label"),
       icon: IconSettingsFilled,
       hidden: !showSettingsGroup,
-      "data-onboarding-tour-id": "manage-settings",
       items: [
         {
           label: t("items.settings.general"),
