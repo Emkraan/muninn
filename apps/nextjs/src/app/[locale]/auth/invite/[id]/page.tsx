@@ -7,7 +7,7 @@ import { and, db, eq } from "@homarr/db";
 import { invites } from "@homarr/db/schema";
 import { getScopedI18n } from "@homarr/translation/server";
 
-import { HomarrLogo } from "~/components/layout/logo/homarr-logo";
+import { MuninnLogo } from "~/components/layout/logo/muninn-logo";
 import classes from "../../login/login.module.css";
 import { RavenMascot } from "../../login/_raven-mascot";
 import { RegistrationForm } from "./_registration-form";
@@ -55,7 +55,7 @@ export default async function InviteUsagePage(props: InviteUsagePageProps) {
       <Box className={classes.authCard}>
         <div className={classes.authHead}>
           <div className={classes.logoBadge}>
-            <HomarrLogo size={46} />
+            <MuninnLogo size={46} />
           </div>
           <Title order={2} fw={700}>
             Muninn

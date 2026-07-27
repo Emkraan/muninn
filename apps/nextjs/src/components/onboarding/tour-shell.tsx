@@ -10,7 +10,7 @@ import type { FloatingPosition } from "@mantine/core";
 
 import { useI18n } from "@homarr/translation/client";
 
-import { homarrLogoPath } from "~/components/layout/logo/homarr-logo";
+import { muninnLogoPath } from "~/components/layout/logo/muninn-logo";
 
 interface TourShellProps extends PropsWithChildren {
   steps: OnboardingTourStep[];
@@ -250,7 +250,7 @@ export const TourShell = ({ steps, started, onEnd, stepRoutes, position, childre
             </Group>
             {(controller.currentStepIndex ?? 0) === 0 && (
               <Center py="xs">
-                <Image src={homarrLogoPath} alt="Muninn" w={64} h={64} fit="contain" />
+                <Image src={muninnLogoPath} alt="Muninn" w={64} h={64} fit="contain" />
               </Center>
             )}
           </>

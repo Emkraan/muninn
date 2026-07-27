@@ -36,7 +36,7 @@ import { env } from "@homarr/docker/env";
 import { getScopedI18n } from "@homarr/translation/server";
 
 import { MainHeader } from "~/components/layout/header";
-import { homarrLogoPath } from "~/components/layout/logo/homarr-logo";
+import { muninnLogoPath } from "~/components/layout/logo/muninn-logo";
 import type { NavigationLink } from "~/components/layout/navigation";
 import { MainNavigation } from "~/components/layout/navigation";
 import { ClientShell } from "~/components/layout/shell";
@@ -248,7 +248,7 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
     },
     {
       label: t("items.about"),
-      icon: homarrLogoPath,
+      icon: muninnLogoPath,
       href: "/manage/about",
     },
   ];

@@ -4,7 +4,7 @@ import type { TablerIcon } from "@homarr/ui";
 
 import { fullHeightWithoutHeaderAndFooter } from "~/constants";
 import { MainHeader } from "../layout/header";
-import { HomarrLogoWithTitle } from "../layout/logo/homarr-logo";
+import { MuninnLogoWithTitle } from "../layout/logo/muninn-logo";
 import { ClientShell } from "../layout/shell";
 
 export interface BoardNotFoundProps {
@@ -21,7 +21,7 @@ export interface BoardNotFoundProps {
 export const BoardNotFound = ({ icon: Icon, title, description, link, notice }: BoardNotFoundProps) => {
   return (
     <ClientShell hasNavigation={false}>
-      <MainHeader logo={<HomarrLogoWithTitle size="md" />} hasNavigation={false} />
+      <MainHeader logo={<MuninnLogoWithTitle size="md" />} hasNavigation={false} />
       <AppShellMain>
         <Center h={fullHeightWithoutHeaderAndFooter}>
           <Flex direction="column" align="center" ta="center">

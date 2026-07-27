@@ -3855,7 +3855,7 @@
         }
       },
       "oldImport": {
-        "label": "Import z homarru pred 1.0.0",
+        "label": "Import z Homarru pred 1.0.0",
         "notification": {
           "success": {
             "title": "Import úspešný",

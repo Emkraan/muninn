@@ -1,1 +1,1 @@
-docker build -t homarr .
+docker build -t muninn .

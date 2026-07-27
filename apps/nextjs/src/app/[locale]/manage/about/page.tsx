@@ -30,7 +30,7 @@ import { capitalize, objectEntries } from "@homarr/common";
 import { hotkeys } from "@homarr/definitions";
 import { getScopedI18n } from "@homarr/translation/server";
 
-import { homarrLogoPath } from "~/components/layout/logo/homarr-logo";
+import { muninnLogoPath } from "~/components/layout/logo/muninn-logo";
 import { ManagePageLayout } from "~/components/manage/manage-page-layout";
 import { createMetaTitle } from "~/metadata";
 import { getDependenciesAsync, getPackageVersion } from "~/versions/package-reader";
@@ -55,7 +55,7 @@ export default async function AboutPage() {
     <ManagePageLayout>
       <Center w="100%">
         <Group py="lg">
-          <Image src={homarrLogoPath} width={100} height={100} alt="" />
+          <Image src={muninnLogoPath} width={100} height={100} alt="" />
           <Stack gap={0}>
             <Title order={1}>Muninn</Title>
             <Title order={2}>{t("version", { version })}</Title>

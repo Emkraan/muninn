@@ -301,7 +301,7 @@ const AnchorNoteWidgetContent = ({ options, integrationId, noteId }: AnchorNoteW
           )}
         </Group>
       </Group>
-      <div className={`homarr-anchor-quill${isEditing ? "" : " homarr-anchor-quill--readonly"}`} style={{ flex: 1 }}>
+      <div className={`muninn-anchor-quill${isEditing ? "" : " muninn-anchor-quill--readonly"}`} style={{ flex: 1 }}>
         <ReactQuill
           theme="snow"
           readOnly={!isEditing}

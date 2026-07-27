@@ -47,7 +47,7 @@ RUN apk add --no-cache redis nginx bash gettext su-exec openssl
 RUN mkdir /appdata
 VOLUME /appdata
 
-# Enable homarr cli
+# Enable the muninn CLI, keeping a homarr alias for operators migrating from upstream
 COPY --from=builder /app/packages/cli/cli.cjs /app/apps/cli/cli.cjs
 RUN echo $'#!/bin/bash\ncd /app/apps/cli && node ./cli.cjs "$@"' > /usr/bin/muninn
 RUN chmod +x /usr/bin/muninn && ln -sf /usr/bin/muninn /usr/bin/homarr

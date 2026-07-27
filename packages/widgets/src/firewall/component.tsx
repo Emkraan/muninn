@@ -44,7 +44,7 @@ export default function FirewallWidget({ integrationIds, width, itemId }: Widget
   const isTiny = width < 256;
 
   const [accordionValue, setAccordionValue] = useLocalStorage<string | null>({
-    key: `homarr-${itemId}-firewall`,
+    key: `muninn-${itemId}-firewall`,
     defaultValue: "interfaces",
   });
 
