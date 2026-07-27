@@ -17,8 +17,7 @@
     "swizzle": "docusaurus swizzle",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
-    "api-dump-contributors": "node ./scripts/dump-contributors.mjs",
-    "verify:search": "node ./scripts/verify-algolia-search.mjs"
+    "api-dump-contributors": "node ./scripts/dump-contributors.mjs"
   },
   "dependencies": {
     "@docusaurus/core": "^3.10.1",
@@ -49,6 +48,7 @@
     "@docusaurus/module-type-aliases": "^3.10.1",
     "@docusaurus/tsconfig": "^3.10.1",
     "@docusaurus/types": "^3.10.1",
+    "@easyops-cn/docusaurus-search-local": "catalog:",
     "@fec/remark-a11y-emoji": "^4.0.2",
     "@tsconfig/docusaurus": "^2.0.9",
     "@types/react": "catalog:",

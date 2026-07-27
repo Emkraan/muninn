@@ -17,6 +17,7 @@ import {
   onboarding,
 } from "@homarr/db/schema";
 import {
+  defaultAppIconUrl,
   everyoneGroup,
   extractContainerImageName,
   getIconUrl,
@@ -257,12 +258,11 @@ export const onboardRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       if (input.length === 0) return;
-      const defaultIcon = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@master/svg/homarr.svg";
       await ctx.db.insert(apps).values(
         input.map((app) => ({
           id: createId(),
           name: app.name,
-          iconUrl: app.iconUrl ?? defaultIcon,
+          iconUrl: app.iconUrl ?? defaultAppIconUrl,
           href: app.href,
           description: null,
         })),

@@ -153,7 +153,7 @@ export class PiHoleIntegrationV6 extends Integration implements DnsHoleSummaryIn
       method: "POST",
       body: JSON.stringify({ password: apiKey ?? "" }),
       headers: {
-        "User-Agent": "Homarr",
+        "User-Agent": "Muninn",
       },
     });
 

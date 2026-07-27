@@ -55,7 +55,7 @@
           "field": {
             "token": {
               "label": "Token",
-              "description": "Wprowadź token importu z poprzedniej instancji homarr"
+              "description": "Wprowadź token importu z poprzedniej instancji Homarr"
             }
           },
           "notification": {

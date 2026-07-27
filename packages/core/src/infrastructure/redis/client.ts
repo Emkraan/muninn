@@ -4,7 +4,7 @@ import { Redis } from "ioredis";
 import { redisEnv } from "./env";
 
 const defaultRedisOptions = {
-  connectionName: "homarr",
+  connectionName: "muninn",
 } satisfies RedisOptions;
 
 export type { Redis as RedisClient } from "ioredis";

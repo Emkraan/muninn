@@ -55,7 +55,7 @@
           "field": {
             "token": {
               "label": "Token-ul",
-              "description": "Introdu token-ul de import afișat în instalarea de homarr anterioară"
+              "description": "Introdu token-ul de import afișat în instalarea de Homarr anterioară"
             }
           },
           "notification": {

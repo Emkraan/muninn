@@ -45,7 +45,24 @@ const config: Config = {
     },
   },
 
-  themes: ["@docusaurus/theme-mermaid"],
+  themes: [
+    "@docusaurus/theme-mermaid",
+    // Search is a build-time local index rather than Algolia DocSearch. The
+    // inherited Algolia credentials point at upstream Homarr's application,
+    // which we do not control: every query returned homarr.dev results and sent
+    // readers off this site. A local index needs no external service and cannot
+    // drift out from under us.
+    [
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      {
+        hashed: true,
+        indexBlog: false,
+        docsRouteBasePath: "/docs",
+        highlightSearchTermsOnTargetPage: true,
+        searchResultLimits: 10,
+      },
+    ],
+  ],
 
   presets: [
     [
@@ -59,13 +76,11 @@ const config: Config = {
           showLastUpdateAuthor: false,
           showLastUpdateTime: false,
         },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl: "https://github.com/Emkraan/muninn/edit/main/apps/docs",
-          authorsMapPath: "authors.yml",
-        },
+        // Explicit false, not omitted: preset-classic enables the blog by
+        // default and would generate an empty one. The blog previously held
+        // upstream Homarr release announcements that a rebrand pass had
+        // rewritten to say Muninn, which claimed Homarr's releases as ours.
+        blog: false,
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
         },
@@ -87,9 +102,6 @@ const config: Config = {
               }
               if (path.startsWith("/docs/")) {
                 return { ...item, priority: 0.7, changefreq: "monthly" };
-              }
-              if (path.startsWith("/blog/")) {
-                return { ...item, priority: 0.3, changefreq: "never" };
               }
               if (path.startsWith("/about-us")) {
                 return { ...item, priority: 0.4, changefreq: "yearly" };
@@ -115,11 +127,6 @@ const config: Config = {
           type: "doc",
           position: "left",
           docId: "getting-started/index",
-        },
-        {
-          label: "Blog",
-          position: "left",
-          to: "/blog",
         },
         {
           label: "About us",
@@ -158,18 +165,6 @@ const config: Config = {
       ],
       hideOnScroll: false,
     },
-    algolia: {
-      appId: "N69WSPZTID",
-      apiKey: "b2b00f4ed8ca3dc87b5d211c55121416",
-      indexName: "Docusaurus",
-      contextualSearch: false,
-      searchPagePath: "search",
-      insights: false,
-      replaceSearchResultPathname: {
-        from: "/docs/(next|\\d+(?:\\.\\d+)*)/",
-        to: "/docs/",
-      },
-    },
     footer: {
       links: [
         {
@@ -197,10 +192,6 @@ const config: Config = {
         {
           title: "More",
           items: [
-            {
-              label: "Blog",
-              to: "/blog",
-            },
             {
               label: "About us",
               to: "/about-us",

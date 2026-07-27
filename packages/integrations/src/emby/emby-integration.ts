@@ -63,7 +63,7 @@ const userSchema = z.object({
 export class EmbyIntegration extends Integration implements IMediaServerIntegration, IMediaReleasesIntegration {
   private static readonly apiKeyHeader = "X-Emby-Token";
   private static readonly deviceId = "homarr-emby-integration";
-  private static readonly authorizationHeaderValue = `Emby Client="Dashboard", Device="Homarr", DeviceId="${EmbyIntegration.deviceId}", Version="0.0.1"`;
+  private static readonly authorizationHeaderValue = `Emby Client="Dashboard", Device="Muninn", DeviceId="${EmbyIntegration.deviceId}", Version="0.0.1"`;
 
   protected async testingAsync(input: IntegrationTestingInput): Promise<TestingResult> {
     const apiKey = super.getSecretValue("apiKey");

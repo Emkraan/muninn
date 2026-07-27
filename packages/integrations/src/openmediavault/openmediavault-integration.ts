@@ -125,7 +125,7 @@ export class OpenMediaVaultIntegration extends Integration implements ISystemHea
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "User-Agent": "Homarr",
+        "User-Agent": "Muninn",
         ...headers,
       },
       body: JSON.stringify({

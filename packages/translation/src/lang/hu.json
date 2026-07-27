@@ -55,7 +55,7 @@
           "field": {
             "token": {
               "label": "Token",
-              "description": "Írja be a megjelenített import tokent az előző homarr példányból"
+              "description": "Írja be a megjelenített import tokent az előző Homarr példányból"
             }
           },
           "notification": {
@@ -3855,7 +3855,7 @@
         }
       },
       "oldImport": {
-        "label": "Importálás a homarr 1.0.0 előtti verzióból",
+        "label": "Importálás a Homarr 1.0.0 előtti verzióból",
         "notification": {
           "success": {
             "title": "Sikeres importálás",

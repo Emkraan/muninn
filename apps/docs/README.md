@@ -74,7 +74,7 @@ The docs app has `@homarr/definitions` as a workspace dependency. You can import
 import { IntegrationKind } from '@homarr/definitions';
 ```
 
-This enables type-safe references to homarr domain concepts within documentation code.
+This enables type-safe references to Muninn domain concepts within documentation code.
 
 ## Search (Algolia DocSearch)
 

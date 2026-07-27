@@ -192,6 +192,7 @@ catalog:
   zod: ^4.4.3
   zod-form-data: ^3.0.2
   zod-validation-error: ^5.0.0
+  '@easyops-cn/docusaurus-search-local': ^0.55.2
 
 catalogMode: strict
 nodeLinker: hoisted

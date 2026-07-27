@@ -55,7 +55,7 @@
           "field": {
             "token": {
               "label": "Token",
-              "description": "Inserisci il token d'importazione mostrato dalla tua precedente istanza homarr"
+              "description": "Inserisci il token d'importazione mostrato dalla tua precedente istanza Homarr"
             }
           },
           "notification": {
@@ -3855,7 +3855,7 @@
         }
       },
       "oldImport": {
-        "label": "Importa da homarr prima della versione 1.0.0",
+        "label": "Importa da Homarr prima della versione 1.0.0",
         "notification": {
           "success": {
             "title": "Importazione conclusa con successo",

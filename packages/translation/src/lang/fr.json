@@ -3855,7 +3855,7 @@
         }
       },
       "oldImport": {
-        "label": "Importer depuis homarr avant la version 1.0.0",
+        "label": "Importer depuis Homarr avant la version 1.0.0",
         "notification": {
           "success": {
             "title": "Importation réussie",

@@ -177,7 +177,7 @@ const getGithubReleaseAsync = async (
       error: { code: "invalidIdentifier", message: `Cannot parse "${identifier}" as owner/repo` },
     };
 
-  const api = getGithubApi(baseUrl, "Homarr-Lab/Homarr:GithubReleaseProvider", token);
+  const api = getGithubApi(baseUrl, "Emkraan/Muninn:GithubReleaseProvider", token);
   try {
     const allReleases = await api.paginate(api.rest.repos.listReleases, {
       owner: parsed.owner,
