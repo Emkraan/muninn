@@ -60,7 +60,7 @@ jobs:
       # site under this org ("Resource not accessible by integration"), so the
       # site is provisioned once out of band and this step only reads it:
       #   gh api -X POST repos/Emkraan/muninn/pages -f build_type=workflow
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
 
       - uses: actions/upload-pages-artifact@v3
         with:
