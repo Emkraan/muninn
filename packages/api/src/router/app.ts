@@ -2,10 +2,11 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
 
 import type { Session } from "@homarr/auth";
+import { constructAppPermissions } from "@homarr/auth/shared";
 import { createId } from "@homarr/common";
 import type { Database, InferSelectModel } from "@homarr/db";
-import { and, asc, eq, handleTransactionsAsync, inArray, likeInsensitive } from "@homarr/db";
-import { appGroupPermissions, apps, appUserPermissions, groupPermissions } from "@homarr/db/schema";
+import { and, asc, eq, handleTransactionsAsync, inArray, likeInsensitive, sql } from "@homarr/db";
+import { appGroupPermissions, apps, appUserPermissions, groupMembers, groupPermissions } from "@homarr/db/schema";
 import { selectAppSchema } from "@homarr/db/validationSchemas";
 import { getPermissionsWithParents } from "@homarr/definitions";
 import { getIconForName } from "@homarr/icons";
@@ -71,7 +72,24 @@ const referenceExistingAppAsync = async (db: Database, appId: string, userId: st
 export const appRouter = createTRPCRouter({
   getPaginated: protectedProcedure
     .input(paginatedSchema)
-    .output(z.object({ items: z.array(selectAppSchema), totalCount: z.number() }))
+    .output(
+      z.object({
+        items: z.array(
+          selectAppSchema.extend({
+            // Per-app grants, so the management list can offer edit/delete to a
+            // user who was granted this app directly rather than only to holders
+            // of the global app-modify-all / app-full-all keys. app.update and
+            // app.delete already accept both (see throwIfActionForbiddenAsync).
+            permissions: z.object({
+              hasUseAccess: z.boolean(),
+              hasModifyAccess: z.boolean(),
+              hasFullAccess: z.boolean(),
+            }),
+          }),
+        ),
+        totalCount: z.number(),
+      }),
+    )
     .meta({
       openapi: {
         method: "GET",
@@ -82,7 +100,7 @@ export const appRouter = createTRPCRouter({
       mcp: {
         enabled: true,
         description:
-          "List apps with pagination. OPTIONAL: search (string to filter by name), pageSize (number, default 10), page (number, default 1). All fields are optional — call with no arguments to get the first page",
+          "List apps with pagination. OPTIONAL: search (string to filter by name), pageSize (number, default 10), page (number, default 1). All fields are optional: call with no arguments to get the first page",
       },
     })
     .query(async ({ input, ctx }) => {
@@ -93,15 +111,31 @@ export const appRouter = createTRPCRouter({
       const whereQuery = and(scopeWhere, searchWhere);
       const totalCount = await ctx.db.$count(apps, whereQuery);
 
+      const groupsOfCurrentUser = await ctx.db.query.groupMembers.findMany({
+        where: eq(groupMembers.userId, ctx.session.user.id),
+        columns: { groupId: true },
+      });
+      const groupIds = groupsOfCurrentUser.map((membership) => membership.groupId);
+
       const dbApps = await ctx.db.query.apps.findMany({
         limit: input.pageSize,
         offset: (input.page - 1) * input.pageSize,
         where: whereQuery,
         orderBy: asc(apps.name),
+        with: {
+          userPermissions: {
+            where: eq(appUserPermissions.userId, ctx.session.user.id),
+          },
+          groupPermissions:
+            groupIds.length > 0 ? { where: inArray(appGroupPermissions.groupId, groupIds) } : { where: sql`1 = 0` },
+        },
       });
 
       return {
-        items: dbApps,
+        items: dbApps.map(({ userPermissions, groupPermissions, ...app }) => ({
+          ...app,
+          permissions: constructAppPermissions({ userPermissions, groupPermissions }, ctx.session),
+        })),
         totalCount,
       };
     }),
@@ -125,6 +159,25 @@ export const appRouter = createTRPCRouter({
         orderBy: asc(apps.name),
       });
     }),
+  // Whether the caller may edit this app, by the same rule app.update applies:
+  // the global app-modify-all key or a per-app modify/full grant. Lets the edit
+  // page gate itself without duplicating the rule in the UI.
+  canModify: protectedProcedure
+    .input(byIdSchema)
+    .output(z.boolean())
+    .query(async ({ ctx, input }) => {
+      return await throwIfActionForbiddenAsync(ctx, eq(apps.id, input.id), "modify").then(
+        () => true,
+        () => false,
+      );
+    }),
+  // Cheap boolean for the navigation surfaces, so they can hide a link that
+  // would only lead to an empty administration page.
+  hasVisible: protectedProcedure.output(z.boolean()).query(async ({ ctx }) => {
+    if (ctx.session.user.permissions.includes("app-create")) return true;
+    const scope = await new AppAccessControl(ctx.db, ctx.session.user).getVisibleAppScopeAsync();
+    return scope === "all" || scope.length > 0;
+  }),
   search: protectedProcedure
     .input(
       z.object({

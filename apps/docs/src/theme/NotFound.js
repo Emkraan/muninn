@@ -1,9 +1,12 @@
 import React from "react";
 import Translate, { translate } from "@docusaurus/Translate";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 import { PageMetadata } from "@docusaurus/theme-common";
 import Layout from "@theme/Layout";
 
 export default function NotFound() {
+  const illustrationUrl = useBaseUrl("/img/undraw_illustrations/undraw_taken_re_yn20.svg");
+
   return (
     <>
       <PageMetadata
@@ -17,7 +20,7 @@ export default function NotFound() {
           <div className="row">
             <div className="col col--6 col--offset-3">
               <img
-                src="/img/undraw_illustrations/undraw_taken_re_yn20.svg"
+                src={illustrationUrl}
                 alt=""
                 height={200}
                 width="auto"

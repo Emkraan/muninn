@@ -126,17 +126,17 @@ const SERVER_INSTRUCTIONS = `You are connected to Muninn, a self-hosted homelab 
 
 ## Key Concepts
 
-**Integrations** are connections to external self-hosted services (Sonarr, Radarr, Plex, Overseerr, Pi-hole, Home Assistant, etc.). Each integration has an \`id\` (integrationId) and a \`kind\` (e.g. "sonarr", "radarr", "overseerr"). Use \`integration_all\` to list them. Many tools require an \`integrationId\` — always fetch it from \`integration_all\` or \`integration_search\` first.
+**Integrations** are connections to external self-hosted services (Sonarr, Radarr, Plex, Overseerr, Pi-hole, Home Assistant, etc.). Each integration has an \`id\` (integrationId) and a \`kind\` (e.g. "sonarr", "radarr", "overseerr"). Use \`integration_all\` to list them. Many tools require an \`integrationId\`, so always fetch it from \`integration_all\` or \`integration_search\` first.
 
 **Boards** are customizable dashboards containing widgets that display data from integrations. Users can have multiple boards.
 
-**Apps** are links/bookmarks to self-hosted services displayed on boards. They are separate from integrations — an app is a visual shortcut, an integration is a data connection.
+**Apps** are links/bookmarks to self-hosted services displayed on boards. They are separate from integrations: an app is a visual shortcut, an integration is a data connection.
 
 **Permissions**: Each integration result includes a \`permissions\` object:
 - \`hasUseAccess: true\` means you can read data from this integration
 - \`hasInteractAccess: true\` means you can perform actions (start/stop, request media, etc.)
 - \`hasFullAccess: true\` means you can modify/delete the integration config
-If \`hasUseAccess\` is false, the API key owner lacks permission for that integration — this is normal, not an error. Simply skip integrations where you lack the required permission level.
+If \`hasUseAccess\` is false, the API key owner lacks permission for that integration. This is normal, not an error. Simply skip integrations where you lack the required permission level.
 
 ## Common Workflows
 

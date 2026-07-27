@@ -1,4 +1,4 @@
-// Algolia DocSearch crawler for muninn.dev
+// Algolia DocSearch crawler for the Muninn docs site
 // Crawler ID: cd77a285-2756-4557-bf21-ee703748df15
 // Paste this in the Algolia crawler editor.
 
@@ -8,22 +8,22 @@ new Crawler({
   indexPrefix: "",
   rateLimit: 32,
   maxDepth: 4,
-  startUrls: ["https://muninn.dev/"],
-  sitemaps: ["https://muninn.dev/sitemap.xml"],
+  startUrls: ["https://emkraan.github.io/muninn/"],
+  sitemaps: ["https://emkraan.github.io/muninn/sitemap.xml"],
   ignoreCanonicalTo: true,
-  discoveryPatterns: ["https://muninn.dev/**"],
+  discoveryPatterns: ["https://emkraan.github.io/muninn/**"],
   exclusionPatterns: [
-    "https://muninn.dev/docs/tags/**",
-    "https://muninn.dev/blog/tags/**",
-    "https://muninn.dev/blog/authors/**",
-    "https://muninn.dev/blog/archive/**",
-    "https://muninn.dev/search/**",
-    "https://muninn.dev/docs/category/**",
+    "https://emkraan.github.io/muninn/docs/tags/**",
+    "https://emkraan.github.io/muninn/blog/tags/**",
+    "https://emkraan.github.io/muninn/blog/authors/**",
+    "https://emkraan.github.io/muninn/blog/archive/**",
+    "https://emkraan.github.io/muninn/search/**",
+    "https://emkraan.github.io/muninn/docs/category/**",
   ],
   actions: [
     {
       indexName: "Docusaurus",
-      pathsToMatch: ["https://muninn.dev/**"],
+      pathsToMatch: ["https://emkraan.github.io/muninn/**"],
       recordExtractor: ({ $, helpers }) => {
         const lvl0 =
           $(".menu__link.menu__link--sublist.menu__link--active, .navbar__item.navbar__link--active").last().text() ||
@@ -51,7 +51,7 @@ new Crawler({
     },
     {
       indexName: "markdown",
-      pathsToMatch: ["https://muninn.dev/**"],
+      pathsToMatch: ["https://emkraan.github.io/muninn/**"],
       recordExtractor: ({ $, url, helpers }) => {
         const text = helpers.markdown("article > *:not(nav):not(header):not(.breadcrumb)");
 

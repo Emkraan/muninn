@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 
 type Contributor = {
   username: string;
@@ -7,13 +8,14 @@ type Contributor = {
 
 export const TranslationContributorList = () => {
   const [contributors, setContributors] = useState<Contributor[]>([]);
+  const dataUrl = useBaseUrl("/data/translation-contributions.json");
 
   useEffect(() => {
-    fetch("/data/translation-contributions.json").then(async (response) => {
+    fetch(dataUrl).then(async (response) => {
       const data = await response.json();
       setContributors(data);
     });
-  }, []);
+  }, [dataUrl]);
 
   return (
     <div className={"flex flex-wrap gap-3 argos-ignore"}>

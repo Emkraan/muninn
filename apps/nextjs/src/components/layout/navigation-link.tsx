@@ -11,9 +11,17 @@ import { Link } from "@homarr/ui";
 export const CommonNavLink = (props: ClientNavigationLink) =>
   "href" in props ? <NavLinkHref {...props} /> : <NavLinkWithItems {...props} />;
 
+// Mirrors ~/components/layout/header/tour-target, but wraps in a plain <div>
+// rather than a Mantine <Box> so the navbar layout is untouched. The
+// data-tour-target attribute is what the tour shell polls for when it navigates
+// between steps; without it a step targeting a nav link can never resolve.
 const TourTarget = ({ id, children }: { id?: string; children: ReactNode }) => {
   if (!id) return <>{children}</>;
-  return <OnboardingTour.Target id={id}>{children}</OnboardingTour.Target>;
+  return (
+    <OnboardingTour.Target id={id}>
+      <div data-tour-target={id}>{children}</div>
+    </OnboardingTour.Target>
+  );
 };
 
 const pathMatches = (pathname: string, href: string) => pathname === href || pathname.startsWith(`${href}/`);

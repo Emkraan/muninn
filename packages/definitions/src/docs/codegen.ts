@@ -4,15 +4,24 @@ import { fileURLToPath } from "node:url";
 import { XMLParser } from "fast-xml-parser";
 import { z } from "zod/v4";
 
-import { createDocumentationLink } from "./index";
+import { documentationBaseUrl } from "./index";
 import { integrationDocSlugs } from "./integration-doc-slugs";
 import { widgetDocSlugs } from "./widget-doc-slugs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const removeCommonUrl = (url: string) => {
-  return url.replace("https://homarr.dev", "");
+// The docs site is published under a baseUrl ("/muninn"), so every sitemap loc
+// carries that prefix. Paths in the generated union are baseUrl-free, because
+// createDocumentationLink concatenates them onto documentationBaseUrl, which
+// already includes it.
+const basePathPrefix = new URL(documentationBaseUrl).pathname.replace(/\/$/, "");
+
+const toSitePath = (loc: string) => {
+  const { pathname } = new URL(loc);
+  const withoutBase =
+    basePathPrefix && pathname.startsWith(basePathPrefix) ? pathname.slice(basePathPrefix.length) : pathname;
+  return withoutBase.replace(/\/$/, "");
 };
 
 const sitemapSchema = z.object({
@@ -25,9 +34,13 @@ const sitemapSchema = z.object({
   }),
 });
 
-const fetchSitemapAsync = async () => {
-  const response = await fetch(createDocumentationLink("/sitemap.xml"));
-  return await response.text();
+// apps/docs/build is gitignored, so the sitemap only exists after a local
+// Docusaurus build. This codegen is therefore run by hand and its output is a
+// committed artifact - see the codegen:docs script.
+const sitemapPath = path.join(__dirname, "../../../../apps/docs/build/sitemap.xml");
+
+const readSitemapAsync = async () => {
+  return await fs.readFile(sitemapPath, "utf8");
 };
 
 const parseXml = (sitemapXml: string) => {
@@ -42,11 +55,11 @@ const parseXml = (sitemapXml: string) => {
 };
 
 const mapSitemapXmlToPaths = (sitemapData: z.infer<typeof sitemapSchema>) => {
-  return sitemapData.urlset.url.map((url) => removeCommonUrl(url.loc));
+  return sitemapData.urlset.url.map((url) => toSitePath(url.loc)).filter((sitePath) => sitePath.length > 0);
 };
 
 const createSitemapPathType = (paths: string[]) => {
-  return "export type HomarrDocumentationPath =\n" + paths.map((path) => `  | "${path.replace(/\/$/, "")}"`).join("\n");
+  return "export type HomarrDocumentationPath =\n" + paths.map((path) => `  | "${path}"`).join("\n");
 };
 
 const updateSitemapTypeFileAsync = async (sitemapPathType: string) => {
@@ -71,24 +84,17 @@ const slugMapPaths = [
 const outputPath = path.join(__dirname, "homarr-docs-sitemap.ts");
 
 const main = async () => {
-  let paths: string[];
+  let sitemapXml: string;
   try {
-    const sitemapXml = await fetchSitemapAsync();
-    const sitemapData = parseXml(sitemapXml);
-    paths = mapSitemapXmlToPaths(sitemapData);
+    sitemapXml = await readSitemapAsync();
   } catch {
-    const exists = await fs.access(outputPath).then(
-      () => true,
-      () => false,
-    );
-    if (exists) {
-      console.warn("Could not fetch sitemap from homarr.dev, keeping existing generated file");
-      return;
-    }
-    console.warn("Could not fetch sitemap from homarr.dev and no existing file, generating from slug maps only");
-    paths = [];
+    // No build on disk. Leave the committed artifact alone rather than
+    // regenerating it from the slug maps and silently losing every other route.
+    console.warn(`No sitemap at ${sitemapPath}. Run \`pnpm -F @homarr/docs build\` first; keeping the existing file.`);
+    return;
   }
 
+  const paths = mapSitemapXmlToPaths(parseXml(sitemapXml));
   paths.push("/sitemap.xml");
   for (const p of slugMapPaths) {
     if (!paths.includes(p)) {
@@ -96,7 +102,7 @@ const main = async () => {
     }
   }
 
-  const sitemapPathType = createSitemapPathType(paths);
+  const sitemapPathType = createSitemapPathType([...new Set(paths)]);
   await updateSitemapTypeFileAsync(sitemapPathType);
 };
 

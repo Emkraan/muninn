@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   AccordionControl,
   AccordionItem,
@@ -51,10 +51,16 @@ export default async function IntegrationsPage(props: IntegrationsPageProps) {
     redirect("/auth/login");
   }
 
-  const integrations = await api.integration.all();
-  const t = await getScopedI18n("integration");
-
   const canCreateIntegrations = session.user.permissions.includes("integration-create");
+  const integrations = await api.integration.allManageable();
+
+  // Nothing to manage and nothing to create: this page is not for you. Matches
+  // new/page.tsx, which already notFound()s without integration-create.
+  if (!canCreateIntegrations && integrations.length === 0) {
+    notFound();
+  }
+
+  const t = await getScopedI18n("integration");
 
   return (
     <ManagePageLayout
@@ -78,7 +84,7 @@ export default async function IntegrationsPage(props: IntegrationsPageProps) {
 }
 
 interface IntegrationListProps {
-  integrations: RouterOutputs["integration"]["all"];
+  integrations: RouterOutputs["integration"]["allManageable"];
   activeTab?: IntegrationKind;
 }
 
@@ -102,7 +108,7 @@ const IntegrationList = async ({ integrations, activeTab }: IntegrationListProps
 
       return acc;
     },
-    {} as Record<IntegrationKind, RouterOutputs["integration"]["all"]>,
+    {} as Record<IntegrationKind, RouterOutputs["integration"]["allManageable"]>,
   );
 
   const entries = objectEntries(groupedIntegrations);

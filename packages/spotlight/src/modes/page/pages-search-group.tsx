@@ -16,6 +16,7 @@ import {
   IconUsersGroup,
 } from "@tabler/icons-react";
 
+import { clientApi } from "@homarr/api/client";
 import { useSession } from "@homarr/auth/client";
 import { useScopedI18n } from "@homarr/translation/client";
 import type { TablerIcon } from "@homarr/ui";
@@ -60,6 +61,12 @@ export const pagesSearchGroup = createGroup<{
   useOptions() {
     const { data: session } = useSession();
     const t = useScopedI18n("search.mode.page.group.page.option");
+    // Second navigation surface: gating only the sidebar would leave these
+    // routes discoverable here. Same predicate as manage/layout.tsx.
+    const { data: canSeeApps } = clientApi.app.hasVisible.useQuery(undefined, { enabled: Boolean(session) });
+    const { data: canSeeIntegrations } = clientApi.integration.hasManageable.useQuery(undefined, {
+      enabled: Boolean(session),
+    });
 
     const managePages = [
       {
@@ -76,13 +83,13 @@ export const pagesSearchGroup = createGroup<{
         icon: IconBox,
         path: "/manage/apps",
         name: t("manageApp.label"),
-        hidden: !session,
+        hidden: !canSeeApps,
       },
       {
         icon: IconPlug,
         path: "/manage/integrations",
         name: t("manageIntegration.label"),
-        hidden: !session,
+        hidden: !canSeeIntegrations,
       },
       {
         icon: IconSearch,

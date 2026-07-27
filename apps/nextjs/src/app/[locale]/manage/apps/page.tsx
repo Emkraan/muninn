@@ -63,22 +63,26 @@ export default async function AppsPage(props: AppsPageProps) {
       footer={<TablePagination total={Math.ceil(totalCount / searchParams.pageSize)} />}
       floatingPrimaryAction={canCreate}
     >
-      {apps.length === 0 && <AppNoResults />}
-      {apps.length > 0 && (
-        <TourTarget id="manage-apps-list">
+      {/* The TourTarget wraps the empty state too. These lists are access-scoped,
+          so "no apps" is the normal first experience for a newly invited user,
+          and a tour step whose target never mounts strands the whole tour. */}
+      <TourTarget id="manage-apps-list">
+        {apps.length === 0 ? (
+          <AppNoResults />
+        ) : (
           <Stack gap="sm">
             {apps.map((app) => (
               <AppCard key={app.id} app={app} disambiguationTag={duplicateTagMap[app.id]} />
             ))}
           </Stack>
-        </TourTarget>
-      )}
+        )}
+      </TourTarget>
     </ManagePageLayout>
   );
 }
 
 interface AppCardProps {
-  app: RouterOutputs["app"]["all"][number];
+  app: RouterOutputs["app"]["getPaginated"]["items"][number];
   // Admin-only `<owner>_<name>` tag, present only when this app's display name
   // collides with another app's (see app.getDuplicateTagMap).
   disambiguationTag?: string;
@@ -86,7 +90,6 @@ interface AppCardProps {
 
 const AppCard = async ({ app, disambiguationTag }: AppCardProps) => {
   const t = await getScopedI18n("app");
-  const session = await auth();
 
   return (
     <Card>
@@ -136,7 +139,11 @@ const AppCard = async ({ app, disambiguationTag }: AppCardProps) => {
         </Group>
         <Group>
           <ActionIconGroup>
-            {session?.user.permissions.includes("app-modify-all") && (
+            {/* Per-app grants count, not just the global keys. app.update and
+                app.delete already accept both, so gating the buttons on the
+                global key alone left a user with full access to this app unable
+                to edit it at all. */}
+            {app.permissions.hasModifyAccess && (
               <ActionIcon
                 component={Link}
                 href={`/manage/apps/edit/${app.id}`}
@@ -147,7 +154,7 @@ const AppCard = async ({ app, disambiguationTag }: AppCardProps) => {
                 <IconPencil size={16} stroke={1.5} />
               </ActionIcon>
             )}
-            {session?.user.permissions.includes("app-full-all") && <AppDeleteButton app={app} />}
+            {app.permissions.hasFullAccess && <AppDeleteButton app={app} />}
           </ActionIconGroup>
         </Group>
       </Group>

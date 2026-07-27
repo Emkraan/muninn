@@ -1,8 +1,9 @@
 "use client";
 
 import type { PropsWithChildren } from "react";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { OnboardingTourStep } from "@gfazioli/mantine-onboarding-tour";
+import { useMediaQuery } from "@mantine/hooks";
 
 import { clientApi } from "@homarr/api/client";
 import { useRequiredBoard } from "@homarr/boards/context";
@@ -18,22 +19,37 @@ export const BoardTourProvider = ({ children }: PropsWithChildren) => {
   const board = useRequiredBoard();
   const { hasChangeAccess } = useBoardPermissions(board);
   const utils = clientApi.useUtils();
+  const isMobile = useMediaQuery("(max-width: 48em)");
+  // Latch, mirroring the manage tour. getTourStatus has staleTime 0 and refetches
+  // on window focus, so without this a refocus (or a failed completeTour) flips
+  // `started` back to true and the library restarts the tour from step 0.
+  const [tourDismissed, setTourDismissed] = useState(false);
   const { data: tourStatus } = clientApi.user.getTourStatus.useQuery();
   const { mutate: completeTour } = clientApi.user.completeTour.useMutation({
     onSuccess() {
       void utils.user.getTourStatus.invalidate();
     },
+    onError() {
+      utils.user.getTourStatus.setData(undefined, {
+        completedManageTour: tourStatus?.completedManageTour ?? false,
+        completedBoardTour: false,
+      });
+    },
   });
 
-  const started = tourStatus !== undefined && !tourStatus.completedBoardTour;
+  // The first step targets the desktop search input, which is display:none below
+  // the sm breakpoint, so on mobile the tour would arm against a target that can
+  // never come into view.
+  const started = tourStatus !== undefined && !tourStatus.completedBoardTour && !tourDismissed && isMobile === false;
 
-  const handleEnd = () => {
+  const handleEnd = useCallback(() => {
+    setTourDismissed(true);
     utils.user.getTourStatus.setData(undefined, {
       completedManageTour: tourStatus?.completedManageTour ?? false,
       completedBoardTour: true,
     });
     completeTour({ tour: "board" });
-  };
+  }, [completeTour, tourStatus?.completedManageTour, utils.user.getTourStatus]);
 
   const steps = useMemo(() => {
     const allSteps: (OnboardingTourStep & { requiresChangeAccess?: boolean })[] = [

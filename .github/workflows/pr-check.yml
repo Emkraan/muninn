@@ -48,3 +48,24 @@ jobs:
       # blocking on it would block every PR until a separate lint-debt cleanup.
       - name: Typecheck
         run: pnpm exec turbo typecheck --concurrency=2
+
+      # House style forbids em/en dashes in our own copy. Scoped to the English
+      # source strings and the README rather than the whole tree: the other lang
+      # files are human translations where the dash is often correct punctuation
+      # (cn.json's double em dash is proper CJK), and the generated
+      # copy-sqlite-to-postgres.cjs bundle inlines third-party comments.
+      - name: No em dashes in English copy
+        run: |
+          if grep -nP '[\x{2013}\x{2014}\x{2015}]' \
+            packages/translation/src/lang/en.json \
+            packages/translation/src/lang/en-gb.json \
+            README.md; then
+            echo "::error::Em/en dash found. Use a hyphen, comma, or colon."
+            exit 1
+          fi
+
+      # Guards the documentation base URL against the half-finished rebrand that
+      # left every "Read the docs" link pointing at a 404. Targeted rather than
+      # `pnpm test`, which pulls in live-network and testcontainers suites.
+      - name: Documentation link tests
+        run: pnpm exec vitest run packages/definitions/src/test/docs.spec.ts

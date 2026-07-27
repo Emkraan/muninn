@@ -27,6 +27,7 @@ import {
   IconUsersGroup,
 } from "@tabler/icons-react";
 
+import { api } from "@homarr/api/server";
 import { auth } from "@homarr/auth/next";
 import { isProviderEnabled } from "@homarr/auth/server";
 import { createDocumentationLink } from "@homarr/definitions";
@@ -61,6 +62,13 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
   const canManageKubernetes = permissions.includes("other-manage-kubernetes");
   const canManageTasks = permissions.includes("other-manage-tasks");
   const canViewLogs = permissions.includes("other-view-logs");
+
+  // Apps and integrations are per-resource, not per-capability: a user belongs on
+  // those pages when they hold the create permission or anything has been shared
+  // with them. Both queries short-circuit on a global grant.
+  const [canSeeApps, canSeeIntegrations] = session
+    ? await Promise.all([api.app.hasVisible(), api.integration.hasManageable()])
+    : [false, false];
 
   // A collapsible group is shown when the user holds ANY of its item permissions
   // (invites has no granular key and stays admin-only, so it also opens the group).
@@ -99,15 +107,13 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
           label: t("items.apps"),
           icon: IconBox,
           href: "/manage/apps",
-          hidden: !session,
-          "data-onboarding-tour-id": "manage-apps",
+          hidden: !canSeeApps,
         },
         {
           label: t("items.integrations"),
           icon: IconAffiliateFilled,
           href: "/manage/integrations",
-          hidden: !session,
-          "data-onboarding-tour-id": "manage-integrations",
+          hidden: !canSeeIntegrations,
         },
         {
           label: t("items.searchEngies"),
@@ -261,5 +267,23 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
 
   if (!session) return shell;
 
-  return <ManageTourProvider isAdmin={isAdmin}>{shell}</ManageTourProvider>;
+  // Server-side capability flags rather than a client query: the tour library
+  // keys progress by array index, so the step list must be its final length on
+  // the very first render. Session permissions arrive pre-expanded, so the
+  // "*-create" keys are safe to read straight off it.
+  return (
+    <ManageTourProvider
+      capabilities={{
+        canCreateBoards: permissions.includes("board-create"),
+        canSeeApps,
+        canCreateApps: permissions.includes("app-create"),
+        canSeeIntegrations,
+        canCreateIntegrations: permissions.includes("integration-create"),
+        canManageUsers,
+        credentialsEnabled: isProviderEnabled("credentials"),
+      }}
+    >
+      {shell}
+    </ManageTourProvider>
+  );
 }

@@ -40,6 +40,12 @@ const defaultSession = {
   expires: new Date().toISOString(),
 } satisfies Session;
 
+const sessionWithPermissions = (permissions: Session["user"]["permissions"]) =>
+  ({
+    ...defaultSession,
+    user: { ...defaultSession.user, permissions },
+  }) satisfies Session;
+
 // Mock the auth module to return an empty session
 vi.mock("@homarr/auth", () => ({ auth: () => ({}) as Session }));
 
@@ -985,7 +991,12 @@ describe("saveBoard should save full board", () => {
   it("should remove integration reference when not present in input", async () => {
     const spy = vi.spyOn(boardAccess, "throwIfActionForbiddenAsync");
     const db = createDb();
-    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+    // Swapping in a different integration is an "add" for the new id.
+    const caller = boardRouter.createCaller({
+      db,
+      deviceType: undefined,
+      session: sessionWithPermissions(["integration-use-all"]),
+    });
     const anotherIntegration = {
       id: createId(),
       kind: "adGuardHome",
@@ -1181,7 +1192,12 @@ describe("saveBoard should save full board", () => {
   it("should add integration reference when present in input", async () => {
     const spy = vi.spyOn(boardAccess, "throwIfActionForbiddenAsync");
     const db = createDb();
-    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+    // Binding an integration needs use access to it, not just board modify.
+    const caller = boardRouter.createCaller({
+      db,
+      deviceType: undefined,
+      session: sessionWithPermissions(["integration-use-all"]),
+    });
     const integration = {
       id: createId(),
       kind: "plex",
@@ -1246,6 +1262,72 @@ describe("saveBoard should save full board", () => {
     expect(firstItem.integrations[0]?.integrationId).toBe(integration.id);
     expect(integrationItem).toBeDefined();
     expect(spy).toHaveBeenCalledWith(expect.anything(), expect.anything(), "modify");
+  });
+  it("should reject binding an integration the caller has no access to", async () => {
+    const db = createDb();
+    // Board "modify" only. Without the bind check this succeeded, which let any
+    // board owner reach an arbitrary integration's decrypted data.
+    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+    const integration = {
+      id: createId(),
+      kind: "plex",
+      name: "Plex",
+      url: "http://plex.local",
+    } as const;
+
+    const { boardId, itemId, sectionId, layoutId } = await createFullBoardAsync(db, "default");
+    await db.insert(integrations).values(integration);
+
+    await expect(
+      caller.saveBoard({
+        id: boardId,
+        sections: [{ id: sectionId, kind: "empty", xOffset: 0, yOffset: 0 }],
+        items: [
+          {
+            id: itemId,
+            kind: "clock",
+            options: { is24HourFormat: true },
+            integrationIds: [integration.id],
+            layouts: [{ sectionId, layoutId, height: 1, width: 1, xOffset: 0, yOffset: 0 }],
+            advancedOptions: {},
+          },
+        ],
+      }),
+    ).rejects.toThrow(/No access to integrations/);
+
+    const integrationItem = await db.query.integrationItems.findFirst({
+      where: eq(integrationItems.integrationId, integration.id),
+    });
+    expect(integrationItem).toBeUndefined();
+  });
+  it("should let a pre-existing integration binding survive a save by a caller without grants", async () => {
+    const db = createDb();
+    const caller = boardRouter.createCaller({ db, deviceType: undefined, session: defaultSession });
+
+    // createFullBoardAsync already binds `integrationId` to the item. Re-saving
+    // it unchanged must not be treated as a new bind, or every board on an
+    // existing install would break on its next save.
+    const { boardId, itemId, integrationId, sectionId, layoutId } = await createFullBoardAsync(db, "default");
+
+    await caller.saveBoard({
+      id: boardId,
+      sections: [{ id: sectionId, kind: "empty", xOffset: 0, yOffset: 0 }],
+      items: [
+        {
+          id: itemId,
+          kind: "clock",
+          options: { is24HourFormat: true },
+          integrationIds: [integrationId],
+          layouts: [{ sectionId, layoutId, height: 1, width: 1, xOffset: 0, yOffset: 0 }],
+          advancedOptions: {},
+        },
+      ],
+    });
+
+    const integrationItem = await db.query.integrationItems.findFirst({
+      where: eq(integrationItems.integrationId, integrationId),
+    });
+    expect(integrationItem).toBeDefined();
   });
   it("should update section when present in input", async () => {
     const db = createDb();

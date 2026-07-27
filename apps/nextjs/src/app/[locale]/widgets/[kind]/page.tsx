@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { Center } from "@mantine/core";
 
+import { api } from "@homarr/api/server";
 import { env } from "@homarr/common/env";
-import { db } from "@homarr/db";
 import type { WidgetKind } from "@homarr/definitions";
 import { widgetImports } from "@homarr/widgets";
 
@@ -13,24 +13,23 @@ interface Props {
 }
 
 export default async function WidgetPreview(props: Props) {
-  if (!((await props.params).kind in widgetImports || env.NODE_ENV !== "development")) {
+  const { kind } = await props.params;
+
+  // Development-only scratch page. The previous guard read
+  // `!(kind in widgetImports || NODE_ENV !== "development")`, and because `||`
+  // is satisfied by the second operand in production, notFound() never fired
+  // for any kind at all.
+  if (env.NODE_ENV !== "development" || !(kind in widgetImports)) {
     notFound();
   }
 
-  const integrationData = await db.query.integrations.findMany({
-    columns: {
-      id: true,
-      name: true,
-      url: true,
-      kind: true,
-    },
-  });
-
-  const sort = (await props.params).kind as WidgetKind;
+  // Scoped router call rather than a raw findMany: this used to hand the whole
+  // integrations table, urls included, to an unauthenticated caller.
+  const integrationData = await api.integration.all();
 
   return (
     <Center h="100vh">
-      <WidgetPreviewPageContent kind={sort} integrationData={integrationData} />
+      <WidgetPreviewPageContent kind={kind as WidgetKind} integrationData={integrationData} />
     </Center>
   );
 }

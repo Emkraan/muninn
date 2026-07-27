@@ -21,6 +21,7 @@
 ## Table of Contents
 
 - [Features](#features)
+- [Documentation](#documentation)
 - [Support](#support)
 - [Requirements](#requirements)
 - [Deployment](#deployment)
@@ -48,6 +49,20 @@ Muninn is a fork of [Homarr](https://github.com/homarr-labs/homarr) that inherit
 - **Cobalt UI** - a dark, logo-blue design system with a live animated background and a redesigned sign-in screen. An optional deployment-set footer credit keeps the published image brand-agnostic.
 - **SQLite or Postgres, bundled or external Redis** - runs zero-config on a bundled SQLite file and an in-container Redis, or points at an external Postgres or MySQL (`DB_DRIVER`) and a shared or external Redis (`REDIS_IS_EXTERNAL`) to centralize state in a larger or multi-service deployment. A one-shot SQLite-to-Postgres copy tool ships inside the image.
 - **Single container** - the image bundles the web server, a websocket service, and Redis, and serves on port 7575. Bring your own reverse proxy for HTTPS.
+
+## Documentation
+
+Full documentation lives at **[emkraan.github.io/muninn](https://emkraan.github.io/muninn/)**, published from [`apps/docs`](apps/docs) on every push to `main`. It is what the in-app "Read the docs" links point at.
+
+| Section | Link |
+| --- | --- |
+| Getting started | [/docs/getting-started](https://emkraan.github.io/muninn/docs/getting-started) |
+| Boards, apps, integrations, users | [/docs/management](https://emkraan.github.io/muninn/docs/management/boards) |
+| Integration catalogue | [/docs/integrations](https://emkraan.github.io/muninn/docs/category/integrations) |
+| Widget catalogue | [/docs/widgets](https://emkraan.github.io/muninn/docs/category/widgets) |
+| REST API reference | [/api-reference](https://emkraan.github.io/muninn/api-reference) |
+
+To preview the site locally, run `pnpm -F @homarr/docs start`.
 
 ## Support
 

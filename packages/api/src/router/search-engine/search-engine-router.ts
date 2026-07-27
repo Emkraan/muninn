@@ -10,6 +10,7 @@ import { byIdSchema, paginatedSchema, searchSchema } from "@homarr/validation/co
 import { searchEngineEditSchema, searchEngineManageSchema } from "@homarr/validation/search-engine";
 
 import { createTRPCRouter, permissionRequiredProcedure, protectedProcedure, publicProcedure } from "../../trpc";
+import { IntegrationAccessControl } from "../integration/integration-access-control";
 
 const logger = createLogger({ module: "searchEngineRouter" });
 
@@ -71,6 +72,20 @@ export const searchEngineRouter = createTRPCRouter({
         };
   }),
   getDefaultSearchEngine: publicProcedure.query(async ({ ctx }) => {
+    // The joined integration carries a credentialed internal url, so it is
+    // stripped unless the caller is actually entitled to that integration. This
+    // procedure is public (the search bar renders before sign-in), which
+    // previously handed the default engine's backing integration id, kind and
+    // url to any anonymous visitor.
+    const accessControl = new IntegrationAccessControl(ctx.db, ctx.session?.user ?? null);
+    const withVisibleIntegration = async <TEngine extends { integration: { id: string } | null } | undefined>(
+      searchEngine: TEngine,
+    ) => {
+      if (!searchEngine?.integration) return searchEngine;
+      const visible = await accessControl.canUserSeeIntegrationsAsync([searchEngine.integration.id]);
+      return visible ? searchEngine : { ...searchEngine, integration: null };
+    };
+
     const userDefaultId = ctx.session?.user.id
       ? ((await ctx.db.query.users
           .findFirst({
@@ -83,18 +98,20 @@ export const searchEngineRouter = createTRPCRouter({
       : null;
 
     if (userDefaultId) {
-      return await ctx.db.query.searchEngines.findFirst({
-        where: eq(searchEngines.id, userDefaultId),
-        with: {
-          integration: {
-            columns: {
-              kind: true,
-              url: true,
-              id: true,
+      return await withVisibleIntegration(
+        await ctx.db.query.searchEngines.findFirst({
+          where: eq(searchEngines.id, userDefaultId),
+          with: {
+            integration: {
+              columns: {
+                kind: true,
+                url: true,
+                id: true,
+              },
             },
           },
-        },
-      });
+        }),
+      );
     }
 
     const searchSettings = await getServerSettingByKeyAsync(ctx.db, "search");
@@ -114,7 +131,7 @@ export const searchEngineRouter = createTRPCRouter({
       },
     });
 
-    if (serverDefault) return serverDefault;
+    if (serverDefault) return await withVisibleIntegration(serverDefault);
 
     // Remove the default search engine ID from settings if it does not longer exist
     try {

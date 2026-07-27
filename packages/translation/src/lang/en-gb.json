@@ -1146,7 +1146,7 @@
             },
             "dns": {
               "notFound": "The server address could not be found. Please check the URL for typos or invalid domain names.",
-              "timeout": "DNS lookup timed out. This may be a temporary issue—please try again in a few moments.",
+              "timeout": "DNS lookup timed out. This may be a temporary issue. Please try again in a few moments.",
               "noAnswer": "The DNS server didn't return a valid response. The domain may exist but has no valid records."
             },
             "timeout": {
@@ -6102,19 +6102,19 @@
       },
       "appsList": {
         "title": "Your Apps",
-        "description": "These are all the apps you've added — links to your self-hosted services. Each app has an icon, optional health check, and a status badge on the dashboard."
+        "description": "These are all the apps you've added: links to your self-hosted services. Each app has an icon, optional health check, and a status badge on the dashboard."
       },
       "appsCreate": {
         "title": "Add an App",
-        "description": "Register a new service here. Give it a name, URL, and icon — it will appear as a tile on your boards with live status monitoring."
+        "description": "Register a new service here. Give it a name, URL, and icon, and it will appear as a tile on your boards with live status monitoring."
       },
       "integrationsList": {
         "title": "Your Integrations",
-        "description": "These are the services connected to Muninn — Sonarr, Radarr, Plex, Jellyfin, and 50+ more. All credentials are encrypted at rest."
+        "description": "These are the services connected to Muninn: Sonarr, Radarr, Plex, Jellyfin, and 50+ more. All credentials are encrypted at rest."
       },
       "integrationsCreate": {
         "title": "Add an Integration",
-        "description": "Connect a new service here. Pick the type, enter the URL and API key — Muninn validates the connection before saving."
+        "description": "Connect a new service here. Pick the type, then enter the URL and API key. Muninn validates the connection before saving."
       },
       "usersList": {
         "title": "Your Users",
@@ -6122,7 +6122,7 @@
       },
       "usersCreate": {
         "title": "Create a User",
-        "description": "Add a new user account here. You can also use invite links for easy onboarding. That's the tour — you're all set!"
+        "description": "Add a new user account here. You can also use invite links for easy onboarding. That's the tour. You're all set!"
       }
     },
     "board": {
@@ -6132,7 +6132,7 @@
       },
       "editMode": {
         "title": "Edit Mode",
-        "description": "Click here to enter edit mode. You can then add widgets, apps, and sections — drag to reposition, resize with the corner handle. Click again to save your changes."
+        "description": "Click here to enter edit mode. You can then add widgets, apps, and sections: drag to reposition, resize with the corner handle. Click again to save your changes."
       },
       "settings": {
         "title": "Board Settings",
@@ -6140,7 +6140,7 @@
       },
       "switcher": {
         "title": "Switch Boards",
-        "description": "Jump between boards. Create separate dashboards for different purposes — media, networking, per-user, or anything you like."
+        "description": "Jump between boards. Create separate dashboards for different purposes: media, networking, per-user, or anything you like."
       },
       "userMenu": {
         "title": "Your Profile",
