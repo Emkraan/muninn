@@ -1,2 +1,2 @@
-export const colorSchemeCookieKey = "homarr.color-scheme";
-export const localeCookieKey = "homarr.locale";
+export const colorSchemeCookieKey = "muninn.color-scheme";
+export const localeCookieKey = "muninn.locale";
