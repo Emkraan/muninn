@@ -45,8 +45,8 @@ describe("getAvailableUpdatesAsync", () => {
     // Assert
     expect(result.map((update) => update.tagName)).toEqual(["v1.3.0", "v1.2.4"]);
     expect(listReleasesSpy).toHaveBeenCalledWith({
-      owner: "homarr-labs",
-      repo: "homarr",
+      owner: "Emkraan",
+      repo: "muninn",
     });
   });
 
@@ -69,8 +69,8 @@ describe("getAvailableUpdatesAsync", () => {
       "v1.2.4-beta.3",
     ]);
     expect(listReleasesSpy).toHaveBeenCalledWith({
-      owner: "homarr-labs",
-      repo: "homarr",
+      owner: "Emkraan",
+      repo: "muninn",
       query: undefined,
     });
   });
@@ -135,7 +135,7 @@ const fakeReleases = (...inputs: [string, boolean][]) => inputs.map(fakeRelease)
 const fakeRelease = ([tagName, isPrerelease]: [string, boolean]) =>
   ({
     tag_name: tagName,
-    html_url: `https://github.com/homarr-labs/homarr/releases/tag/${tagName}`,
+    html_url: `https://github.com/Emkraan/muninn/releases/tag/${tagName}`,
     name: tagName,
     body_html: undefined,
     prerelease: isPrerelease,

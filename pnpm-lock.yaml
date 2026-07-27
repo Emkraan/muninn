@@ -384,9 +384,6 @@ catalogs:
     jsdom:
       specifier: ^29.1.1
       version: 29.1.1
-    json5:
-      specifier: ^2.2.3
-      version: 2.2.3
     jsonpath-plus:
       specifier: ^10.4.0
       version: 10.4.0
@@ -674,9 +671,6 @@ importers:
       jsdom:
         specifier: 'catalog:'
         version: 29.1.1(@noble/hashes@2.0.1)
-      json5:
-        specifier: 'catalog:'
-        version: 2.2.3
       oxfmt:
         specifier: 'catalog:'
         version: 0.58.0

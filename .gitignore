@@ -17,6 +17,7 @@ next-env.d.ts
 
 # artifacts
 packages/db/migrations/*/migrate.cjs
+packages/db/migrations/copy-sqlite-to-postgres.cjs
 
 # nitro
 .nitro/

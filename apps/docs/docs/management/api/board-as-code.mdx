@@ -1,0 +1,293 @@
+---
+title: Board as Code
+tags:
+  - API
+  - Boards
+  - Automation
+---
+
+# Board as Code
+
+A Muninn board is a document: metadata, responsive breakpoint layouts, sections, and items with a grid position per breakpoint. The REST API exposes that document directly, so you can keep a board in version control, generate it from your infrastructure, or change a single element from a script.
+
+There are three ways to work with it, and you can mix them freely:
+
+- **Read the whole board.** `GET /api/boards/{id}` returns the full document, including an optimistic-concurrency token.
+- **Write the whole board.** `PUT /api/boards/{id}` replaces the board's sections and items in one atomic transaction.
+- **Change one element.** The item and section routes apply a single change server side and return the saved board.
+
+Every write on this surface needs modify permission on the board. The whole-board write and the granular item and section routes all run through the same persistence function, so their behaviour cannot drift apart. The one exception is `POST /api/boards/items`, which inserts its own rows directly; the gotchas below cover what that changes.
+
+## Authentication
+
+These routes use the same `ApiKey` header as the rest of the API. See [API](/docs/management/api) for the key format and how to obtain one.
+
+Three things matter for board work:
+
+- A key acts as the user who owns it, and never carries more permission than that user currently holds. Board access, group membership and integration grants are all resolved against that user.
+- A scoped key can hold less. Its scopes are expanded with the permissions they imply and then intersected with the owner's live permission set. That intersection narrows global permissions only, so per-board grants held by the owner still apply. A key can also be given an expiry, and a key past its expiry fails authentication outright.
+- `GET /api/boards/{id}` is readable without a key when the board is public. Every write route requires an authenticated caller.
+
+## Routes
+
+The board-as-code surface:
+
+| Method   | Path                                    | What it does                                                                          |
+| -------- | --------------------------------------- | ------------------------------------------------------------------------------------- |
+| `GET`    | `/api/boards/{id}`                      | Read the full board document: metadata, settings, breakpoint layouts, sections, items   |
+| `PUT`    | `/api/boards/{id}`                      | Replace the board's sections and items atomically                                       |
+| `PATCH`  | `/api/boards/{id}/layouts`              | Replace the responsive breakpoint layouts                                               |
+| `POST`   | `/api/boards/items`                     | Add one item and auto-place it. The board id goes in the body, not the path             |
+| `PATCH`  | `/api/boards/{id}/items/{itemId}`       | Update one item. Only the fields you send change                                        |
+| `DELETE` | `/api/boards/{id}/items/{itemId}`       | Remove one item                                                                         |
+| `POST`   | `/api/boards/{id}/sections`             | Add one section                                                                         |
+| `PATCH`  | `/api/boards/{id}/sections/{sectionId}` | Replace one section                                                                     |
+| `DELETE` | `/api/boards/{id}/sections/{sectionId}` | Remove one section, if it is empty                                                      |
+
+Every route above returns the full board document, except `POST /api/boards/items`, which returns `{ "itemId": "..." }`.
+
+The routes around it, which a script usually needs too:
+
+| Method   | Path                           | What it does                                             |
+| -------- | ------------------------------ | -------------------------------------------------------- |
+| `GET`    | `/api/boards`                  | List the boards you can access                            |
+| `POST`   | `/api/boards`                  | Create a board with a name, column count and public flag  |
+| `POST`   | `/api/boards/{id}/duplicate`   | Duplicate a board under a new name                        |
+| `PATCH`  | `/api/boards/{id}/settings`    | Update visual and behaviour settings                      |
+| `PATCH`  | `/api/boards/{id}/name`        | Rename a board                                            |
+| `PATCH`  | `/api/boards/{id}/visibility`  | Switch a board between `public` and `private`             |
+| `PATCH`  | `/api/boards/{id}/home`        | Set the calling user's desktop home board                 |
+| `PATCH`  | `/api/boards/{id}/mobile-home` | Set the calling user's mobile home board                  |
+| `DELETE` | `/api/boards/{id}`             | Delete a board                                            |
+
+Those routes are not all on modify. Renaming, changing visibility and deleting need full permission on the board. Updating settings needs modify. The two home-board routes need only view. Creating or duplicating a board needs the "Create boards" permission, and duplicating also needs view on the source board.
+
+The generated specification is authoritative for exact field types. Open it with [the full interactive API reference](/api-reference) and look under the `boards` tag.
+
+## The board document
+
+`GET /api/boards/{id}` returns:
+
+- `id`, `name`, `version`, `isPublic`, `creatorId` and a `creator` object.
+- `layouts`: the responsive breakpoint layouts, sorted by `breakpoint` ascending. Each has `id`, `name`, `columnCount` and `breakpoint`.
+- `sections`: every section has `id` and `kind`, and one of three shapes. A `category` section adds `name`, `yOffset`, `xOffset` and `collapsed`. An `empty` section adds `yOffset` and `xOffset`. A `dynamic` section adds `options` and a `layouts` array, where each entry has `layoutId`, `parentSectionId`, `xOffset`, `yOffset`, `width` and `height`.
+- `items`: each has `id`, `kind`, `options`, `integrationIds`, `advancedOptions`, and a `layouts` array with one entry per breakpoint layout (`layoutId`, `sectionId`, `xOffset`, `yOffset`, `width`, `height`).
+- `userPermissions` and `groupPermissions`: your own permission rows on this board.
+- The board's settings columns, such as `pageTitle` and `customCss`, come through as well.
+
+The `PUT` body accepts exactly three properties: `sections`, `items` and the optional `expectedVersion`. Settings, name, visibility and breakpoint layouts have their own routes. The board id comes from the path.
+
+Because the read and write shapes line up, `{ sections, items }` taken straight out of a `GET` is a valid `PUT` body.
+
+:::warning
+
+`PUT` is a full replacement. A section or item that is present on the board but missing from your payload is deleted, and deleting a section cascades to the item positions inside it. Always build the payload from a fresh read.
+
+:::
+
+To add an element through `PUT`, append an entry with an id you mint yourself. Item and section ids are primary keys for the whole instance, not just for one board, so generate a random id rather than a readable one. The added-and-removed comparison only looks at the board being saved, so an id already in use on a different board is treated as an insert and fails against the primary-key constraint.
+
+## Breakpoint layouts
+
+Breakpoint layouts are not part of the `PUT` body. They have their own route, `PATCH /api/boards/{id}/layouts`, and it is also a full replacement: a layout that exists on the board but is missing from the payload is deleted. Each entry needs `id`, `name` (1 to 32 characters), `columnCount` (1 to 24) and `breakpoint` (0 to 32767).
+
+Two things happen automatically when the payload differs from what is stored:
+
+- **A new layout** gets item and section positions cloned from an existing one and refitted to its column count. Muninn picks the smallest existing layout whose `columnCount` is greater than or equal to the new layout's, and falls back to the largest if there is none.
+- **A changed `columnCount`** on an existing layout regenerates the positions of that layout's items and dynamic sections to fit the new width.
+
+:::danger
+
+Ids on this route are not yours to choose. A layout entry whose id is not already on the board is created with a server-generated id, and the id you sent is discarded. Read the board back after adding a breakpoint and store the returned ids. Otherwise re-sending the same version-controlled payload deletes the layout it created last time and builds a new one, regenerating every item and section position along the way.
+
+:::
+
+Deleting a layout takes its positions with it. Every item position and dynamic section position recorded against that layout is removed by cascade.
+
+This route does not run inside a single transaction. Inserts, updates and deletes are applied in sequence, so a failure partway through can leave the layout set half-applied. Read the board back and check rather than assuming the whole payload landed.
+
+## The read-modify-write loop
+
+Every board carries an integer `version` that starts at `0`. A read returns it. Send it back as `expectedVersion` and the save is applied only if the board is still at that version.
+
+### How the check works
+
+The save opens a transaction and runs a guarded update first: increment `version` where the board id matches **and** the version still equals `expectedVersion`. It then counts how many rows that update matched. Zero matched rows means the version moved after you read it, so the transaction is rolled back and the request fails with `409`.
+
+The row count is what decides, not a re-read of the value. A concurrent save bumps the version by exactly one, so reading it back after your own guarded update can show `expectedVersion + 1` whether that increment was yours or someone else's. Only the number of rows your own statement matched is unambiguous.
+
+Two consequences worth building on:
+
+- Because the guard is the first statement in the transaction, a `409` means **nothing** was written. There is no partial save to clean up.
+- Never infer success from the version value. The status code is the only signal.
+
+### Worked example
+
+```bash
+BASE=http://localhost:7575
+KEY='<id>.<token>'
+BOARD=jz1x8k2m4p9q
+
+# 1. Read the board.
+board=$(curl -sf -H "ApiKey: $KEY" "$BASE/api/boards/$BOARD")
+
+# 2. Modify it: switch every clock widget to 24 hour time.
+payload=$(jq -c '{
+  sections: .sections,
+  items: (.items | map(if .kind == "clock" then .options.is24HourFormat = true else . end)),
+  expectedVersion: .version
+}' <<<"$board")
+
+# 3. Write it back, guarded by the version you read.
+curl -sf -X PUT "$BASE/api/boards/$BOARD" \
+  -H "ApiKey: $KEY" \
+  -H 'Content-Type: application/json' \
+  -d "$payload"
+```
+
+### Handling 409
+
+A conflict comes back with HTTP `409`. The body also carries a `data` object, but the two fields to match on are:
+
+```json
+{
+  "message": "This board was modified by another request. Reload the latest board and retry.",
+  "code": "CONFLICT"
+}
+```
+
+The correct response is re-read, reapply, retry. Do not resend the same payload with a bumped number: the board you read is stale, and your payload would delete whatever the other writer added.
+
+```bash
+apply() {
+  jq -c '{
+    sections: .sections,
+    items: (.items | map(if .kind == "clock" then .options.is24HourFormat = true else . end)),
+    expectedVersion: .version
+  }'
+}
+
+for attempt in 1 2 3 4 5; do
+  payload=$(curl -sf -H "ApiKey: $KEY" "$BASE/api/boards/$BOARD" | apply)
+
+  status=$(curl -s -o /tmp/muninn-save.json -w '%{http_code}' \
+    -X PUT "$BASE/api/boards/$BOARD" \
+    -H "ApiKey: $KEY" \
+    -H 'Content-Type: application/json' \
+    -d "$payload")
+
+  case "$status" in
+    200) echo "saved"; break ;;
+    409) echo "conflict on attempt $attempt, re-reading"; sleep 1 ;;
+    *) cat /tmp/muninn-save.json; exit 1 ;;
+  esac
+done
+```
+
+:::tip
+
+A successful save returns a fresh read of the board, so the `version` in the response is the token for your next save. You do not need a second `GET` between two saves you make yourself.
+
+:::
+
+### Omitting expectedVersion
+
+`expectedVersion` is optional. Leave it out and the version is still incremented, so other readers notice the change, but no conflict check runs and your write wins over any concurrent edit. That is reasonable for a board only your script owns, and a bad idea for a board people also edit in the browser.
+
+The version only moves on the board content path: `PUT /api/boards/{id}` and the granular item and section routes. The layouts, settings, name and visibility routes, and `POST /api/boards/items`, do not touch it.
+
+## Granular endpoints
+
+`PATCH` and `DELETE` on an item, and the three section routes, are a convenience over the whole-board write. Each one reads the board, applies your single change, and calls the same save function using the version it just read, so it cannot clobber a save that landed in the meantime. They do not accept `expectedVersion` from you. `POST /api/boards/items` is not one of these: it writes its own rows and takes no part in the version guard.
+
+Reach for the whole-board `PUT` when you generate a board from a source of truth, or when several changes have to land together. It is also the only way to move many items at once.
+
+Reach for a granular route when you have one change to make and no full document in hand. There is nothing to omit by accident, so nothing gets deleted by accident.
+
+Their extra rules:
+
+- `PATCH /api/boards/{id}/sections/{sectionId}` rejects a body whose `section.id` differs from the path `sectionId` with a `400`. Otherwise the underlying whole-board diff would delete the section named in the path and insert the body's section as a new one.
+- `DELETE /api/boards/{id}/sections/{sectionId}` returns `400` while the section still holds items or a nested dynamic sub-section. Move or remove those first.
+- `POST /api/boards/{id}/sections` returns `409` if a section with that id is already on the board. Read the `message` to tell that apart from a version conflict.
+- `PATCH /api/boards/{id}/items/{itemId}` takes any of `options`, `advancedOptions`, `integrationIds` and `layouts`. Fields you leave out are untouched. `options`, `advancedOptions` and `integrationIds` are replaced whole, so `options` is not merged into the stored options. `layouts` is the exception: each entry updates the item's existing position for that `layoutId`, entries you omit are left alone, and an entry for a layout the item has no position for is silently dropped.
+
+## Binding integrations to items
+
+An item references integrations through its `integrationIds` array. A binding grants real access to that integration's data through the widget request path, so board modify permission alone is not enough to create one.
+
+On every write, Muninn collects the integration ids already bound anywhere on that board and checks only the ids your payload adds on top of them. Ids you may not bind are rejected with `403`. The body carries a `data` object too, but the fields that identify the failure are:
+
+```json
+{
+  "message": "No access to integrations: y7k2p4m9",
+  "code": "FORBIDDEN"
+}
+```
+
+Two properties follow from that check being a delta against the whole board:
+
+- Bindings that already exist on the board survive a save by anyone who can modify it, even if that person holds no grant on the integrations involved. Boards built before this rule keep working.
+- Moving an existing binding from one item to another on the same board is not a new binding, so it is not re-checked.
+
+You may bind an integration when you hold a grant on it directly or through one of your groups, or when you hold one of the global integration permissions. Being able to see an integration only because it sits on a board you can view does not qualify. See [Integrations](/docs/management/integrations) for granting access and [Users](/docs/management/users) for the group permissions involved.
+
+:::warning
+
+`GET /api/integrations` lists everything you can see, which is wider than what you can bind. An entry whose `permissions.hasUseAccess` is `false` is visible to you through a board, and binding it will be rejected.
+
+:::
+
+`POST /api/boards/items` behaves slightly differently, because every binding it creates is new: it first rejects ids that do not exist at all with a `400` listing them, then applies the same access check to all of them.
+
+## Apps a board author needs
+
+The `app` widget stores an app id in its `appId` option, so laying out apps from a script usually means resolving or creating the app record first.
+
+| Method   | Path                   | What it does                                                                       |
+| -------- | ---------------------- | ---------------------------------------------------------------------------------- |
+| `GET`    | `/api/apps`            | List every app you can see                                                          |
+| `GET`    | `/api/apps/selectable` | The same list trimmed to `id`, `name`, `iconUrl`, `href`, `pingUrl`, `description`  |
+| `GET`    | `/api/apps/search`     | Search apps by name                                                                 |
+| `GET`    | `/api/apps/paginated`  | Paginated list with your per-app permission flags                                   |
+| `GET`    | `/api/apps/{id}`       | Read one app                                                                        |
+| `POST`   | `/api/apps`            | Create an app. Requires the "Create apps" permission                                |
+| `PATCH`  | `/api/apps/{id}`       | Update an app                                                                       |
+| `DELETE` | `/api/apps/{id}`       | Delete an app                                                                       |
+
+`POST /api/apps` deduplicates on name **and** URL together, across the whole instance and regardless of who owns the existing record. If an app with the same name and the same URL already exists, no new record is created: you are granted use access to the existing one and the response carries `"referencedExisting": true` alongside that app's `appId`. Same name with a different URL is a genuinely different app and is created as one, with you as its full holder.
+
+So always place the `appId` from the response, never an id you assumed. See [Apps](/docs/management/apps) for what the fields mean.
+
+## Gotchas
+
+**A forbidden board looks like a missing one.** Board permission failures return `404` with `Board not found`, deliberately, so the API does not confirm that a board exists to someone who may not see it. A `404` on a write can mean the board is not there or that you lack modify on it.
+
+**Not every write bumps the version.** `POST /api/boards/items` inserts directly and leaves `version` alone. A `PUT` built from a read taken before that call therefore still carries a matching `expectedVersion`, passes the guard, and deletes the item that route added. Take the read immediately before the write.
+
+**Give every item a layout entry for every breakpoint layout.** An item missing an entry for one of the board's layouts still saves, but a later `PATCH /api/boards/{id}/layouts` that adds a breakpoint or changes a column count has to regenerate positions from the existing layouts, and can fail with a server error when an item has no position to read there.
+
+**`PUT` cannot fill in a position that does not exist yet.** For an item already on the board, the save only updates the position row matching that item and that layout; it never inserts a missing one. New items get exactly the entries you supply. So the way to introduce a breakpoint is `PATCH /api/boards/{id}/layouts`, which clones positions for every item and dynamic section, and only then to move things around with `PUT`.
+
+**Section kind cannot be changed.** A section update writes offsets, options and name, never `kind`. Send `"kind": "category"` for a section stored as `empty` and it stays `empty`, and its `name` stays null. Delete the section and add a new one instead.
+
+**`xOffset` on category and empty sections is ignored.** It is required in the payload but always stored as `0`. Order those sections with `yOffset`.
+
+**`collapsed` is read only here.** It is per-user state, and no route on this REST surface writes it. Send the value you read.
+
+**Board names are restricted.** A name is 1 to 255 characters of letters, digits, hyphen and underscore only, so no spaces and no dots. Renaming and duplicating additionally reject a case-insensitive collision with an existing name, returning `409` and `Board with similar name already exists`. `POST /api/boards` does not run that check, so a colliding name fails at the database level instead of with a clean `409`. Slugify infrastructure names before you feed them in.
+
+**A new board is not empty.** `POST /api/boards` also inserts one `empty` section and one breakpoint layout named `Base` at breakpoint `0` with the column count you asked for. That is why `POST /api/boards/items` works straight after a create.
+
+**Widget options are not validated.** `options` is an untyped map on both read and write, so a misspelled key is stored as written and no error is raised. Check the result in the browser.
+
+**`POST /api/boards/items` needs somewhere to put things.** It places the item in the first section of kind `empty`, ordered by `yOffset`, and returns `400` when the board has none. It also returns `400` when that section's grid has no free position for the widget's default size.
+
+**`409` is not in the generated specification.** The document declares `400`, `401`, `403` and `500` for the board write routes, plus `404` on all of them except `POST /api/boards/{id}/sections` and `POST /api/boards/items`. The conflict response is returned at runtime regardless, so a generated client may need the case added by hand.
+
+**Unreadable items disappear from reads.** An item that fails to parse, most often one stored with a widget kind this build does not know, is logged and skipped, so it is absent from `GET`. It is also absent from the server's own comparison set, so a later save does not delete it. It just stays invisible over this surface.
+
+## Related
+
+- [API](/docs/management/api) for keys, the specification and the tRPC surface.
+- [Boards](/docs/management/boards) for what these fields do in the browser.
+- [Model Context Protocol (MCP)](/docs/management/mcp) for the same board operations exposed as tools.
