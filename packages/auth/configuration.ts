@@ -22,8 +22,8 @@ import { expireDateAfter, generateSessionToken, sessionTokenCookieName } from ".
 
 const logger = createLogger({ module: "authConfiguration" });
 
-// All Auth.js cookies are prefixed with AUTH_COOKIE_PREFIX (default "homarr") so
-// Homarr's cookie jar is isolated from any other Auth.js/NextAuth app on the
+// All Auth.js cookies are prefixed with AUTH_COOKIE_PREFIX (default "muninn") so
+// Muninn's cookie jar is isolated from any other Auth.js/NextAuth app on the
 // same hostname (browsers scope cookies by host, not by port).
 // See https://github.com/homarr-labs/homarr/issues/5773
 const createCookies = (useSecureCookies: boolean) => {

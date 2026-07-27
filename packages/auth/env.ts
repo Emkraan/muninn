@@ -32,7 +32,7 @@ export const env = createEnv({
       .string()
       .min(1)
       .regex(/^[a-zA-Z0-9-_]+$/, "AUTH_COOKIE_PREFIX must only contain letters, numbers, hyphens and underscores")
-      .default("homarr"),
+      .default("muninn"),
     // Multi-provider OIDC: identity providers are configured in the DB and
     // managed at /manage/authentication, so the env-based single-provider config
     // is retired. These vars stay defined (optional, with defaults) only so the

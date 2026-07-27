@@ -6,7 +6,7 @@ import type { Database } from "@homarr/db";
 import { getCurrentUserPermissionsAsync } from "./callbacks";
 import { env } from "./env";
 
-// Prefixed (AUTH_COOKIE_PREFIX, default "homarr") to avoid cookie collisions
+// Prefixed (AUTH_COOKIE_PREFIX, default "muninn") to avoid cookie collisions
 // with other Auth.js apps on the same host. See https://github.com/homarr-labs/homarr/issues/5773
 export const sessionTokenCookieName = `${env.AUTH_COOKIE_PREFIX}.session-token`;
 
