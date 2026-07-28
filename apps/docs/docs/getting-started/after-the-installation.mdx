@@ -14,10 +14,6 @@ import manageBoardHeaderEditMode from "./img/manage-board-header-edit-mode.png";
 import manageBoardHeaderAddItem from "./img/manage-board-header-add-item-menu.png";
 import manageBoardHeaderChooseItem from "./img/manage-board-header-choose-item.png";
 import manageBoardNoApp from "./img/manage-board-no-app.png";
-import manageExportOldMuninn from "./img/old-homarr-export-data.png";
-import manageImportOldMuninnDropzone from "./img/old-homarr-import-dropzone.png";
-import manageImportOldMuninnChooseData from "./img/old-homarr-import-choose-imported-data.png";
-import manageImportDecryptionToken from "./img/old-homarr-import-decryption-token.png";
 
 :::tip
 
@@ -121,30 +117,6 @@ We recommend you to continue with the section [creating your first board on this
   alt={"Screenshot of the finish onboarding process with links"}
   width={300}
 />
-
-### Importing a ZIP from version before 1.0.0
-
-This is recommended when you used Homarr before 1.0 and want to re-import your data.
-It is important that you first migrate correctly using [Homarr's list of breaking changes for 1.0](https://homarr.dev/blog/2024/09/23/version-1.0).
-
-<img
-  src={manageExportOldMuninn}
-  alt="Export from old Homarr"
-  style={{ maxWidth: 500 }}
-/>
-
-**How to export and import data**
-
-1. Navigate to your old Homarr, open your management pages, open the tools submenu and open `Migrate to 1.0`.
-2. Check the contents that you want to export. We recommend you to export all data.
-3. Click on the export data button
-4. Save the ZIP file, that is being downloaded, on your device. If you selected "integrations" or "users", you also get an encryption / decryption key.
-   Copy it and do not loose it!
-5. Go to your Muninn instance and start the onboarding. Choose `Import from Homarr before 1.0.0`
-6. Drag and drop your previously downloaded ZIP archive into the file upload: <br/><img src={manageImportOldMuninnDropzone} style={{ maxWidth: 500 }} />
-7. Next, choose the data that you want to import and how to import it. Since screen sizes were removed in 1.0, we create a new board for every screen size by default. We recommend you to only keep the best layout and adjust it later in 1.0.0 - but you can also import all of them and pick later.<br/><img src={manageImportOldMuninnChooseData} style={{ maxWidth: 500 }} />
-8. If you previously exported integrations or users, you will be asked to decrypt the data safely using your obtained encryption token. Paste into the modal and confirm your action.<br/><img src={manageImportDecryptionToken} style={{ maxWidth: 500 }} />
-9. Next, you can [follow the same setup as when starting from scratch](#starting-from-scratch). After you completed the onboarding, all of your data will be migrated and available.
 
 ## Creating your first board
 
