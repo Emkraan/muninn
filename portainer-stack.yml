@@ -26,7 +26,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DATABASE_INDEX=1
-      - AUTH_PROVIDERS=credentials
+      - AUTH_PROVIDERS=credentials,oidc
       - AUTH_COOKIE_PREFIX=homarr
       # dns-caching patches dns.lookup() to use c-ares which bypasses /etc/hosts.
       # Disabled so extra_hosts entries resolve correctly for server-side OIDC calls.
