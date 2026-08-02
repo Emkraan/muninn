@@ -1,15 +1,16 @@
 # ===========================================================================
-# Muninn - build and publish the container image to GHCR.
+# Muninn - build, publish, pin, and deploy.
 #
-# Muninn is a fork of Homarr (Apache-2.0). This workflow BUILDS AND PUBLISHES
-# the image only; deployment to the homelab is handled out-of-band by the
-# private stack repo (Emkraan/hq-muninn), which pins the image reference.
-# Do NOT add a deploy webhook or any internal URL to this file.
+# Muninn is a fork of Homarr (Apache-2.0).
 #
 # Triggers:
 #   push to main            -> :latest, :edge, :sha-<short-sha>
 #   push of a v* git tag    -> additionally the bare semver X.Y.Z
 #   manual (workflow_dispatch)
+#
+# On every push to main the workflow also pins the new sha tag into
+# portainer-stack.yml, commits back to main with [skip ci], and fires
+# the Portainer webhook to redeploy hq_muninn.
 #
 # Image: ghcr.io/emkraan/muninn
 # ===========================================================================
@@ -29,7 +30,7 @@ env:
   IMAGE_NAME: emkraan/muninn
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -70,6 +71,7 @@ jobs:
           {
             echo "tags=${TAGS}"
             echo "app_version=${APP_VERSION}"
+            echo "short_sha=${SHORT_SHA}"
             echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           } >> "${GITHUB_OUTPUT}"
 
@@ -99,3 +101,42 @@ jobs:
             org.opencontainers.image.version=${{ steps.meta.outputs.app_version }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.created=${{ steps.meta.outputs.created }}
+
+      - name: Mint deploy-bot app token
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/create-github-app-token@v3
+        id: deploy-token
+        with:
+          app-id: ${{ vars.DEPLOY_APP_ID }}
+          private-key: ${{ secrets.DEPLOY_APP_PRIVATE_KEY }}
+
+      - name: Configure git for pin commit
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          TOKEN: ${{ steps.deploy-token.outputs.token }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+      - name: Pin portainer-stack.yml to new sha tag
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          NEW_TAG: sha-${{ steps.meta.outputs.short_sha }}
+        run: |
+          sed -i -E "s|(image:[[:space:]]+)${IMAGE}:[A-Za-z0-9._-]+|\1${IMAGE}:${NEW_TAG}|" portainer-stack.yml
+          if git diff --quiet portainer-stack.yml; then
+            echo "portainer-stack.yml already at ${NEW_TAG}; nothing to commit"
+          else
+            git add portainer-stack.yml
+            git commit -m "chore: pin muninn -> ${NEW_TAG} [skip ci]"
+            git push
+          fi
+
+      - name: Trigger Portainer redeploy (hq_muninn)
+        if: >-
+          github.event_name == 'push' &&
+          github.ref == 'refs/heads/main' &&
+          vars.PORTAINER_WEBHOOK_ENABLED == 'true'
+        run: curl -fsS -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}"
