@@ -117,6 +117,9 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # actions/checkout sets a GITHUB_TOKEN extraheader that wins over the remote URL.
+          # Unset it so the app-token URL below is actually used (and the bypass applies).
+          git config --unset-all http.https://github.com/.extraheader || true
           git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
       - name: Pin portainer-stack.yml to new sha tag
