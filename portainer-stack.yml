@@ -14,7 +14,7 @@
 
 services:
   muninn:
-    image: ghcr.io/emkraan/muninn:sha-368cd57 # pinned by CI -- do not edit
+    image: ghcr.io/emkraan/muninn:sha-209d4b9 # pinned by CI -- do not edit
     container_name: HQ_Muninn
     restart: always
     environment:
