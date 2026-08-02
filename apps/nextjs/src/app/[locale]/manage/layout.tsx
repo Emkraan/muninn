@@ -37,6 +37,7 @@ import { getScopedI18n } from "@homarr/translation/server";
 
 import { MainHeader } from "~/components/layout/header";
 import { muninnLogoPath } from "~/components/layout/logo/muninn-logo";
+import { ManageSidebarFooter } from "~/components/layout/manage-sidebar-footer";
 import type { NavigationLink } from "~/components/layout/navigation";
 import { MainNavigation } from "~/components/layout/navigation";
 import { ClientShell } from "~/components/layout/shell";
@@ -256,7 +257,7 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
   const shell = (
     <ClientShell hasNavigation>
       <MainHeader></MainHeader>
-      <MainNavigation links={navigationLinks}></MainNavigation>
+      <MainNavigation links={navigationLinks} footerSection={<ManageSidebarFooter />}></MainNavigation>
       <AppShellMain>{children}</AppShellMain>
     </ClientShell>
   );
