@@ -103,7 +103,7 @@ jobs:
             org.opencontainers.image.created=${{ steps.meta.outputs.created }}
 
       - name: Mint deploy-bot app token
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
         uses: actions/create-github-app-token@v3
         id: deploy-token
         with:
@@ -111,7 +111,7 @@ jobs:
           private-key: ${{ secrets.DEPLOY_APP_PRIVATE_KEY }}
 
       - name: Configure git for pin commit
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
         env:
           TOKEN: ${{ steps.deploy-token.outputs.token }}
         run: |
@@ -120,7 +120,7 @@ jobs:
           git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
       - name: Pin portainer-stack.yml to new sha tag
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
         env:
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           NEW_TAG: sha-${{ steps.meta.outputs.short_sha }}
@@ -136,7 +136,7 @@ jobs:
 
       - name: Trigger Portainer redeploy (hq_muninn)
         if: >-
-          github.event_name == 'push' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
           github.ref == 'refs/heads/main' &&
           vars.PORTAINER_WEBHOOK_ENABLED == 'true'
         run: curl -fsS -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}"
