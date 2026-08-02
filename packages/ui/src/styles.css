@@ -67,7 +67,7 @@
   height: 34vw;
   right: 4vw;
   bottom: -10vh;
-  background: radial-gradient(circle, rgba(52, 199, 89, 0.11), rgba(0, 0, 0, 0) 66%);
+  background: radial-gradient(circle, rgba(36, 134, 185, 0.11), rgba(0, 0, 0, 0) 66%);
   animation: muninnDrift4 16s ease-in-out infinite alternate;
 }
 @keyframes muninnDrift1 {
