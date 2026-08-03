@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.25
 
-FROM node:24.18.0-alpine AS base
+FROM node:24.18.1-alpine AS base
 
 FROM base AS builder
 WORKDIR /app
