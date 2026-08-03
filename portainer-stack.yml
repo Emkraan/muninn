@@ -28,6 +28,11 @@ services:
       - REDIS_DATABASE_INDEX=1
       - AUTH_PROVIDERS=credentials,oidc
       - AUTH_COOKIE_PREFIX=homarr
+      # OIDC via Authentik (issuer = the Authentik 'muninn' application).
+      - AUTH_OIDC_CLIENT_ID=RGzAocEnrFcgXESW4jM3mYKexneKKrn0LMCE9G4E
+      - AUTH_OIDC_ISSUER=https://auth.emkraan.com/application/o/muninn/
+      - AUTH_OIDC_CLIENT_NAME=Emkraan SSO
+      - AUTH_OIDC_CLIENT_SECRET_FILE=/run/secrets/oidc_client_secret
       # dns-caching patches dns.lookup() to use c-ares which bypasses /etc/hosts.
       # Disabled so extra_hosts entries resolve correctly for server-side OIDC calls.
       - ENABLE_DNS_CACHING=false
@@ -45,6 +50,7 @@ services:
       - /opt/HQ_Muninn/appdata:/appdata
       - /opt/HQ_Muninn/secrets/secret_encryption_key:/run/secrets/secret_encryption_key:ro
       - /opt/HQ_Muninn/secrets/db_url:/run/secrets/db_url:ro
+      - /opt/HQ_Muninn/secrets/oidc_client_secret:/run/secrets/oidc_client_secret:ro
     networks:
       - default
       - backend
