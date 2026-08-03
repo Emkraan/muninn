@@ -180,7 +180,7 @@ catalog:
   turbo: ^2.10.4
   typescript: "npm:@typescript/typescript6@^6.0.2"
   vite: ^8.1.4
-  undici: 7.28.0
+  undici: 7.29.0
   use-deep-compare-effect: ^1.8.1
   video.js: ^8.23.9
   vite-tsconfig-paths: ^6.1.1
