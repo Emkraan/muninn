@@ -19,7 +19,7 @@ interface AuditTableProps {
 
 export function AuditTable({ initialEntries }: AuditTableProps) {
   const t = useScopedI18n("management.page.tool.audit");
-  const [verifyResult, setVerifyResult] = useState<{ ok: boolean; totalEntries: number; firstBrokenId: number | null } | null>(null);
+  const [verifyResult, setVerifyResult] = useState<{ ok: boolean; totalEntries: number; firstBrokenId: string | null } | null>(null);
 
   const { data: listData, refetch, isFetching } = clientApi.audit.list.useQuery(
     { limit: 100 },
@@ -37,7 +37,7 @@ export function AuditTable({ initialEntries }: AuditTableProps) {
       accessorKey: "id",
       header: t("columns.id"),
       size: 70,
-      Cell: ({ cell }) => <Text size="xs" c="dimmed">#{cell.getValue<number>()}</Text>,
+      Cell: ({ cell }) => <Text size="xs" c="dimmed" ff="monospace">{cell.getValue<string>().slice(0, 8)}</Text>,
     },
     {
       accessorKey: "timestamp",
@@ -146,7 +146,7 @@ export function AuditTable({ initialEntries }: AuditTableProps) {
         >
           {verifyResult.ok
             ? t("verify.ok.message", { count: verifyResult.totalEntries })
-            : t("verify.broken.message", { id: verifyResult.firstBrokenId ?? 0 })}
+            : t("verify.broken.message", { id: verifyResult.firstBrokenId ?? "" })}
         </Alert>
       )}
 

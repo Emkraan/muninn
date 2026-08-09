@@ -16,14 +16,14 @@ export const auditRouter = createTRPCRouter({
     .input(
       z.object({
         limit: z.number().min(1).max(200).default(50),
-        cursor: z.number().optional(), // id of the last entry on the previous page
+        cursor: z.string().optional(), // CUID2 id of the last entry on the previous page
       }),
     )
     .output(
       z.object({
         entries: z.array(
           z.object({
-            id: z.number(),
+            id: z.string(),
             timestamp: z.string(),
             userId: z.string(),
             userEmail: z.string(),
@@ -34,7 +34,7 @@ export const auditRouter = createTRPCRouter({
             hash: z.string(),
           }),
         ),
-        nextCursor: z.number().nullable(),
+        nextCursor: z.string().nullable(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -80,7 +80,7 @@ export const auditRouter = createTRPCRouter({
       z.object({
         ok: z.boolean(),
         totalEntries: z.number(),
-        firstBrokenId: z.number().nullable(),
+        firstBrokenId: z.string().nullable(),
       }),
     )
     .query(async ({ ctx }) => {

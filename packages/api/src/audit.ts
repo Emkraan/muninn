@@ -111,7 +111,7 @@ export const writeAuditEntry = async (db: Db, params: WriteAuditParams): Promise
 export interface AuditVerifyResult {
   ok: boolean;
   totalEntries: number;
-  firstBrokenId: number | null;
+  firstBrokenId: string | null;
 }
 
 /**
