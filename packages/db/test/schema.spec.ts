@@ -14,13 +14,15 @@ import * as sqliteSchema from "../schema/sqlite";
 // We need the following three types as there is currently no support for Buffer in mysql & pg and
 // so we use a custom type which results in the config beeing different
 
-// TypeScript 5.8 made typed arrays generic (Uint8Array<TArrayBuffer>), which changed how
+// TypeScript 5.8 made typed arrays generic (Uint8Array<TArrayBuffer>), which changes how
 // Buffer.buffer resolves depending on the declaration context (.$type<Buffer>() vs
 // customType<{ data: Buffer }>).  The two paths produce structurally-identical Buffer types
 // that nonetheless fail toEqualTypeOf because their .buffer properties carry different type
-// identities (ArrayBuffer vs ArrayBufferLike). NormalizedBuffer pins .buffer to ArrayBufferLike
-// so all three FixedConfig types agree on a single stable representation.
-type NormalizedBuffer = Omit<Buffer, "buffer"> & { readonly buffer: ArrayBufferLike };
+// identities.  Worse, vitest's Equal<X,Y> distributes the constraint as an intersection of
+// ArrayBuffer & SharedArrayBuffer, producing a "growable: never" that nothing can satisfy.
+// NormalizedBuffer strips .buffer and re-adds it as the concrete ArrayBuffer type so the
+// equality check operates on a union-free, stable property across all three dialects.
+type NormalizedBuffer = Omit<Buffer, "buffer"> & { readonly buffer: ArrayBuffer };
 
 type FixedMysqlConfig = {
   [key in keyof MysqlConfig]: {
