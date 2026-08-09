@@ -514,6 +514,14 @@
           "manage-settings": {
             "label": "Manage settings",
             "description": "View and change global server settings"
+          },
+          "audit-export": {
+            "label": "Audit log export",
+            "description": "View, filter, and export the admin audit log"
+          },
+          "audit-verify": {
+            "label": "Audit chain verify",
+            "description": "Run integrity verification of the full audit chain"
           }
         }
       },

@@ -62,9 +62,11 @@ describe("admin keeps every fine-grained management capability", () => {
     "other-manage-kubernetes",
     "other-manage-tasks",
     "other-manage-settings",
+    "other-audit-export",
+    "other-audit-verify",
   ] satisfies GroupPermissionKey[];
 
-  test("getPermissionsWithChildren(['admin']) includes all 10 other-manage-* keys and view-logs", () => {
+  test("getPermissionsWithChildren(['admin']) includes all other-manage-* and other-audit-* keys and view-logs", () => {
     const adminPermissions = getPermissionsWithChildren(["admin"]);
     expect(adminPermissions).toEqual(expect.arrayContaining([...fineGrainedManageKeys, "other-view-logs"]));
   });
