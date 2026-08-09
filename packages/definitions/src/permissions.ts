@@ -69,6 +69,8 @@ export const groupPermissions = {
     "manage-kubernetes",
     "manage-tasks",
     "manage-settings",
+    "audit-export",
+    "audit-verify",
   ],
   admin: true,
 } as const;
@@ -105,6 +107,8 @@ const groupPermissionParents = {
     "other-manage-kubernetes",
     "other-manage-tasks",
     "other-manage-settings",
+    "other-audit-export",
+    "other-audit-verify",
   ],
 } satisfies Partial<Record<GroupPermissionKey, GroupPermissionKey[]>>;
 

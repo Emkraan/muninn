@@ -23,10 +23,10 @@ export const auditRouter = createTRPCRouter({
    *
    * Supports optional filters: actor email (prefix match), action (prefix
    * match), outcome, and date range. All filters are server-side and
-   * parameterized. Requires the `admin` permission.
+   * parameterized. Requires the `other-audit-export` permission (admin implies it).
    */
   list: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-audit-export")
     .input(
       z.object({
         limit: z.number().min(1).max(500).default(50),
@@ -100,10 +100,10 @@ export const auditRouter = createTRPCRouter({
    *
    * Returns total entry count, per-day breakdowns, top actors, top actions,
    * outcome distribution, and most recent entries - all within a rolling window.
-   * Requires the `admin` permission.
+   * Requires the `other-audit-export` permission (admin implies it).
    */
   stats: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-audit-export")
     .input(
       z.object({
         days: z.number().int().min(1).max(365).default(14),
@@ -199,10 +199,10 @@ export const auditRouter = createTRPCRouter({
 
   /**
    * Verify the integrity of the full audit chain (admin-hub-standard §2.4).
-   * Requires the `admin` permission.
+   * Requires the `other-audit-verify` permission (admin implies it).
    */
   verify: permissionRequiredProcedure
-    .requiresPermission("admin")
+    .requiresPermission("other-audit-verify")
     .input(z.undefined())
     .output(
       z.object({
