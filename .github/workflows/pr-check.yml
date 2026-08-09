@@ -69,3 +69,13 @@ jobs:
       # `pnpm test`, which pulls in live-network and testcontainers suites.
       - name: Documentation link tests
         run: pnpm exec vitest run packages/definitions/src/test/docs.spec.ts
+
+  ci:
+    name: ci
+    needs: [check]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: All checks passed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
