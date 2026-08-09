@@ -22,6 +22,7 @@ import {
   IconPointerFilled,
   IconSearch,
   IconSettingsFilled,
+  IconShieldCheckFilled,
   IconShieldLockFilled,
   IconUsers,
   IconUsersGroup,
@@ -82,7 +83,7 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
     canManageCertificates ||
     canManageBackup ||
     isAdmin;
-  const showToolsGroup = canManageDocker || canManageKubernetes || canViewLogs || canManageTasks;
+  const showToolsGroup = canManageDocker || canManageKubernetes || canViewLogs || canManageTasks || isAdmin;
 
   // Unified admin hub IA: a few coherent groups instead of a flat list.
   // Home | Library (content) | Settings (all admin config incl. Authentication)
@@ -220,6 +221,12 @@ export default async function ManageLayout({ children }: PropsWithChildren) {
           icon: IconClipboardListFilled,
           href: "/manage/tools/tasks",
           hidden: !canManageTasks,
+        },
+        {
+          label: t("items.tools.items.audit"),
+          icon: IconShieldCheckFilled,
+          href: "/manage/tools/audit",
+          hidden: !isAdmin,
         },
       ],
     },

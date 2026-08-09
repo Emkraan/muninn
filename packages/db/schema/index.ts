@@ -18,6 +18,7 @@ export const schema = createSchema({
 // Sadly we can't use export * from here as we have multiple possible exports
 export const {
   accounts,
+  adminAudit,
   apiKeys,
   apps,
   appGroupPermissions,
@@ -57,6 +58,7 @@ export const {
   widgetSecrets,
 } = schema;
 
+export type AdminAudit = InferSelectModel<typeof schema.adminAudit>;
 export type ApiKey = InferSelectModel<typeof schema.apiKeys>;
 export type User = InferSelectModel<typeof schema.users>;
 export type Account = InferSelectModel<typeof schema.accounts>;

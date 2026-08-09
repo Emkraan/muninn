@@ -10,6 +10,7 @@ import { db, eq, ne } from "@homarr/db";
 import { oidcProviders } from "@homarr/db/schema";
 import { oidcProviderTypes } from "@homarr/definitions";
 
+import { writeAuditEntry } from "../audit";
 import { createTRPCRouter, permissionRequiredProcedure } from "../trpc";
 
 // Sentinel returned to the client instead of the real secret, and accepted back
@@ -158,7 +159,7 @@ export const oidcProviderRouter = createTRPCRouter({
   upsert: permissionRequiredProcedure
     .requiresPermission("other-manage-authentication")
     .input(upsertInputSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const { id, clientSecret, ...fields } = input;
 
       // Only one provider may be the default.
@@ -179,6 +180,13 @@ export const oidcProviderRouter = createTRPCRouter({
           .where(eq(oidcProviders.id, id));
         await clearOtherDefaults(id);
         invalidateOidcProvidersCache();
+        await writeAuditEntry(db, {
+          userId: ctx.session.user.id,
+          userEmail: ctx.session.user.email ?? "",
+          action: "oidcProvider.upsert",
+          targetId: id,
+          detail: { op: "update", displayName: fields.displayName },
+        });
         return { id };
       }
 
@@ -196,15 +204,28 @@ export const oidcProviderRouter = createTRPCRouter({
       });
       await clearOtherDefaults(newId);
       invalidateOidcProvidersCache();
+      await writeAuditEntry(db, {
+        userId: ctx.session.user.id,
+        userEmail: ctx.session.user.email ?? "",
+        action: "oidcProvider.upsert",
+        targetId: newId,
+        detail: { op: "create", displayName: fields.displayName },
+      });
       return { id: newId };
     }),
 
   delete: permissionRequiredProcedure
     .requiresPermission("other-manage-authentication")
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       await db.delete(oidcProviders).where(eq(oidcProviders.id, input.id));
       invalidateOidcProvidersCache();
+      await writeAuditEntry(db, {
+        userId: ctx.session.user.id,
+        userEmail: ctx.session.user.email ?? "",
+        action: "oidcProvider.delete",
+        targetId: input.id,
+      });
     }),
 
   // Test-connection: sanity-check a stored provider without signing anyone in.

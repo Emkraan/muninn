@@ -4562,7 +4562,8 @@
             "api": "API & MCP",
             "certificates": "Certificates",
             "tasks": "Tasks",
-            "backup": "Backup"
+            "backup": "Backup",
+            "audit": "Audit Log"
           }
         },
         "settings": {
@@ -5290,6 +5291,33 @@
             "invalidMissingMetadata": "Invalid backup: missing metadata.json",
             "invalidMissingDb": "Invalid backup: missing db.sqlite",
             "analyzeError": "Failed to analyze backup"
+          }
+        },
+        "audit": {
+          "title": "Admin Audit Log",
+          "columns": {
+            "id": "ID",
+            "timestamp": "Timestamp",
+            "user": "User",
+            "action": "Action",
+            "target": "Target",
+            "detail": "Detail",
+            "hash": "Hash"
+          },
+          "actions": {
+            "refresh": "Refresh",
+            "verify": "Verify chain"
+          },
+          "entryCount": "{count, plural, =0 {No entries} =1 {1 entry} other {# entries}}",
+          "verify": {
+            "ok": {
+              "title": "Chain intact",
+              "message": "All {count, plural, =1 {1 entry} other {# entries}} verified - no tampering detected."
+            },
+            "broken": {
+              "title": "Chain broken",
+              "message": "Integrity failure detected at entry #{id}. The log may have been tampered with."
+            }
           }
         }
       },
