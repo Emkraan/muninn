@@ -17,7 +17,7 @@ import { createHmac, hkdfSync } from "crypto";
 
 import { asc, desc } from "@homarr/db";
 import { adminAudit } from "@homarr/db/schema";
-import { env } from "@homarr/common";
+import { env } from "@homarr/common/env";
 
 import type { createTRPCContext } from "./trpc";
 

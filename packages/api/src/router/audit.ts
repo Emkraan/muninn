@@ -56,7 +56,7 @@ export const auditRouter = createTRPCRouter({
       return {
         entries: page.map((r) => ({
           id: r.id,
-          timestamp: r.timestamp instanceof Date ? r.timestamp.toISOString() : String(r.timestamp),
+          timestamp: typeof r.timestamp === "string" ? r.timestamp : (r.timestamp as Date).toISOString(),
           userId: r.userId,
           userEmail: r.userEmail,
           action: r.action,
