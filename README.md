@@ -86,75 +86,6 @@ Entirely optional, and every feature stays free either way.
 | Persistent volume | Mounted at `/appdata` for the database, cache, and trusted certificates. |
 | Reverse proxy (recommended) | The container serves plain HTTP on 7575. Terminate TLS at an external reverse proxy, which is also required for secure OIDC redirect URIs. |
 
-## Deployment
-
-Muninn ships as a single container image at `ghcr.io/emkraan/muninn`.
-
-### Image tags
-
-| Tag | Meaning |
-|---|---|
-| `0.9.11` (semver) | An immutable, released version. Pin to this in production. |
-| `latest` | The most recent released build. |
-| `edge` | The current `main` branch. |
-
-### Docker Compose (SQLite, the simplest setup)
-
-```yaml
-services:
-  muninn:
-    image: ghcr.io/emkraan/muninn:0.9.11
-    container_name: muninn
-    restart: unless-stopped
-    ports:
-      - "7575:7575"
-    environment:
-      - SECRET_ENCRYPTION_KEY_FILE=/run/secrets/secret_encryption_key
-    volumes:
-      - ./appdata:/appdata
-      - ./secret_encryption_key:/run/secrets/secret_encryption_key:ro
-```
-
-Generate the encryption key once with `openssl rand -hex 32` and write it to `./secret_encryption_key`.
-
-### First run
-
-Bring the stack up, then open `http://<host>:7575`. Migrations run automatically at boot; complete the onboarding to create the administrator account.
-
-### Pin to a version
-
-There is no built-in auto-updater, by design. Pin a released semver tag and bump it deliberately when you want to update.
-
-### External Postgres
-
-To use an external Postgres server instead of the bundled SQLite file:
-
-```yaml
-    environment:
-      - DB_DRIVER=node-postgres
-      # postgresql://user:pass@host:5432/muninn
-      - DB_URL_FILE=/run/secrets/db_url
-      - SECRET_ENCRYPTION_KEY_FILE=/run/secrets/secret_encryption_key
-```
-
-### External Redis
-
-Muninn bundles a Redis instance and uses it by default (zero-config). To point at
-an external or centralized Redis instead of the bundled one:
-
-```yaml
-    environment:
-      - REDIS_IS_EXTERNAL=true
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      # optional: isolate Muninn's keys on a dedicated logical database
-      - REDIS_DATABASE_INDEX=0
-      # optional auth (supports the _FILE convention for Docker secrets)
-      # - REDIS_PASSWORD_FILE=/run/secrets/redis_password
-```
-
-The bundled Redis is skipped when `REDIS_IS_EXTERNAL=true`.
-
 ## Data Volume
 
 State lives under `/appdata`:
@@ -231,6 +162,75 @@ Nothing is shared by default. Boards, apps, and integrations are private to thei
 - Each resource has an Access panel where an admin grants a specific user or group `view`, `modify`, or `full` access.
 - Group membership and fine-grained admin permissions (`other-manage-*`) gate the management surfaces.
 - A user only ever sees the boards, apps, and integrations shared with them. Unauthorized access returns "not found" rather than revealing that a resource exists.
+
+## Deployment
+
+Muninn ships as a single container image at `ghcr.io/emkraan/muninn`.
+
+### Image tags
+
+| Tag | Meaning |
+|---|---|
+| `0.9.11` (semver) | An immutable, released version. Pin to this in production. |
+| `latest` | The most recent released build. |
+| `edge` | The current `main` branch. |
+
+### Docker Compose (SQLite, the simplest setup)
+
+```yaml
+services:
+  muninn:
+    image: ghcr.io/emkraan/muninn:0.9.11
+    container_name: muninn
+    restart: unless-stopped
+    ports:
+      - "7575:7575"
+    environment:
+      - SECRET_ENCRYPTION_KEY_FILE=/run/secrets/secret_encryption_key
+    volumes:
+      - ./appdata:/appdata
+      - ./secret_encryption_key:/run/secrets/secret_encryption_key:ro
+```
+
+Generate the encryption key once with `openssl rand -hex 32` and write it to `./secret_encryption_key`.
+
+### First run
+
+Bring the stack up, then open `http://<host>:7575`. Migrations run automatically at boot; complete the onboarding to create the administrator account.
+
+### Pin to a version
+
+There is no built-in auto-updater, by design. Pin a released semver tag and bump it deliberately when you want to update.
+
+### External Postgres
+
+To use an external Postgres server instead of the bundled SQLite file:
+
+```yaml
+    environment:
+      - DB_DRIVER=node-postgres
+      # postgresql://user:pass@host:5432/muninn
+      - DB_URL_FILE=/run/secrets/db_url
+      - SECRET_ENCRYPTION_KEY_FILE=/run/secrets/secret_encryption_key
+```
+
+### External Redis
+
+Muninn bundles a Redis instance and uses it by default (zero-config). To point at
+an external or centralized Redis instead of the bundled one:
+
+```yaml
+    environment:
+      - REDIS_IS_EXTERNAL=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      # optional: isolate Muninn's keys on a dedicated logical database
+      - REDIS_DATABASE_INDEX=0
+      # optional auth (supports the _FILE convention for Docker secrets)
+      # - REDIS_PASSWORD_FILE=/run/secrets/redis_password
+```
+
+The bundled Redis is skipped when `REDIS_IS_EXTERNAL=true`.
 
 ## Programmatic API
 
