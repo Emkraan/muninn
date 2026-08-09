@@ -968,7 +968,7 @@ export const customWidgetSecretRelations = relations(customWidgetSecrets, ({ one
 // tampering. prevHash is null only on the very first entry.
 export const adminAudit = sqliteTable("admin_audit", {
   id: int().primaryKey({ autoIncrement: true }),
-  timestamp: int({ mode: "timestamp_ms" }).notNull(), // millisecond precision; returns Date
+  timestamp: int({ mode: "timestamp" }).notNull(), // stored as unix seconds; returns Date
   userId: text().notNull(), // stored independently; survives user deletion
   userEmail: text().notNull(),
   action: text().notNull(), // e.g. "invite.createInvite"

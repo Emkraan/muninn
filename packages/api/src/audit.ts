@@ -35,9 +35,19 @@ const getAuditKey = (): Buffer => {
   return _auditKey;
 };
 
+/**
+ * Normalise a Date to second granularity for the hash payload.
+ * SQLite stores timestamps as unix seconds (int mode:"timestamp"), so the
+ * retrieved Date always has zero milliseconds.  Normalising before hashing
+ * ensures write-time and verify-time payloads are identical regardless of
+ * sub-second differences at the write call-site.
+ */
+const toHashTimestamp = (d: Date): string =>
+  new Date(Math.floor(d.getTime() / 1000) * 1000).toISOString();
+
 /** Produce the HMAC for a single audit entry. */
 const computeHash = (prevHash: string, timestamp: Date, userId: string, action: string, targetId: string, detail: string): string => {
-  const payload = [prevHash, timestamp.toISOString(), userId, action, targetId, detail].join("|");
+  const payload = [prevHash, toHashTimestamp(timestamp), userId, action, targetId, detail].join("|");
   return createHmac("sha256", getAuditKey()).update(payload).digest("hex");
 };
 
