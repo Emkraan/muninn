@@ -83,7 +83,7 @@ export const auditRouter = createTRPCRouter({
         firstBrokenId: z.string().nullable(),
       }),
     )
-    .query(async ({ ctx }) => {
+    .mutation(async ({ ctx }) => {
       return verifyAuditChain(ctx.db);
     }),
 });
