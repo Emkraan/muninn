@@ -94,7 +94,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/(.*)", // Apply CSP to all routes
+        source: "/(.*)", // Apply security headers to all routes
         headers: [
           {
             key: "Content-Security-Policy",
@@ -105,7 +105,7 @@ const nextConfig: NextConfig = {
               worker-src * blob:;
               base-uri 'self';
               connect-src *;
-              style-src * 'unsafe-inline'; 
+              style-src * 'unsafe-inline';
               frame-ancestors *;
               frame-src *;
               form-action 'self';
@@ -115,6 +115,16 @@ const nextConfig: NextConfig = {
             `
               .replace(/\s{2,}/g, " ")
               .trim(),
+          },
+          // Defense-in-depth headers. Traefik/Pangolin adds HSTS and rate-limiting
+          // at the ingress; these headers provide an app-layer second line of defense
+          // and are safe to set even when a proxy is in front.
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-XSS-Protection", value: "1; mode=block" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
           },
         ],
       },
