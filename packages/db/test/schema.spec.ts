@@ -13,13 +13,22 @@ import * as sqliteSchema from "../schema/sqlite";
 
 // We need the following three types as there is currently no support for Buffer in mysql & pg and
 // so we use a custom type which results in the config beeing different
+
+// TypeScript 5.8 made typed arrays generic (Uint8Array<TArrayBuffer>), which changed how
+// Buffer.buffer resolves depending on the declaration context (.$type<Buffer>() vs
+// customType<{ data: Buffer }>).  The two paths produce structurally-identical Buffer types
+// that nonetheless fail toEqualTypeOf because their .buffer properties carry different type
+// identities (ArrayBuffer vs ArrayBufferLike). NormalizedBuffer pins .buffer to ArrayBufferLike
+// so all three FixedConfig types agree on a single stable representation.
+type NormalizedBuffer = Omit<Buffer, "buffer"> & { readonly buffer: ArrayBufferLike };
+
 type FixedMysqlConfig = {
   [key in keyof MysqlConfig]: {
     [column in keyof MysqlConfig[key]]: {
       [property in Exclude<keyof MysqlConfig[key][column], "dataType" | "data">]: MysqlConfig[key][column][property];
     } & {
       dataType: MysqlConfig[key][column]["data"] extends Buffer ? "buffer" : MysqlConfig[key][column]["dataType"];
-      data: MysqlConfig[key][column]["data"] extends Buffer ? Buffer : MysqlConfig[key][column]["data"];
+      data: MysqlConfig[key][column]["data"] extends Buffer ? NormalizedBuffer : MysqlConfig[key][column]["data"];
     };
   };
 };
@@ -35,7 +44,9 @@ type FixedPostgresqlConfig = {
       dataType: PostgreisqlConfig[key][column]["data"] extends Buffer
         ? "buffer"
         : PostgreisqlConfig[key][column]["dataType"];
-      data: PostgreisqlConfig[key][column]["data"] extends Buffer ? Buffer : PostgreisqlConfig[key][column]["data"];
+      data: PostgreisqlConfig[key][column]["data"] extends Buffer
+        ? NormalizedBuffer
+        : PostgreisqlConfig[key][column]["data"];
     };
   };
 };
@@ -46,7 +57,7 @@ type FixedSqliteConfig = {
       [property in Exclude<keyof SqliteConfig[key][column], "dataType" | "data">]: SqliteConfig[key][column][property];
     } & {
       dataType: SqliteConfig[key][column]["dataType"] extends Buffer ? "buffer" : SqliteConfig[key][column]["dataType"];
-      data: SqliteConfig[key][column]["data"] extends Buffer ? Buffer : SqliteConfig[key][column]["data"];
+      data: SqliteConfig[key][column]["data"] extends Buffer ? NormalizedBuffer : SqliteConfig[key][column]["data"];
     };
   };
 };
