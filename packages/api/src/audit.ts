@@ -36,8 +36,8 @@ const getAuditKey = (): Buffer => {
 };
 
 /** Produce the HMAC for a single audit entry. */
-const computeHash = (prevHash: string, timestamp: string, userId: string, action: string, targetId: string, detail: string): string => {
-  const payload = [prevHash, timestamp, userId, action, targetId, detail].join("|");
+const computeHash = (prevHash: string, timestamp: Date, userId: string, action: string, targetId: string, detail: string): string => {
+  const payload = [prevHash, timestamp.toISOString(), userId, action, targetId, detail].join("|");
   return createHmac("sha256", getAuditKey()).update(payload).digest("hex");
 };
 
@@ -68,7 +68,7 @@ export const writeAuditEntry = async (db: Db, params: WriteAuditParams): Promise
     });
 
     const prevHash = last?.hash ?? "";
-    const timestamp = new Date().toISOString();
+    const timestamp = new Date();
     const detailStr = detail ? JSON.stringify(detail) : "";
 
     const hash = computeHash(
@@ -117,7 +117,7 @@ export const verifyAuditChain = async (db: Db): Promise<AuditVerifyResult> => {
     const detailStr = entry.detail ?? "";
     const expected = computeHash(
       prevHash,
-      entry.timestamp,
+      entry.timestamp instanceof Date ? entry.timestamp : new Date(entry.timestamp),
       entry.userId,
       entry.action,
       entry.targetId ?? "",

@@ -975,7 +975,7 @@ export const customWidgetSecretRelations = relations(customWidgetSecrets, ({ one
 // tampering. prevHash is null only on the very first entry.
 export const adminAudit = pgTable("admin_audit", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  timestamp: timestamp({ withTimezone: true }).notNull(),
+  timestamp: timestamp({ mode: "date" }).notNull(),
   userId: varchar({ length: 64 }).notNull(),
   userEmail: varchar({ length: 256 }).notNull(),
   action: varchar({ length: 128 }).notNull(),

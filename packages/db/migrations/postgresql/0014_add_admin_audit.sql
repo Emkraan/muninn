@@ -1,6 +1,6 @@
 CREATE TABLE "admin_audit" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL,
+	"timestamp" timestamp NOT NULL,
 	"userId" varchar(64) NOT NULL,
 	"userEmail" varchar(256) NOT NULL,
 	"action" varchar(128) NOT NULL,

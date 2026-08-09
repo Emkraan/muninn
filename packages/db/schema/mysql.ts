@@ -976,7 +976,7 @@ export const customWidgetSecretRelations = relations(customWidgetSecrets, ({ one
 // tampering. prevHash is null only on the very first entry.
 export const adminAudit = mysqlTable("admin_audit", {
   id: int().primaryKey().autoincrement(),
-  timestamp: timestamp().notNull(),
+  timestamp: timestamp({ mode: "date" }).notNull(),
   userId: varchar({ length: 64 }).notNull(),
   userEmail: varchar({ length: 256 }).notNull(),
   action: varchar({ length: 128 }).notNull(),
