@@ -974,7 +974,7 @@ export const customWidgetSecretRelations = relations(customWidgetSecrets, ({ one
 // entity, and carries a SHA-256 hash chain so the log can be verified for
 // tampering. prevHash is null only on the very first entry.
 export const adminAudit = pgTable("admin_audit", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: varchar({ length: 64 }).notNull().primaryKey(),
   timestamp: timestamp({ mode: "date" }).notNull(),
   userId: varchar({ length: 64 }).notNull(),
   userEmail: varchar({ length: 256 }).notNull(),

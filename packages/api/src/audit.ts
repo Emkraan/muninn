@@ -17,6 +17,7 @@ import { createHmac, hkdfSync } from "crypto";
 
 import { asc, desc } from "@homarr/db";
 import { adminAudit } from "@homarr/db/schema";
+import { createId } from "@homarr/common";
 import { env } from "@homarr/common/env";
 
 import type { createTRPCContext } from "./trpc";
@@ -91,6 +92,7 @@ export const writeAuditEntry = async (db: Db, params: WriteAuditParams): Promise
     );
 
     await db.insert(adminAudit).values({
+      id: createId(),
       timestamp,
       userId,
       userEmail,

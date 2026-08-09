@@ -967,7 +967,7 @@ export const customWidgetSecretRelations = relations(customWidgetSecrets, ({ one
 // entity, and carries a SHA-256 hash chain so the log can be verified for
 // tampering. prevHash is null only on the very first entry.
 export const adminAudit = sqliteTable("admin_audit", {
-  id: int().primaryKey({ autoIncrement: true }),
+  id: text().notNull().primaryKey(),
   timestamp: int({ mode: "timestamp" }).notNull(), // stored as unix seconds; returns Date
   userId: text().notNull(), // stored independently; survives user deletion
   userEmail: text().notNull(),
