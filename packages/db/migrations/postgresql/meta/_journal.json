@@ -99,6 +99,13 @@
       "when": 1785017061948,
       "tag": "0013_add_board_version",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1786982400000,
+      "tag": "0014_add_admin_audit",
+      "breakpoints": true
     }
   ]
 }

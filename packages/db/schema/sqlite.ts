@@ -962,3 +962,18 @@ export const customWidgetSecretRelations = relations(customWidgetSecrets, ({ one
     references: [customWidgetDefinitions.id],
   }),
 }));
+
+// HMAC-chained admin audit log. Each entry records who did what, to which
+// entity, and carries a SHA-256 hash chain so the log can be verified for
+// tampering. prevHash is null only on the very first entry.
+export const adminAudit = sqliteTable("admin_audit", {
+  id: text().notNull().primaryKey(),
+  timestamp: int({ mode: "timestamp" }).notNull(), // stored as unix seconds; returns Date
+  userId: text().notNull(), // stored independently; survives user deletion
+  userEmail: text().notNull(),
+  action: text().notNull(), // e.g. "invite.createInvite"
+  targetId: text(), // nullable – the affected entity ID when applicable
+  detail: text(), // nullable JSON – extra context (old value, new value, etc.)
+  prevHash: text(), // null only for the first entry
+  hash: text().notNull(), // HMAC-SHA256 of canonical entry content + prevHash
+});

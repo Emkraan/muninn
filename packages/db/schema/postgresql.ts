@@ -969,3 +969,18 @@ export const customWidgetSecretRelations = relations(customWidgetSecrets, ({ one
     references: [customWidgetDefinitions.id],
   }),
 }));
+
+// HMAC-chained admin audit log. Each entry records who did what, to which
+// entity, and carries a SHA-256 hash chain so the log can be verified for
+// tampering. prevHash is null only on the very first entry.
+export const adminAudit = pgTable("admin_audit", {
+  id: varchar({ length: 64 }).notNull().primaryKey(),
+  timestamp: timestamp({ mode: "date" }).notNull(),
+  userId: varchar({ length: 64 }).notNull(),
+  userEmail: varchar({ length: 256 }).notNull(),
+  action: varchar({ length: 128 }).notNull(),
+  targetId: varchar({ length: 64 }), // nullable
+  detail: text(), // nullable JSON
+  prevHash: varchar({ length: 128 }), // null only for first entry
+  hash: varchar({ length: 128 }).notNull(),
+});

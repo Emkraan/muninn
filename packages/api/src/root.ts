@@ -3,6 +3,7 @@ import { lazy } from "@trpc/server";
 import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
+  audit: lazy(() => import("./router/audit").then((mod) => mod.auditRouter)),
   user: lazy(() => import("./router/user").then((mod) => mod.userRouter)),
   group: lazy(() => import("./router/group").then((mod) => mod.groupRouter)),
   invite: lazy(() => import("./router/invite").then((mod) => mod.inviteRouter)),

@@ -7,6 +7,7 @@ import { asc, eq } from "@homarr/db";
 import { invites } from "@homarr/db/schema";
 import { selectInviteSchema } from "@homarr/db/validationSchemas";
 
+import { writeAuditEntry } from "../audit";
 import { createTRPCRouter, permissionRequiredProcedure } from "../trpc";
 import { throwIfCredentialsDisabled } from "./invite/checks";
 
@@ -85,6 +86,14 @@ export const inviteRouter = createTRPCRouter({
         token,
       });
 
+      await writeAuditEntry(ctx.db, {
+        userId: ctx.session.user.id,
+        userEmail: ctx.session.user.email ?? "",
+        action: "invite.createInvite",
+        targetId: id,
+        detail: { expirationDate: input.expirationDate.toISOString() },
+      });
+
       return {
         id,
         token,
@@ -121,5 +130,12 @@ export const inviteRouter = createTRPCRouter({
       }
 
       await ctx.db.delete(invites).where(eq(invites.id, input.id));
+
+      await writeAuditEntry(ctx.db, {
+        userId: ctx.session.user.id,
+        userEmail: ctx.session.user.email ?? "",
+        action: "invite.deleteInvite",
+        targetId: input.id,
+      });
     }),
 });

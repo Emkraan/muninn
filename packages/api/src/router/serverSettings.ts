@@ -13,6 +13,7 @@ import type { ServerSettings } from "@homarr/server-settings";
 import { defaultServerSettingsKeys } from "@homarr/server-settings";
 import { settingsInitSchema } from "@homarr/validation/settings";
 
+import { writeAuditEntry } from "../audit";
 import { createTRPCRouter, onboardingProcedure, permissionRequiredProcedure, publicProcedure } from "../trpc";
 import { nextOnboardingStepAsync } from "./onboard/onboard-queries";
 
@@ -107,6 +108,12 @@ export const serverSettingsRouter = createTRPCRouter({
         ...current,
         ...input.value,
       } as ServerSettings[keyof ServerSettings]);
+      await writeAuditEntry(ctx.db, {
+        userId: ctx.session.user.id,
+        userEmail: ctx.session.user.email ?? "",
+        action: "serverSettings.saveSettings",
+        targetId: input.settingsKey,
+      });
     }),
   initSettings: onboardingProcedure
     .requiresStep("settings")
