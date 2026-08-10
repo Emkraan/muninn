@@ -6,10 +6,10 @@ The official [Muninn](https://github.com/Emkraan/muninn) documentation site, bui
 
 Having documentation alongside the application code enables:
 
-- **Two-way linking** — the docs app imports from `@homarr/definitions` for type-safe integration/widget metadata, and the main app references doc paths via generated sitemap types
-- **Atomic PRs** — code changes and their documentation updates ship in the same pull request
-- **Shared tooling** — same Node version, pnpm catalog, oxlint/oxfmt, CI pipeline
-- **Build-time validation** — Docusaurus strict mode catches broken links and references at build time
+- **Two-way linking** - the docs app imports from `@homarr/definitions` for type-safe integration/widget metadata, and the main app references doc paths via generated sitemap types
+- **Atomic PRs** - code changes and their documentation updates ship in the same pull request
+- **Shared tooling** - same Node version, pnpm catalog, oxlint/oxfmt, CI pipeline
+- **Build-time validation** - Docusaurus strict mode catches broken links and references at build time
 
 ## Development
 
@@ -63,8 +63,8 @@ docs/
 
 Each integration/widget doc follows a consistent pattern:
 
-- `index.ts` — typed metadata (`IntegrationDefinition` / `WidgetDefinition`)
-- `index.mdx` — content using shared React components (`IntegrationHeader`, `WidgetHeader`, etc.)
+- `index.ts` - typed metadata (`IntegrationDefinition` / `WidgetDefinition`)
+- `index.mdx` - content using shared React components (`IntegrationHeader`, `WidgetHeader`, etc.)
 
 ## Importing from homarr packages
 
