@@ -49,20 +49,43 @@ jobs:
       - name: Typecheck
         run: pnpm exec turbo typecheck --concurrency=2
 
-      # House style forbids em/en dashes in our own copy. Scoped to the English
-      # source strings and the README rather than the whole tree: the other lang
-      # files are human translations where the dash is often correct punctuation
-      # (cn.json's double em dash is proper CJK), and the generated
-      # copy-sqlite-to-postgres.cjs bundle inlines third-party comments.
-      - name: No em dashes in English copy
+      - name: No em dashes
         run: |
-          if grep -nP '[\x{2013}\x{2014}\x{2015}]' \
-            packages/translation/src/lang/en.json \
-            packages/translation/src/lang/en-gb.json \
-            README.md; then
-            echo "::error::Em/en dash found. Use a hyphen, comma, or colon."
-            exit 1
-          fi
+          python3 - << 'PYEOF'
+          import sys, pathlib
+          DASHES = '\u2013\u2014\u2015'
+          SKIP = {'.git', '.github', 'node_modules', '__pycache__', 'dist', 'build'}
+          found = False
+          # Check all *.md files
+          for path in sorted(pathlib.Path('.').rglob('*.md')):
+              if any(p in SKIP for p in path.parts):
+                  continue
+              try:
+                  lines = path.read_text(encoding='utf-8', errors='replace').splitlines()
+              except Exception as e:
+                  print(f'::warning::Could not read {path}: {e}')
+                  continue
+              for lineno, line in enumerate(lines, 1):
+                  if any(ch in line for ch in DASHES):
+                      print(f'::error file={path},line={lineno}::Em/en dash found. Use a hyphen, comma, or colon.')
+                      found = True
+          # Check English translation source files (CJK files are exempt)
+          for relpath in ['packages/translation/src/lang/en.json', 'packages/translation/src/lang/en-gb.json']:
+              path = pathlib.Path(relpath)
+              if not path.exists():
+                  continue
+              try:
+                  lines = path.read_text(encoding='utf-8', errors='replace').splitlines()
+              except Exception as e:
+                  print(f'::warning::Could not read {path}: {e}')
+                  continue
+              for lineno, line in enumerate(lines, 1):
+                  if any(ch in line for ch in DASHES):
+                      print(f'::error file={path},line={lineno}::Em/en dash found. Use a hyphen, comma, or colon.')
+                      found = True
+          if found:
+              sys.exit(1)
+          PYEOF
 
       # Guards the documentation base URL against the half-finished rebrand that
       # left every "Read the docs" link pointing at a 404. Targeted rather than
