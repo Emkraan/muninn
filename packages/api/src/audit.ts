@@ -58,6 +58,13 @@ export interface WriteAuditParams {
   action: string;
   targetId?: string | null;
   detail?: Record<string, unknown> | null;
+  // §2.1 standard fields — stored but NOT part of the hash payload.
+  // Existing chain entries remain valid; new writes should supply at least
+  // outcome and resourceType.
+  outcome?: "success" | "failure" | null;
+  resourceType?: string | null;
+  resourceId?: string | null;
+  errorMessage?: string | null;
 }
 
 /**
@@ -69,7 +76,18 @@ export interface WriteAuditParams {
  */
 export const writeAuditEntry = async (db: Db, params: WriteAuditParams): Promise<void> => {
   try {
-    const { userId, userEmail, action, targetId = null, detail = null } = params;
+    const {
+      userId,
+      userEmail,
+      action,
+      targetId = null,
+      detail = null,
+      // §2.1 — not hashed; stored as metadata alongside the chained fields.
+      outcome = "success",
+      resourceType = null,
+      resourceId = null,
+      errorMessage = null,
+    } = params;
 
     // Read the last entry to form the hash chain (SQLite and PG/MySQL differ in
     // column type for timestamp, but hash is always text/varchar).
@@ -99,6 +117,11 @@ export const writeAuditEntry = async (db: Db, params: WriteAuditParams): Promise
       action,
       targetId: targetId ?? null,
       detail: detailStr || null,
+      // §2.1 metadata — not part of the hash; new columns added in migration 0047/0015.
+      outcome,
+      resourceType,
+      resourceId,
+      errorMessage,
       prevHash: prevHash || null,
       hash,
     });
