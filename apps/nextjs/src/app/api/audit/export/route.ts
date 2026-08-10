@@ -34,7 +34,7 @@ const csvField = (value: string | null | undefined): string => {
 
 export async function GET(request: NextRequest) {
   const session = await auth();
-  if (!session?.user.permissions.includes("admin")) {
+  if (!session?.user.permissions.includes("other-audit-export")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
