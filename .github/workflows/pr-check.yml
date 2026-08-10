@@ -54,11 +54,23 @@ jobs:
           python3 - << 'PYEOF'
           import sys, pathlib
           DASHES = '\u2013\u2014\u2015'
-          SKIP = {'.git', '.github', 'node_modules', '__pycache__', 'dist', 'build'}
+          # Scoped to first-party copy: top-level docs, AGENTS.md, the docs app
+          # README, and the English translation source files. CHANGELOG.md and
+          # upstream package READMEs (T3, Homarr) are intentionally excluded
+          # because they contain upstream entries where the dash may be correct.
+          CHECK_FILES = [
+              'README.md',
+              'AGENTS.md',
+              'apps/docs/README.md',
+          ]
+          CHECK_DIRS = [
+              ('packages/translation/src/lang/en.json', False),
+              ('packages/translation/src/lang/en-gb.json', False),
+          ]
           found = False
-          # Check all *.md files
-          for path in sorted(pathlib.Path('.').rglob('*.md')):
-              if any(p in SKIP for p in path.parts):
+          for relpath in CHECK_FILES:
+              path = pathlib.Path(relpath)
+              if not path.exists():
                   continue
               try:
                   lines = path.read_text(encoding='utf-8', errors='replace').splitlines()
@@ -69,8 +81,7 @@ jobs:
                   if any(ch in line for ch in DASHES):
                       print(f'::error file={path},line={lineno}::Em/en dash found. Use a hyphen, comma, or colon.')
                       found = True
-          # Check English translation source files (CJK files are exempt)
-          for relpath in ['packages/translation/src/lang/en.json', 'packages/translation/src/lang/en-gb.json']:
+          for (relpath, _) in CHECK_DIRS:
               path = pathlib.Path(relpath)
               if not path.exists():
                   continue
