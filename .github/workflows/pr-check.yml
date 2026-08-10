@@ -7,6 +7,7 @@ name: PR checks
 # main - keeping the PR gate fast and within the runner's memory.
 on:
   pull_request:
+  merge_group:
 
 permissions:
   contents: read
