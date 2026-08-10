@@ -67,17 +67,17 @@ When modifying user-facing code, you MUST also update the corresponding document
 
 ## Monorepo Commands
 
-- `pnpm dev` — Next.js app only
-- `pnpm dev:docs` — Docusaurus docs site only
-- `pnpm turbo build` — build all packages
-- `pnpm turbo build --filter=@homarr/docs` — build docs only
-- `pnpm turbo typecheck` — typecheck all packages
-- `pnpm lint` / `pnpm format` — oxlint / oxfmt
+- `pnpm dev` - Next.js app only
+- `pnpm dev:docs` - Docusaurus docs site only
+- `pnpm turbo build` - build all packages
+- `pnpm turbo build --filter=@homarr/docs` - build docs only
+- `pnpm turbo typecheck` - typecheck all packages
+- `pnpm lint` / `pnpm format` - oxlint / oxfmt
 
 ## Code Style
 
 - Lint: oxlint (not ESLint)
 - Format: oxfmt (not Prettier)
-- UI: Mantine (not Tailwind) — Tailwind is only used in docs app
+- UI: Mantine (not Tailwind) - Tailwind is only used in docs app
 - Icons: @tabler/icons-react
 - Docs app can import from `@homarr/definitions` for shared types

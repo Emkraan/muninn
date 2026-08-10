@@ -7,6 +7,7 @@ name: PR checks
 # main - keeping the PR gate fast and within the runner's memory.
 on:
   pull_request:
+  merge_group:
 
 permissions:
   contents: read
@@ -49,20 +50,54 @@ jobs:
       - name: Typecheck
         run: pnpm exec turbo typecheck --concurrency=2
 
-      # House style forbids em/en dashes in our own copy. Scoped to the English
-      # source strings and the README rather than the whole tree: the other lang
-      # files are human translations where the dash is often correct punctuation
-      # (cn.json's double em dash is proper CJK), and the generated
-      # copy-sqlite-to-postgres.cjs bundle inlines third-party comments.
-      - name: No em dashes in English copy
+      - name: No em dashes
         run: |
-          if grep -nP '[\x{2013}\x{2014}\x{2015}]' \
-            packages/translation/src/lang/en.json \
-            packages/translation/src/lang/en-gb.json \
-            README.md; then
-            echo "::error::Em/en dash found. Use a hyphen, comma, or colon."
-            exit 1
-          fi
+          python3 - << 'PYEOF'
+          import sys, pathlib
+          DASHES = '\u2013\u2014\u2015'
+          # Scoped to first-party copy: top-level docs, AGENTS.md, the docs app
+          # README, and the English translation source files. CHANGELOG.md and
+          # upstream package READMEs (T3, Homarr) are intentionally excluded
+          # because they contain upstream entries where the dash may be correct.
+          CHECK_FILES = [
+              'README.md',
+              'AGENTS.md',
+              'apps/docs/README.md',
+          ]
+          CHECK_DIRS = [
+              ('packages/translation/src/lang/en.json', False),
+              ('packages/translation/src/lang/en-gb.json', False),
+          ]
+          found = False
+          for relpath in CHECK_FILES:
+              path = pathlib.Path(relpath)
+              if not path.exists():
+                  continue
+              try:
+                  lines = path.read_text(encoding='utf-8', errors='replace').splitlines()
+              except Exception as e:
+                  print(f'::warning::Could not read {path}: {e}')
+                  continue
+              for lineno, line in enumerate(lines, 1):
+                  if any(ch in line for ch in DASHES):
+                      print(f'::error file={path},line={lineno}::Em/en dash found. Use a hyphen, comma, or colon.')
+                      found = True
+          for (relpath, _) in CHECK_DIRS:
+              path = pathlib.Path(relpath)
+              if not path.exists():
+                  continue
+              try:
+                  lines = path.read_text(encoding='utf-8', errors='replace').splitlines()
+              except Exception as e:
+                  print(f'::warning::Could not read {path}: {e}')
+                  continue
+              for lineno, line in enumerate(lines, 1):
+                  if any(ch in line for ch in DASHES):
+                      print(f'::error file={path},line={lineno}::Em/en dash found. Use a hyphen, comma, or colon.')
+                      found = True
+          if found:
+              sys.exit(1)
+          PYEOF
 
       # Guards the documentation base URL against the half-finished rebrand that
       # left every "Read the docs" link pointing at a 404. Targeted rather than
