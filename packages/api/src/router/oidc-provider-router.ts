@@ -186,6 +186,8 @@ export const oidcProviderRouter = createTRPCRouter({
           action: "oidcProvider.upsert",
           targetId: id,
           detail: { op: "update", displayName: fields.displayName },
+          resourceType: "oidcProvider",
+          resourceId: id,
         });
         return { id };
       }
@@ -210,6 +212,8 @@ export const oidcProviderRouter = createTRPCRouter({
         action: "oidcProvider.upsert",
         targetId: newId,
         detail: { op: "create", displayName: fields.displayName },
+        resourceType: "oidcProvider",
+        resourceId: newId,
       });
       return { id: newId };
     }),
@@ -225,6 +229,8 @@ export const oidcProviderRouter = createTRPCRouter({
         userEmail: ctx.session.user.email ?? "",
         action: "oidcProvider.delete",
         targetId: input.id,
+        resourceType: "oidcProvider",
+        resourceId: input.id,
       });
     }),
 

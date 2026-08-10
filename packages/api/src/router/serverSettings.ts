@@ -113,6 +113,8 @@ export const serverSettingsRouter = createTRPCRouter({
         userEmail: ctx.session.user.email ?? "",
         action: "serverSettings.saveSettings",
         targetId: input.settingsKey,
+        resourceType: "serverSettings",
+        resourceId: input.settingsKey,
       });
     }),
   initSettings: onboardingProcedure

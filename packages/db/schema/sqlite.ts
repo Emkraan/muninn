@@ -974,6 +974,11 @@ export const adminAudit = sqliteTable("admin_audit", {
   action: text().notNull(), // e.g. "invite.createInvite"
   targetId: text(), // nullable – the affected entity ID when applicable
   detail: text(), // nullable JSON – extra context (old value, new value, etc.)
+  // §2.1 standard columns (never part of the hash payload; existing chain stays valid)
+  outcome: text(), // "success" | "failure"; null for legacy rows pre-0047
+  resourceType: text(), // e.g. "invite", "oidcProvider", "serverSettings"
+  resourceId: text(), // the primary identifier of the affected resource
+  errorMessage: text(), // populated on outcome="failure"; null on success
   prevHash: text(), // null only for the first entry
   hash: text().notNull(), // HMAC-SHA256 of canonical entry content + prevHash
 });

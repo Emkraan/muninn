@@ -981,6 +981,11 @@ export const adminAudit = pgTable("admin_audit", {
   action: varchar({ length: 128 }).notNull(),
   targetId: varchar({ length: 64 }), // nullable
   detail: text(), // nullable JSON
+  // §2.1 standard columns (never part of the hash payload; existing chain stays valid)
+  outcome: varchar({ length: 16 }), // "success" | "failure"; null for legacy rows pre-0015
+  resourceType: varchar({ length: 64 }), // e.g. "invite", "oidcProvider"
+  resourceId: varchar({ length: 64 }), // primary identifier of the affected resource
+  errorMessage: text(), // populated on outcome="failure"; null on success
   prevHash: varchar({ length: 128 }), // null only for first entry
   hash: varchar({ length: 128 }).notNull(),
 });

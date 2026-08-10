@@ -92,6 +92,8 @@ export const inviteRouter = createTRPCRouter({
         action: "invite.createInvite",
         targetId: id,
         detail: { expirationDate: input.expirationDate.toISOString() },
+        resourceType: "invite",
+        resourceId: id,
       });
 
       return {
@@ -136,6 +138,8 @@ export const inviteRouter = createTRPCRouter({
         userEmail: ctx.session.user.email ?? "",
         action: "invite.deleteInvite",
         targetId: input.id,
+        resourceType: "invite",
+        resourceId: input.id,
       });
     }),
 });
