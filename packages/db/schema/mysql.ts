@@ -996,7 +996,9 @@ export const adminAudit = mysqlTable("admin_audit", {
   contextRequestId: varchar("context_request_id", { length: 64 }),
   contextMethod: varchar("context_method", { length: 10 }),
   contextPath: varchar("context_path", { length: 2048 }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  // No .defaultNow() here: DB-level DEFAULT CURRENT_TIMESTAMP in migration 0049 handles
+  // rows added before the writer began populating this field; new entries are set explicitly.
+  createdAt: timestamp("created_at", { mode: "date" }).notNull(),
   searchText: text("search_text"), // denormalised text for full-text search
   prevHash: varchar({ length: 128 }), // null only for first entry
   hash: varchar({ length: 128 }).notNull(),

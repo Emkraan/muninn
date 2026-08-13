@@ -10,7 +10,8 @@ ALTER TABLE "admin_audit"
   ADD COLUMN IF NOT EXISTS "context_request_id" VARCHAR(64),
   ADD COLUMN IF NOT EXISTS "context_method" VARCHAR(10),
   ADD COLUMN IF NOT EXISTS "context_path" VARCHAR(2048),
-  ADD COLUMN IF NOT EXISTS "created_at" TIMESTAMPTZ NOT NULL DEFAULT NOW();
+  ADD COLUMN IF NOT EXISTS "created_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS "search_text" TEXT;
 
 -- Full-text search: generated tsvector over the searchable text fields.
 -- The GENERATED ALWAYS AS ... STORED clause requires PostgreSQL 12+.

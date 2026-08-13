@@ -988,7 +988,8 @@ export const adminAudit = sqliteTable("admin_audit", {
   contextRequestId: text("context_request_id"),
   contextMethod: text("context_method"),
   contextPath: text("context_path"),
-  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  // Stored as unix seconds (same mode as the main `timestamp` column); returns Date.
+  createdAt: int("created_at", { mode: "timestamp" }).notNull(),
   searchText: text("search_text"), // denormalised plain text for FTS5 virtual table sync
   prevHash: text(), // null only for the first entry
   hash: text().notNull(), // HMAC-SHA256 of canonical entry content + prevHash

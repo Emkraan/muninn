@@ -8,7 +8,7 @@ ALTER TABLE `admin_audit` ADD `context_user_agent` TEXT;
 ALTER TABLE `admin_audit` ADD `context_request_id` TEXT;
 ALTER TABLE `admin_audit` ADD `context_method` TEXT;
 ALTER TABLE `admin_audit` ADD `context_path` TEXT;
-ALTER TABLE `admin_audit` ADD `created_at` TEXT NOT NULL DEFAULT (datetime('now'));
+ALTER TABLE `admin_audit` ADD `created_at` INTEGER NOT NULL DEFAULT (unixepoch());
 ALTER TABLE `admin_audit` ADD `search_text` TEXT;
 
 CREATE INDEX IF NOT EXISTS `admin_audit_created_at_idx` ON `admin_audit`(`created_at` DESC);

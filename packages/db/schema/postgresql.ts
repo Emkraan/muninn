@@ -995,7 +995,10 @@ export const adminAudit = pgTable("admin_audit", {
   contextRequestId: varchar("context_request_id", { length: 64 }),
   contextMethod: varchar("context_method", { length: 10 }),
   contextPath: varchar("context_path", { length: 2048 }),
-  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+  // No .defaultNow() here: the DB-level DEFAULT NOW() from migration 0016 handles rows
+  // added before the writer began populating this field; new entries are set explicitly.
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
+  searchText: text("search_text"), // denormalised text for FTS (mirrors SQLite/MySQL; PG search_vector is DB-only)
   // search_vector (tsvector generated column) exists in the DB but is managed entirely by
   // PostgreSQL; it is not mapped here because Drizzle cannot write to generated columns.
   // Query it via raw SQL: sql`"admin_audit"."search_vector" @@ plainto_tsquery(...)`.
