@@ -986,6 +986,19 @@ export const adminAudit = pgTable("admin_audit", {
   resourceType: varchar({ length: 64 }), // e.g. "invite", "oidcProvider"
   resourceId: varchar({ length: 64 }), // primary identifier of the affected resource
   errorMessage: text(), // populated on outcome="failure"; null on success
+  // §2.2 context columns (never part of the hash payload; added in migration 0016)
+  schemaVersion: integer("schema_version").notNull().default(1),
+  actorName: varchar("actor_name", { length: 256 }),
+  actorJson: text("actor_json"), // JSON string; use actor_json::jsonb in raw SQL for queries
+  contextIp: varchar("context_ip", { length: 45 }),
+  contextUserAgent: varchar("context_user_agent", { length: 240 }),
+  contextRequestId: varchar("context_request_id", { length: 64 }),
+  contextMethod: varchar("context_method", { length: 10 }),
+  contextPath: varchar("context_path", { length: 2048 }),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+  // search_vector (tsvector generated column) exists in the DB but is managed entirely by
+  // PostgreSQL; it is not mapped here because Drizzle cannot write to generated columns.
+  // Query it via raw SQL: sql`"admin_audit"."search_vector" @@ plainto_tsquery(...)`.
   prevHash: varchar({ length: 128 }), // null only for first entry
   hash: varchar({ length: 128 }).notNull(),
 });

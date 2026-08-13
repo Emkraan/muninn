@@ -65,6 +65,17 @@ export interface WriteAuditParams {
   resourceType?: string | null;
   resourceId?: string | null;
   errorMessage?: string | null;
+  // §2.2 context fields — stored but NOT part of the hash payload.
+  // Pass actorName / actorJson from the session and context_* from the HTTP request.
+  actorName?: string | null;
+  actorJson?: Record<string, unknown> | null;
+  context?: {
+    ip?: string | null;
+    userAgent?: string | null;
+    requestId?: string | null;
+    method?: string | null;
+    path?: string | null;
+  } | null;
 }
 
 /**
@@ -87,6 +98,10 @@ export const writeAuditEntry = async (db: Db, params: WriteAuditParams): Promise
       resourceType = null,
       resourceId = null,
       errorMessage = null,
+      // §2.2 — not hashed; request/actor context.
+      actorName = null,
+      actorJson = null,
+      context = null,
     } = params;
 
     // Read the last entry to form the hash chain (SQLite and PG/MySQL differ in
@@ -122,6 +137,18 @@ export const writeAuditEntry = async (db: Db, params: WriteAuditParams): Promise
       resourceType,
       resourceId,
       errorMessage,
+      // §2.2 context — not part of the hash; new columns added in migration 0048/0016.
+      schemaVersion: 2,
+      actorName,
+      // Serialize actorJson as a JSON string so the same writer works across all DB
+      // adapters (PG stores as jsonb, SQLite/MySQL store as text).
+      actorJson: actorJson ? JSON.stringify(actorJson) : null,
+      contextIp: context?.ip ?? null,
+      contextUserAgent: context?.userAgent ?? null,
+      contextRequestId: context?.requestId ?? null,
+      contextMethod: context?.method ?? null,
+      contextPath: context?.path ?? null,
+      createdAt: timestamp,
       prevHash: prevHash || null,
       hash,
     });
