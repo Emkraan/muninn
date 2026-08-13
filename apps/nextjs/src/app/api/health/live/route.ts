@@ -1,93 +1,30 @@
-import { performance } from "perf_hooks";
+import { NextResponse } from "next/server";
 
-import { createLogger } from "@homarr/core/infrastructure/logs";
-import { ErrorWithMetadata } from "@homarr/core/infrastructure/logs/error";
 import { db } from "@homarr/db";
 import { handshakeAsync } from "@homarr/redis";
 
-const logger = createLogger({ module: "healthLiveRoute" });
-
 export async function GET() {
-  const timeBeforeHealthCheck = performance.now();
-  const response = await executeAndAggregateAllHealthChecksAsync();
-  logger.info("Completed healthcheck", { elapsed: `${performance.now() - timeBeforeHealthCheck}ms` });
+  const subsystems: Record<string, { ok: boolean; status: string; message?: string; latency?: number }> = {};
 
-  if (response.status === "healthy") {
-    return new Response(JSON.stringify(response), {
-      status: 200,
-    });
-  }
-
-  return new Response(JSON.stringify(response), {
-    status: 500,
-  });
-}
-
-const executeAndAggregateAllHealthChecksAsync = async (): Promise<{
-  healthChecks: Record<string, object>;
-  status: "healthy" | "unhealthy";
-}> => {
-  const healthChecks = [
-    executeHealthCheckSafelyAsync("database", async () => {
-      // sqlite driver does not support raw query execution. this is for a heartbeat check only - it doesn't matter if data is returned or not
-      await db.query.serverSettings.findFirst();
-      return {};
-    }),
-    executeHealthCheckSafelyAsync("redis", async () => {
-      await handshakeAsync();
-      return {};
-    }),
-  ];
-
-  const healthCheckResults = await Promise.all(healthChecks);
-  const anyUnhealthy = healthCheckResults.some((healthCheck) => healthCheck.status === "unhealthy");
-
-  const healthCheckValues = healthCheckResults.reduce(
-    (acc, healthCheck) => {
-      acc[healthCheck.name] = {
-        status: healthCheck.status,
-        ...healthCheck.values,
-      };
-      return acc;
-    },
-    {} as Record<string, object>,
-  );
-
-  return {
-    status: anyUnhealthy ? "unhealthy" : "healthy",
-    healthChecks: healthCheckValues,
-  };
-};
-
-const executeHealthCheckSafelyAsync = async (
-  name: string,
-  callback: () => Promise<object>,
-): Promise<HealthCheckResult> => {
+  // Database liveness — use the ORM query builder; raw sql`SELECT 1` is unsupported
+  // on the SQLite driver (better-sqlite3 in synchronous mode).
+  const dbStart = Date.now();
   try {
-    const currentTimeBeforeCallback = performance.now();
-    const values = await callback();
-    return {
-      name,
-      status: "healthy",
-      values: {
-        ...values,
-        latency: performance.now() - currentTimeBeforeCallback,
-      },
-    };
-  } catch (error) {
-    logger.error(new ErrorWithMetadata("Healthcheck failed", { name }, { cause: error }));
-    return {
-      status: "unhealthy",
-      values: {
-        error,
-      },
-      name,
-    };
+    await db.query.serverSettings.findFirst();
+    subsystems.database = { ok: true, status: "up", latency: Date.now() - dbStart };
+  } catch (e) {
+    subsystems.database = { ok: false, status: "down", message: String(e), latency: Date.now() - dbStart };
   }
-};
 
-interface HealthCheckResult {
-  status: "healthy" | "unhealthy";
-  name: string;
-  values: object;
+  // Redis liveness.
+  const redisStart = Date.now();
+  try {
+    await handshakeAsync();
+    subsystems.redis = { ok: true, status: "up", latency: Date.now() - redisStart };
+  } catch (e) {
+    subsystems.redis = { ok: false, status: "down", message: String(e), latency: Date.now() - redisStart };
+  }
+
+  const allOk = Object.values(subsystems).every((s) => s.ok);
+  return NextResponse.json({ ok: allOk, subsystems }, { status: allOk ? 200 : 503 });
 }

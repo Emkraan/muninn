@@ -3,6 +3,7 @@ import SuperJSON from "superjson";
 import { createId, objectKeys } from "@homarr/common";
 import { customWidgetImportSchema } from "@homarr/validation/custom-widget";
 import {
+  auditorGroup,
   createDocumentationLink,
   credentialsAdminGroup,
   defaultBookmarkApps,
@@ -143,6 +144,7 @@ export const seedDataAsync = async (db: Database) => {
   }
 
   await seedEveryoneGroupAsync(db);
+  await seedAuditorGroupAsync(db);
   await seedOnboardingAsync(db);
   await seedServerSettingsAsync(db);
   await seedDefaultSearchEnginesAsync(db);
@@ -173,6 +175,34 @@ const seedEveryoneGroupAsync = async (db: Database) => {
     position: -1,
   });
   console.log("Created group 'everyone' through seed");
+};
+
+const seedAuditorGroupAsync = async (db: Database) => {
+  const existing = await db.query.groups.findFirst({
+    where: eq(groups.name, auditorGroup),
+  });
+
+  if (existing) {
+    console.log("Skipping seeding of group 'auditor' as it already exists");
+    return;
+  }
+
+  const maxPosition = await getMaxGroupPositionAsync(db);
+  const groupId = createId();
+  await db.insert(groups).values({
+    id: groupId,
+    name: auditorGroup,
+    position: maxPosition + 1,
+  });
+
+  // Grant read-only audit access: list/export and chain-verify.
+  // These permissions are already gated on the audit export and verify routes.
+  await db.insert(groupPermissions).values([
+    { groupId, permission: "other-audit-export" },
+    { groupId, permission: "other-audit-verify" },
+  ]);
+
+  console.log("Created group 'auditor' with audit permissions through seed");
 };
 
 const seedOnboardingAsync = async (db: Database) => {

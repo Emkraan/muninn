@@ -330,6 +330,20 @@
       "when": 1786982400000,
       "tag": "0046_add_admin_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "6",
+      "when": 1786982500000,
+      "tag": "0047_audit_standard_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "6",
+      "when": 1786982600000,
+      "tag": "0048_audit_context_columns",
+      "breakpoints": true
     }
   ]
 }

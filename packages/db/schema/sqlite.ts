@@ -979,6 +979,18 @@ export const adminAudit = sqliteTable("admin_audit", {
   resourceType: text(), // e.g. "invite", "oidcProvider", "serverSettings"
   resourceId: text(), // the primary identifier of the affected resource
   errorMessage: text(), // populated on outcome="failure"; null on success
+  // §2.2 context columns (never part of the hash payload; added in migration 0048)
+  schemaVersion: int("schema_version").notNull().default(1),
+  actorName: text("actor_name"),
+  actorJson: text("actor_json"), // SQLite stores JSON as TEXT
+  contextIp: text("context_ip"),
+  contextUserAgent: text("context_user_agent"),
+  contextRequestId: text("context_request_id"),
+  contextMethod: text("context_method"),
+  contextPath: text("context_path"),
+  // Stored as unix seconds (same mode as the main `timestamp` column); returns Date.
+  createdAt: int("created_at", { mode: "timestamp" }).notNull(),
+  searchText: text("search_text"), // denormalised plain text for FTS5 virtual table sync
   prevHash: text(), // null only for the first entry
   hash: text().notNull(), // HMAC-SHA256 of canonical entry content + prevHash
 });

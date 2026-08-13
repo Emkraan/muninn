@@ -983,10 +983,23 @@ export const adminAudit = mysqlTable("admin_audit", {
   targetId: varchar({ length: 64 }), // nullable
   detail: text(), // nullable JSON
   // §2.1 standard columns (never part of the hash payload; existing chain stays valid)
-  outcome: varchar({ length: 16 }), // "success" | "failure"; null for legacy rows pre-0047
+  outcome: varchar({ length: 16 }), // "success" | "failure"; null for legacy rows pre-0049
   resourceType: varchar({ length: 64 }), // e.g. "invite", "oidcProvider"
   resourceId: varchar({ length: 64 }), // primary identifier of the affected resource
   errorMessage: text(), // populated on outcome="failure"; null on success
+  // §2.2 context columns (never part of the hash payload; added in migration 0049)
+  schemaVersion: int("schema_version").notNull().default(1),
+  actorName: varchar("actor_name", { length: 256 }),
+  actorJson: text("actor_json"), // JSON string; consistent across all DB adapters
+  contextIp: varchar("context_ip", { length: 45 }),
+  contextUserAgent: varchar("context_user_agent", { length: 240 }),
+  contextRequestId: varchar("context_request_id", { length: 64 }),
+  contextMethod: varchar("context_method", { length: 10 }),
+  contextPath: varchar("context_path", { length: 2048 }),
+  // No .defaultNow() here: DB-level DEFAULT CURRENT_TIMESTAMP in migration 0049 handles
+  // rows added before the writer began populating this field; new entries are set explicitly.
+  createdAt: timestamp("created_at", { mode: "date" }).notNull(),
+  searchText: text("search_text"), // denormalised text for full-text search
   prevHash: varchar({ length: 128 }), // null only for first entry
   hash: varchar({ length: 128 }).notNull(),
 });
