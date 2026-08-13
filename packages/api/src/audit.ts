@@ -148,7 +148,7 @@ export const writeAuditEntry = async (db: Db, params: WriteAuditParams): Promise
       contextRequestId: context?.requestId ?? null,
       contextMethod: context?.method ?? null,
       contextPath: context?.path ?? null,
-      createdAt: timestamp,
+      // createdAt omitted: DB DEFAULT (NOW() / datetime('now')) sets it automatically.
       prevHash: prevHash || null,
       hash,
     });
