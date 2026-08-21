@@ -612,7 +612,7 @@ overrides:
   sharp@<0.35.0: '>=0.35.0'
   shell-quote@<=1.8.4: '>=1.9.0'
   svgo@>=3.0.0 <3.3.4: '>=3.3.4 <4.0.0'
-  undici@<6.27.0: '>=6.27.0 <7.0.0'
+  undici@<6.27.0: '>=6.27.0 <9.0.0'
   undici@>=7.0.0 <7.28.0: '>=7.28.0 <8.0.0'
   uuid@<11.1.1: '>=11.1.1'
   webpack-dev-server@<=5.2.5: '>=5.2.6 <6.0.0'
@@ -7939,6 +7939,7 @@ packages:
   '@xmldom/xmldom@0.8.13':
     resolution: {integrity: sha512-KRYzxepc14G/CEpEGc3Yn+JKaAeT63smlDr+vjB8jRfgTBBI9wRj/nkQEO+ucV8p8I9bfKLWp37uHgFrbntPvw==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@xterm/addon-canvas@0.7.0':
     resolution: {integrity: sha512-LF5LYcfvefJuJ7QotNRdRSPc9YASAVDeoT5uyXS/nZshZXjYplGXRECBGiznwvhNL2I8bq1Lf5MzRwstsYQ2Iw==}
@@ -8919,6 +8920,7 @@ packages:
 
   crypto-js@4.2.0:
     resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
+    deprecated: Active development of CryptoJS has been discontinued. This library is no longer maintained.
 
   crypto-random-string@4.0.0:
     resolution: {integrity: sha512-x8dy3RnvYdlUcPOjkEHqozhiwzKNSq7GcPuXFbnyMOCHxX8V3OgIg/pYuabl2sbUPfIJaeAQB7PMOK8DFIdoRA==}
@@ -10434,7 +10436,7 @@ packages:
     engines: {node: '>=18.0.0'}
     peerDependencies:
       tough-cookie: ^4.0.0 || ^5.0.0
-      undici: '>=6.27.0 <7.0.0'
+      undici: '>=6.27.0 <9.0.0'
     peerDependenciesMeta:
       undici:
         optional: true
