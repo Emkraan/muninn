@@ -600,7 +600,7 @@ overrides:
   immutable@>=5.0.0-beta.1 <5.1.8: '>=5.1.8'
   ip-address@<=10.1.0: '>=10.1.1'
   joi@<17.13.4: '>=17.13.4 <18.0.0'
-  js-yaml@<3.15.0: '>=3.15.0 <4.0.0'
+  js-yaml@<3.15.0: '>=3.15.0 <6.0.0'
   js-yaml@>=4.0.0 <4.3.0: '>=4.3.0 <5.0.0'
   lodash-es@<4.18.0: '>=4.18.0'
   mdast-util-to-hast@<13.2.1: '>=13.2.1'
@@ -7939,6 +7939,7 @@ packages:
   '@xmldom/xmldom@0.8.13':
     resolution: {integrity: sha512-KRYzxepc14G/CEpEGc3Yn+JKaAeT63smlDr+vjB8jRfgTBBI9wRj/nkQEO+ucV8p8I9bfKLWp37uHgFrbntPvw==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@xterm/addon-canvas@0.7.0':
     resolution: {integrity: sha512-LF5LYcfvefJuJ7QotNRdRSPc9YASAVDeoT5uyXS/nZshZXjYplGXRECBGiznwvhNL2I8bq1Lf5MzRwstsYQ2Iw==}
@@ -8919,6 +8920,7 @@ packages:
 
   crypto-js@4.2.0:
     resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
+    deprecated: Active development of CryptoJS has been discontinued. This library is no longer maintained.
 
   crypto-random-string@4.0.0:
     resolution: {integrity: sha512-x8dy3RnvYdlUcPOjkEHqozhiwzKNSq7GcPuXFbnyMOCHxX8V3OgIg/pYuabl2sbUPfIJaeAQB7PMOK8DFIdoRA==}
