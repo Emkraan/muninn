@@ -45,7 +45,7 @@ export const { definition, componentLoader } = createWidgetDefinition("app", {
               icon: IconEyeOff,
             },
           ],
-          defaultValue: "hidden",
+          defaultValue: "tooltip",
           searchable: true,
           withDescription: true,
         }),
