@@ -8,9 +8,14 @@
 #   push of a v* git tag    -> additionally the bare semver X.Y.Z
 #   manual (workflow_dispatch)
 #
-# On every push to main the workflow also pins the new sha tag into
-# portainer-stack.yml, commits back to main with [skip ci], and fires
-# the Portainer webhook to redeploy hq_muninn.
+# Pin-to-live WITHOUT bypassing the merge queue:
+#   A real push to main builds and pushes the image, then opens an auto-merge
+#   "pin" PR that updates portainer-stack.yml to the new sha tag. That PR flows
+#   through the merge queue like any other change (no direct push to main, no
+#   ruleset bypass). When it merges, the squash commit lands on main with the
+#   "chore: pin muninn ->" title; that push re-triggers this workflow in
+#   webhook-only mode, which fires the Portainer webhook to redeploy hq_muninn.
+#   The webhook-only pass makes no commit, so there is no deploy loop.
 #
 # Image: ghcr.io/emkraan/muninn
 # ===========================================================================
@@ -32,9 +37,36 @@ env:
 permissions:
   contents: write
   packages: write
+  pull-requests: write
 
 jobs:
+  # Route the run. A push to main whose head commit is the pin commit is the
+  # post-merge pass: skip the build and just fire the redeploy webhook.
+  # Everything else (real code push, tag, manual) is a full build.
+  classify:
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.m.outputs.mode }}
+    steps:
+      - id: m
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          HEAD_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          mode=build
+          if [ "${EVENT}" = "push" ] && [ "${REF}" = "refs/heads/main" ]; then
+            first="$(printf '%s' "${HEAD_MSG}" | head -n1)"
+            case "${first}" in
+              "chore: pin muninn ->"*) mode=webhook ;;
+            esac
+          fi
+          echo "mode=${mode}" >> "${GITHUB_OUTPUT}"
+          echo "classified mode=${mode}"
+
   build-and-push:
+    needs: classify
+    if: needs.classify.outputs.mode == 'build'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -102,44 +134,63 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.created=${{ steps.meta.outputs.created }}
 
+      # Deploy-bot App token, used to open the pin PR as the App (not
+      # GITHUB_TOKEN) so the automerge workflow's pull_request trigger fires and
+      # enqueues it. Pin PRs are only opened for pushes to main.
       - name: Mint deploy-bot app token
-        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main'
         uses: actions/create-github-app-token@v3
         id: deploy-token
         with:
           app-id: ${{ vars.DEPLOY_APP_ID }}
           private-key: ${{ secrets.DEPLOY_APP_PRIVATE_KEY }}
 
-      - name: Configure git for pin commit
-        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+      # Pin the new sha into portainer-stack.yml on a branch and open an
+      # auto-merge PR. No direct push to main: the pin flows through the merge
+      # queue. The PR title starts with "chore: pin muninn ->" so the
+      # post-merge push classifies as webhook-only and triggers the redeploy.
+      - name: Open pin PR (through the merge queue)
+        if: github.ref == 'refs/heads/main'
         env:
-          TOKEN: ${{ steps.deploy-token.outputs.token }}
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # actions/checkout sets a GITHUB_TOKEN extraheader that wins over the remote URL.
-          # Unset it so the app-token URL below is actually used (and the bypass applies).
-          git config --unset-all http.https://github.com/.extraheader || true
-          git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-
-      - name: Pin portainer-stack.yml to new sha tag
-        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
-        env:
+          GH_TOKEN: ${{ steps.deploy-token.outputs.token }}
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           NEW_TAG: sha-${{ steps.meta.outputs.short_sha }}
         run: |
           sed -i -E "s|(image:[[:space:]]+)${IMAGE}:[A-Za-z0-9._-]+|\1${IMAGE}:${NEW_TAG}|" portainer-stack.yml
           if git diff --quiet portainer-stack.yml; then
-            echo "portainer-stack.yml already at ${NEW_TAG}; nothing to commit"
-          else
-            git add portainer-stack.yml
-            git commit -m "chore: pin muninn -> ${NEW_TAG} [skip ci]"
-            git push
+            echo "portainer-stack.yml already at ${NEW_TAG}; nothing to pin"
+            exit 0
           fi
 
+          BRANCH="ci/pin-${NEW_TAG}"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # actions/checkout sets a GITHUB_TOKEN extraheader that wins over the
+          # remote URL. Unset it so the app-token push is attributed to the App.
+          git config --unset-all http.https://github.com/.extraheader || true
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          git checkout -b "${BRANCH}"
+          git add portainer-stack.yml
+          git commit -m "chore: pin muninn -> ${NEW_TAG}"
+          git push -f origin "${BRANCH}"
+
+          # Reuse an existing open PR for this branch, else open one. The
+          # automerge workflow enqueues it once checks are green.
+          if gh pr view "${BRANCH}" --json state --jq '.state' 2>/dev/null | grep -q OPEN; then
+            echo "pin PR for ${BRANCH} already open"
+          else
+            gh pr create --base main --head "${BRANCH}" \
+              --title "chore: pin muninn -> ${NEW_TAG}" \
+              --body "Automated image pin to \`${NEW_TAG}\`. Flows through the merge queue; the merge triggers the Portainer redeploy of hq_muninn. Do not squash-edit the title."
+          fi
+
+  # Post-merge pass: the pin PR has landed on main. Fire the Portainer webhook
+  # to redeploy hq_muninn from the freshly pinned portainer-stack.yml.
+  redeploy:
+    needs: classify
+    if: needs.classify.outputs.mode == 'webhook' && vars.PORTAINER_WEBHOOK_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
       - name: Trigger Portainer redeploy (hq_muninn)
-        if: >-
-          (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
-          github.ref == 'refs/heads/main' &&
-          vars.PORTAINER_WEBHOOK_ENABLED == 'true'
         run: curl -fsS -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}"
