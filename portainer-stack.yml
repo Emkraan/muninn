@@ -14,7 +14,7 @@
 
 services:
   muninn:
-    image: ghcr.io/emkraan/muninn:sha-35f160e # pinned by CI -- do not edit
+    image: ghcr.io/emkraan/muninn:sha-4ecdaec # pinned by CI -- do not edit
     container_name: HQ_Muninn
     # First-party image (private ghcr, CI sha-pinned): exclude from WUD so it does
     # not emit registry 401 noise. Updates ship via the CI -> Portainer path, not WUD.
