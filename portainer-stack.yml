@@ -16,6 +16,10 @@ services:
   muninn:
     image: ghcr.io/emkraan/muninn:sha-35f160e # pinned by CI -- do not edit
     container_name: HQ_Muninn
+    # First-party image (private ghcr, CI sha-pinned): exclude from WUD so it does
+    # not emit registry 401 noise. Updates ship via the CI -> Portainer path, not WUD.
+    labels:
+      wud.watch: "false"
     restart: always
     environment:
       - SECRET_ENCRYPTION_KEY_FILE=/run/secrets/secret_encryption_key
