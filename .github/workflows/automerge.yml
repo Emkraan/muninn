@@ -118,11 +118,20 @@ jobs:
               pr.mergeStateStatus === 'CLEAN' ||
               (pr.mergeStateStatus === 'UNSTABLE' && pr.mergeable === 'MERGEABLE');
 
+            // mergeStateStatus is computed LAZILY. The first query for a PR GitHub
+            // has not looked at recently returns UNKNOWN and only then kicks off the
+            // computation. On a sweep that means every cold PR reads UNKNOWN and gets
+            // skipped: the first live sweep was a no-op across all 7 open PRs for
+            // exactly this reason. Warm them all first, then read the settled values.
+            if (isSweep) {
+              await Promise.all(numbers.map(n =>
+                github.graphql(Q, {o: owner, r: repo, n}).catch(() => null)));
+              await sleep(5000);
+            }
+
             for (const n of numbers) {
-              // mergeStateStatus is computed async; retry briefly on UNKNOWN.
-              // One pass is enough on the sweep: the next one is 15 minutes away,
-              // so waiting here would only burn runner minutes.
-              const attempts = isSweep ? 1 : 6;
+              // Still retry: the warm-up is best-effort, not a guarantee.
+              const attempts = 6;
               let data;
               for (let i = 0; i < attempts; i++) {
                 data = await github.graphql(Q, {o: owner, r: repo, n});
