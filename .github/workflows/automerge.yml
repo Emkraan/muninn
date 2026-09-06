@@ -6,8 +6,24 @@ name: automerge
 # protection is satisfied.
 # Merge-queue repos: GitHub auto-merge does NOT reliably add a PR to the queue,
 # so once the PR is mergeable we call the enqueuePullRequest GraphQL mutation
-# explicitly. It fires on check completion (not just PR open) so the PR is
-# actually ready when we try.
+# explicitly.
+#
+# WHY THE SCHEDULED SWEEP EXISTS (2026-09-06):
+# The event-driven path alone is not sufficient on a merge-queue repo. When a
+# check_suite completes, GitHub has often not yet recomputed mergeStateStatus,
+# so the PR still reads BLOCKED. The old workflow logged "waiting for a later
+# check_suite event" and exited. If that was the LAST check_suite event for the
+# PR, nothing ever retried and the PR sat open forever while reading CLEAN.
+# Pin PR #148 stranded that way for four days, which silently froze the
+# GitOps deploy chain: build-and-deploy.yml only classifies mode=webhook for a
+# "chore: pin muninn ->" head commit, so the Portainer redeploy never ran and
+# the host kept serving the previous image with no alert anywhere.
+#
+# Two defences, both needed:
+#   1. Retry in-run while the PR is BLOCKED but its checks are still PENDING.
+#   2. A scheduled sweep that enqueues ANY open, mergeable, unqueued PR. This
+#      is the convergence guarantee: it is independent of event delivery, so a
+#      dropped or badly-timed event can no longer strand a PR indefinitely.
 #
 # Branch protection (required reviews/checks) still fully applies either way.
 
@@ -18,13 +34,19 @@ on:
     types: [submitted]
   check_suite:
     types: [completed]
+  schedule:
+    # Every 15 minutes. Backstop only; the event path handles the happy case.
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
   pull-requests: write
 
 concurrency:
-  group: automerge-${{ github.event.pull_request.number || github.event.check_suite.id }}
+  # Non-PR events (schedule/dispatch) have no pull_request payload, so fall
+  # back to run_id rather than collapsing every sweep into one group.
+  group: automerge-${{ github.event.pull_request.number || github.event.check_suite.id || github.run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -35,6 +57,7 @@ jobs:
         with:
           script: |
             const {owner, repo} = context.repo;
+            const isSweep = context.eventName === 'schedule' || context.eventName === 'workflow_dispatch';
 
             // Collect candidate PR numbers from whatever event fired.
             let numbers = [];
@@ -42,6 +65,12 @@ jobs:
               numbers = [context.payload.pull_request.number];
             } else if (context.eventName === 'check_suite') {
               numbers = (context.payload.check_suite.pull_requests || []).map(p => p.number);
+            } else if (isSweep) {
+              const open = await github.paginate(github.rest.pulls.list, {
+                owner, repo, state: 'open', per_page: 100,
+              });
+              numbers = open.map(p => p.number);
+              core.info(`sweep: ${numbers.length} open PR(s)`);
             }
             if (numbers.length === 0) { core.info('no candidate PRs'); return; }
 
@@ -50,6 +79,7 @@ jobs:
                 mergeQueue{ id }
                 pullRequest(number:$n){
                   id number isDraft state merged isInMergeQueue mergeStateStatus
+                  commits(last:1){ nodes{ commit{ statusCheckRollup{ state } } } }
                 }
               }
             }`;
@@ -57,16 +87,33 @@ jobs:
             const AUTOMERGE = `mutation($id:ID!){ enablePullRequestAutoMerge(input:{pullRequestId:$id, mergeMethod:SQUASH}){ pullRequest{ number } } }`;
             const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+            const rollupOf = pr => {
+              const n = pr.commits && pr.commits.nodes && pr.commits.nodes[0];
+              return (n && n.commit.statusCheckRollup && n.commit.statusCheckRollup.state) || null;
+            };
+
+            // On the sweep we do a single pass per PR: the next sweep is only
+            // 15 minutes away, so burning runner minutes waiting is pointless.
+            // On an event we wait, because we are racing GitHub's own
+            // mergeStateStatus recomputation and want to land it in this run.
+            const attempts = isSweep ? 1 : 12;
+            let stuck = 0;
+
             for (const n of numbers) {
-              // mergeStateStatus is computed async; retry briefly on UNKNOWN.
-              let data;
-              for (let i = 0; i < 6; i++) {
-                data = await github.graphql(Q, {o: owner, r: repo, n});
-                if (data.repository.pullRequest.mergeStateStatus !== 'UNKNOWN') break;
-                await sleep(5000);
+              let pr, hasQueue;
+              for (let i = 0; i < attempts; i++) {
+                const data = await github.graphql(Q, {o: owner, r: repo, n});
+                pr = data.repository.pullRequest;
+                hasQueue = !!data.repository.mergeQueue;
+                if (!pr) break;
+                const st = pr.mergeStateStatus;
+                const rollup = rollupOf(pr);
+                // Terminal states: stop waiting.
+                if (st !== 'UNKNOWN' && st !== 'BLOCKED') break;
+                if (st === 'BLOCKED' && rollup && rollup !== 'PENDING') break;
+                if (i < attempts - 1) await sleep(10000);
               }
-              const pr = data.repository.pullRequest;
-              const hasQueue = !!data.repository.mergeQueue;
+
               if (!pr || pr.state !== 'OPEN' || pr.merged) { core.info(`#${n}: not an open PR`); continue; }
               if (pr.isDraft) { core.info(`#${n}: draft, skipping`); continue; }
               if (pr.isInMergeQueue) { core.info(`#${n}: already in merge queue`); continue; }
@@ -74,12 +121,15 @@ jobs:
               if (hasQueue) {
                 if (pr.mergeStateStatus === 'CLEAN') {
                   try { await github.graphql(ENQUEUE, {id: pr.id}); core.info(`#${n}: enqueued`); }
-                  catch (e) { core.info(`#${n}: enqueue not accepted yet (${e.message})`); }
+                  catch (e) { core.info(`#${n}: enqueue not accepted (${e.message})`); stuck++; }
                 } else {
-                  core.info(`#${n}: mergeStateStatus=${pr.mergeStateStatus}, waiting for a later check_suite event`);
+                  // Not an error: could be failing checks, conflicts, or a
+                  // required review. The sweep will re-evaluate in 15 minutes.
+                  core.info(`#${n}: mergeStateStatus=${pr.mergeStateStatus} rollup=${rollupOf(pr)}, leaving for the next sweep`);
                 }
               } else {
                 try { await github.graphql(AUTOMERGE, {id: pr.id}); core.info(`#${n}: auto-merge enabled`); }
                 catch (e) { core.info(`#${n}: auto-merge enable skipped (${e.message})`); }
               }
             }
+            if (stuck > 0) core.warning(`${stuck} PR(s) were CLEAN but the enqueue call was rejected`);
