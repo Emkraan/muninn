@@ -37,6 +37,12 @@ on:
     types: [completed]
   schedule:
     # Backstop only; the event path still handles the happy case immediately.
+    # Asks for every 15 minutes. GitHub does NOT honour that here: measured over
+    # 12 consecutive scheduled runs of homelab-stacks eir-windmill-sync (same
+    # cron, same org) the real interval was 98 to 287 minutes, median 135. So the
+    # sweep converges in hours, not minutes. That is still a real backstop (the
+    # previous behaviour was never), and the event path above still handles the
+    # normal case immediately, but do not document this as a 15-minute guarantee.
     - cron: '*/15 * * * *'
   workflow_dispatch:
 
@@ -152,7 +158,8 @@ jobs:
                 } else {
                   // Not an error: failing checks, a conflict, or a required review.
                   // No longer relies on a later event arriving; the sweep re-evaluates
-                  // this PR within 15 minutes, so it cannot strand.
+                  // this PR on the next scheduled run, so it cannot strand
+                  // indefinitely. Expect hours, not minutes: see the cron note above.
                   core.info(`#${n}: mergeStateStatus=${pr.mergeStateStatus}, leaving for the next sweep`);
                 }
               } else {
