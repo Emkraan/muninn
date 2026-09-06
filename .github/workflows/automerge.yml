@@ -10,6 +10,23 @@ name: automerge
 # actually ready when we try.
 #
 # Branch protection (required reviews/checks) still fully applies either way.
+#
+# WHY THE SCHEDULED SWEEP EXISTS (2026-09-06):
+# On a merge-queue repo the event-driven path alone is not sufficient. When a
+# check_suite completes, GitHub has often not yet recomputed mergeStateStatus,
+# so the PR still reads BLOCKED and this job exits without enqueuing. If that
+# was the LAST check_suite event for the PR, nothing ever retried: the PR then
+# went CLEAN and sat open forever. Pin PR #148 stranded that way for four days,
+# which silently froze the GitOps deploy chain, because build-and-deploy.yml
+# only classifies mode=webhook for a "chore: pin muninn ->" head commit, so the
+# Portainer redeploy never ran and the host kept serving the previous image with
+# no alert anywhere. Reproduced live on #150.
+#
+# The sweep is the convergence guarantee: it re-evaluates every open PR on a
+# fixed cadence, independent of event delivery, so a dropped or badly-timed
+# event can no longer strand a PR indefinitely. Muninn is currently the only
+# Emkraan repo with a merge-queue ruleset, which is why the explicit
+# enqueuePullRequest call is load-bearing here and nowhere else.
 
 on:
   pull_request:
@@ -18,23 +35,41 @@ on:
     types: [submitted]
   check_suite:
     types: [completed]
+  schedule:
+    # Backstop only; the event path still handles the happy case immediately.
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
   pull-requests: write
 
 concurrency:
-  group: automerge-${{ github.event.pull_request.number || github.event.check_suite.id }}
+  # Non-PR events (schedule/dispatch) carry no pull_request payload, so fall
+  # back to run_id rather than collapsing every sweep into a single group.
+  group: automerge-${{ github.event.pull_request.number || github.event.check_suite.id || github.run_id }}
   cancel-in-progress: false
 
 jobs:
   automerge:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v7
+      # A PR merged under the default GITHUB_TOKEN (github-actions[bot]) does not
+      # trigger push-triggered deploy-*.yml (GitHub loop-prevention), so a
+      # bot-merged stack change lands on main but never redeploys. Merge under the
+      # emkraan-deploy-bot App token instead; an App-token merge DOES trigger those
+      # workflows. Per github-actions-monorepo-standard.md. See #291.
+      - uses: actions/create-github-app-token@v3
+        id: app-token
         with:
+          app-id: ${{ vars.DEPLOY_APP_ID }}
+          private-key: ${{ secrets.DEPLOY_APP_PRIVATE_KEY }}
+      - uses: actions/github-script@v9
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const {owner, repo} = context.repo;
+            const isSweep = context.eventName === 'schedule' || context.eventName === 'workflow_dispatch';
 
             // Collect candidate PR numbers from whatever event fired.
             let numbers = [];
@@ -42,6 +77,13 @@ jobs:
               numbers = [context.payload.pull_request.number];
             } else if (context.eventName === 'check_suite') {
               numbers = (context.payload.check_suite.pull_requests || []).map(p => p.number);
+            } else if (isSweep) {
+              // The backstop: consider every open PR, not just one an event named.
+              const open = await github.paginate(github.rest.pulls.list, {
+                owner, repo, state: 'open', per_page: 100,
+              });
+              numbers = open.map(p => p.number);
+              core.info(`sweep: ${numbers.length} open PR(s)`);
             }
             if (numbers.length === 0) { core.info('no candidate PRs'); return; }
 
@@ -49,21 +91,43 @@ jobs:
               repository(owner:$o,name:$r){
                 mergeQueue{ id }
                 pullRequest(number:$n){
-                  id number isDraft state merged isInMergeQueue mergeStateStatus
+                  id number isDraft state merged isInMergeQueue mergeStateStatus mergeable headRefOid
                 }
               }
             }`;
             const ENQUEUE = `mutation($id:ID!){ enqueuePullRequest(input:{pullRequestId:$id}){ mergeQueueEntry{ position } } }`;
             const AUTOMERGE = `mutation($id:ID!){ enablePullRequestAutoMerge(input:{pullRequestId:$id, mergeMethod:SQUASH}){ pullRequest{ number } } }`;
+            const MERGE = `mutation($id:ID!,$oid:GitObjectID!){ mergePullRequest(input:{pullRequestId:$id, mergeMethod:SQUASH, expectedHeadOid:$oid}){ pullRequest{ number merged } } }`;
             const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+            // A PR is ready to merge/enqueue when mergeStateStatus is CLEAN, OR UNSTABLE
+            // with mergeable === MERGEABLE. UNSTABLE means every REQUIRED check has
+            // already passed and only a non-required context is failing or still pending
+            // (a failing/pending REQUIRED check yields BLOCKED, not UNSTABLE) - so branch
+            // protection is satisfied. Treating UNSTABLE as ready is what unstrands
+            // fast-CI repos: by the time this job evaluates, the only non-success context
+            // is often its OWN in-progress `automerge` check, which pins the commit to
+            // UNSTABLE, blocks the direct merge, and makes enablePullRequestAutoMerge
+            // fail with "unstable status", leaving the PR clean-but-open with no event to
+            // re-fire it (#404/#405). We do NOT inspect check runs (the App token cannot
+            // read statusCheckRollup): the merge/enqueue mutation itself enforces branch
+            // protection with expectedHeadOid, so a genuinely-unsatisfied required check
+            // still cannot slip through, and non-required checks are advisory (the same
+            // semantics as GitHub's native auto-merge). BLOCKED/DIRTY/UNKNOWN are not ready.
+            const isReady = (pr) =>
+              pr.mergeStateStatus === 'CLEAN' ||
+              (pr.mergeStateStatus === 'UNSTABLE' && pr.mergeable === 'MERGEABLE');
 
             for (const n of numbers) {
               // mergeStateStatus is computed async; retry briefly on UNKNOWN.
+              // One pass is enough on the sweep: the next one is 15 minutes away,
+              // so waiting here would only burn runner minutes.
+              const attempts = isSweep ? 1 : 6;
               let data;
-              for (let i = 0; i < 6; i++) {
+              for (let i = 0; i < attempts; i++) {
                 data = await github.graphql(Q, {o: owner, r: repo, n});
                 if (data.repository.pullRequest.mergeStateStatus !== 'UNKNOWN') break;
-                await sleep(5000);
+                if (i < attempts - 1) await sleep(5000);
               }
               const pr = data.repository.pullRequest;
               const hasQueue = !!data.repository.mergeQueue;
@@ -71,14 +135,39 @@ jobs:
               if (pr.isDraft) { core.info(`#${n}: draft, skipping`); continue; }
               if (pr.isInMergeQueue) { core.info(`#${n}: already in merge queue`); continue; }
 
+              const ready = isReady(pr);
               if (hasQueue) {
-                if (pr.mergeStateStatus === 'CLEAN') {
+                if (ready) {
                   try { await github.graphql(ENQUEUE, {id: pr.id}); core.info(`#${n}: enqueued`); }
                   catch (e) { core.info(`#${n}: enqueue not accepted yet (${e.message})`); }
                 } else {
-                  core.info(`#${n}: mergeStateStatus=${pr.mergeStateStatus}, waiting for a later check_suite event`);
+                  // Not an error: failing checks, a conflict, or a required review.
+                  // No longer relies on a later event arriving; the sweep re-evaluates
+                  // this PR within 15 minutes, so it cannot strand.
+                  core.info(`#${n}: mergeStateStatus=${pr.mergeStateStatus}, leaving for the next sweep`);
                 }
               } else {
+                // Non-merge-queue repo. Prefer a SYNCHRONOUS merge under the App
+                // token when the PR is ready. GitHub's native auto-merge is completed
+                // asynchronously by GitHub itself and has two failure modes this avoids:
+                // it can strand a PR "clean but never merged" with no event left to
+                // re-fire it (#314), and its merge completion hits the no-cascade rule
+                // so push:[main] deploy workflows never run for that commit (#315). A
+                // direct App-token merge is deterministic and lands a normal push that
+                // DOES cascade to the deploy workflows.
+                if (ready) {
+                  try {
+                    await github.graphql(MERGE, {id: pr.id, oid: pr.headRefOid});
+                    core.info(`#${n}: merged (app-token squash)`);
+                    continue;
+                  } catch (e) {
+                    core.info(`#${n}: direct merge not accepted (${e.message}); falling back to auto-merge`);
+                  }
+                }
+                // Not ready yet, or the direct merge raced a new head: enable native
+                // auto-merge so GitHub merges once branch protection is satisfied. A
+                // later check_suite/review event also re-runs this job and will take
+                // the direct-merge path above once the PR is ready.
                 try { await github.graphql(AUTOMERGE, {id: pr.id}); core.info(`#${n}: auto-merge enabled`); }
                 catch (e) { core.info(`#${n}: auto-merge enable skipped (${e.message})`); }
               }
