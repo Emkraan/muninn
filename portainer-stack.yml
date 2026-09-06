@@ -20,7 +20,16 @@ services:
     # not emit registry 401 noise. Updates ship via the CI -> Portainer path, not WUD.
     labels:
       wud.watch: "false"
-    restart: always
+    # unless-stopped, not always: the two are identical for crash and reboot
+    # recovery, and always additionally overrides a deliberate operator stop,
+    # bringing the container back mid-maintenance. Fleet standard.
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:7575/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     environment:
       - SECRET_ENCRYPTION_KEY_FILE=/run/secrets/secret_encryption_key
       - DB_DIALECT=postgresql
