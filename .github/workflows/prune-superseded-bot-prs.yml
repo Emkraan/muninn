@@ -1,0 +1,63 @@
+name: prune-superseded-bot-prs
+
+# Close superseded automated PRs so they never pile up. The version-bump and
+# deploy image-pin workflows open a new ci/version-bump-<sha> or ci/pin-<app>-<sha>
+# branch on every push. Because each edits the same VERSION / portainer-stack file,
+# once main advances the older ones go DIRTY and can never merge, so a fresh build's
+# PR strands every earlier one open (the 2026-09-17 emkraan-apps pile-up: 8 version
+# bumps + a stale studio pin). A DIRTY bot PR on one of these branches is by
+# definition superseded (a new one is regenerated on the next build), so close it.
+# Runs after every push to main and on a weekly safety sweep.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: prune-superseded-bot-prs
+  cancel-in-progress: false
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const PREFIXES = ['ci/version-bump-', 'ci/pin-'];
+            const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner, repo, state: 'open', per_page: 100,
+            });
+
+            for (const pr of prs) {
+              if (!PREFIXES.some(p => pr.head.ref.startsWith(p))) continue;
+              // Only ever touch bot-authored PRs, never a human's.
+              if (pr.user && pr.user.type !== 'Bot') continue;
+
+              // mergeable_state is computed async and omitted from the list payload.
+              let full;
+              for (let i = 0; i < 6; i++) {
+                full = (await github.rest.pulls.get({owner, repo, pull_number: pr.number})).data;
+                if (full.mergeable_state !== 'unknown') break;
+                await sleep(3000);
+              }
+              // DIRTY == real conflict with main == a newer build already moved past it.
+              if (full.mergeable_state !== 'dirty') { continue; }
+
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: pr.number,
+                body: 'Closing as superseded: this automated pin/version-bump PR is in merge conflict with main, which means a newer build has already moved past it. A fresh PR is regenerated on the next push. See docs/standards/github-repo-standard.md Section 8.',
+              });
+              await github.rest.pulls.update({owner, repo, pull_number: pr.number, state: 'closed'});
+              core.info(`#${pr.number} (${pr.head.ref}): closed as superseded (dirty)`);
+            }
