@@ -1,95 +1,53 @@
 name: automerge
 
-# Repo-level auto-merge that works on BOTH plain repos and merge-queue repos.
+# Repo-level auto-merge for BOTH plain repos and merge-queue repos.
 #
-# Plain repos: enable GitHub auto-merge (squash) so the PR merges when branch
-# protection is satisfied.
-# Merge-queue repos: GitHub auto-merge does NOT reliably add a PR to the queue,
-# so once the PR is mergeable we call the enqueuePullRequest GraphQL mutation
-# explicitly. It fires on check completion (not just PR open) so the PR is
-# actually ready when we try.
+# Triggered by workflow_run on this repo's CI workflow completing, NOT
+# check_suite: GitHub creates no workflow runs from events triggered by
+# GITHUB_TOKEN, so check_suite.completed never re-fires this workflow and a PR
+# that went green after its open-time run sat stranded (clean but never merged).
+# workflow_run chains off a named workflow finishing and is not blocked that way.
 #
-# Branch protection (required reviews/checks) still fully applies either way.
+# A PR is ready when mergeStateStatus is CLEAN, OR UNSTABLE with mergeable
+# MERGEABLE: a failing/pending REQUIRED check reads BLOCKED, so UNSTABLE means
+# branch protection is satisfied and only a non-required context (often this
+# automerge run itself, in progress) is not green. Gating on strict CLEAN let a
+# PR pin itself open forever behind its own run.
 #
-# WHY THE SCHEDULED SWEEP EXISTS (2026-09-06):
-# On a merge-queue repo the event-driven path alone is not sufficient. When a
-# check_suite completes, GitHub has often not yet recomputed mergeStateStatus,
-# so the PR still reads BLOCKED and this job exits without enqueuing. If that
-# was the LAST check_suite event for the PR, nothing ever retried: the PR then
-# went CLEAN and sat open forever. Pin PR #148 stranded that way for four days,
-# which silently froze the GitOps deploy chain, because build-and-deploy.yml
-# only classifies mode=webhook for a "chore: pin muninn ->" head commit, so the
-# Portainer redeploy never ran and the host kept serving the previous image with
-# no alert anywhere. Reproduced live on #150.
-#
-# The sweep is the convergence guarantee: it re-evaluates every open PR on a
-# fixed cadence, independent of event delivery, so a dropped or badly-timed
-# event can no longer strand a PR indefinitely. Muninn is currently the only
-# Emkraan repo with a merge-queue ruleset, which is why the explicit
-# enqueuePullRequest call is load-bearing here and nowhere else.
+# Branch protection (required reviews/checks) still fully applies: the enqueue
+# and merge mutations enforce it, and expectedHeadOid guards the direct merge.
 
 on:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
   pull_request_review:
     types: [submitted]
-  check_suite:
+  workflow_run:
+    workflows: ["PR checks"]
     types: [completed]
-  schedule:
-    # Backstop only; the event path still handles the happy case immediately.
-    # Asks for every 15 minutes. GitHub does NOT honour that here: measured over
-    # 12 consecutive scheduled runs of homelab-stacks eir-windmill-sync (same
-    # cron, same org) the real interval was 98 to 287 minutes, median 135. So the
-    # sweep converges in hours, not minutes. That is still a real backstop (the
-    # previous behaviour was never), and the event path above still handles the
-    # normal case immediately, but do not document this as a 15-minute guarantee.
-    - cron: '*/15 * * * *'
-  workflow_dispatch:
 
 permissions:
   contents: write
   pull-requests: write
 
 concurrency:
-  # Non-PR events (schedule/dispatch) carry no pull_request payload, so fall
-  # back to run_id rather than collapsing every sweep into a single group.
-  group: automerge-${{ github.event.pull_request.number || github.event.check_suite.id || github.run_id }}
+  group: automerge-${{ github.event.pull_request.number || github.event.workflow_run.id }}
   cancel-in-progress: false
 
 jobs:
   automerge:
     runs-on: ubuntu-latest
     steps:
-      # A PR merged under the default GITHUB_TOKEN (github-actions[bot]) does not
-      # trigger push-triggered deploy-*.yml (GitHub loop-prevention), so a
-      # bot-merged stack change lands on main but never redeploys. Merge under the
-      # emkraan-deploy-bot App token instead; an App-token merge DOES trigger those
-      # workflows. Per github-actions-monorepo-standard.md. See #291.
-      - uses: actions/create-github-app-token@v3
-        id: app-token
+      - uses: actions/github-script@v7
         with:
-          app-id: ${{ vars.DEPLOY_APP_ID }}
-          private-key: ${{ secrets.DEPLOY_APP_PRIVATE_KEY }}
-      - uses: actions/github-script@v9
-        with:
-          github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const {owner, repo} = context.repo;
-            const isSweep = context.eventName === 'schedule' || context.eventName === 'workflow_dispatch';
 
-            // Collect candidate PR numbers from whatever event fired.
             let numbers = [];
             if (context.eventName === 'pull_request' || context.eventName === 'pull_request_review') {
               numbers = [context.payload.pull_request.number];
-            } else if (context.eventName === 'check_suite') {
-              numbers = (context.payload.check_suite.pull_requests || []).map(p => p.number);
-            } else if (isSweep) {
-              // The backstop: consider every open PR, not just one an event named.
-              const open = await github.paginate(github.rest.pulls.list, {
-                owner, repo, state: 'open', per_page: 100,
-              });
-              numbers = open.map(p => p.number);
-              core.info(`sweep: ${numbers.length} open PR(s)`);
+            } else if (context.eventName === 'workflow_run') {
+              numbers = (context.payload.workflow_run.pull_requests || []).map(p => p.number);
             }
             if (numbers.length === 0) { core.info('no candidate PRs'); return; }
 
@@ -106,43 +64,16 @@ jobs:
             const MERGE = `mutation($id:ID!,$oid:GitObjectID!){ mergePullRequest(input:{pullRequestId:$id, mergeMethod:SQUASH, expectedHeadOid:$oid}){ pullRequest{ number merged } } }`;
             const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-            // A PR is ready to merge/enqueue when mergeStateStatus is CLEAN, OR UNSTABLE
-            // with mergeable === MERGEABLE. UNSTABLE means every REQUIRED check has
-            // already passed and only a non-required context is failing or still pending
-            // (a failing/pending REQUIRED check yields BLOCKED, not UNSTABLE) - so branch
-            // protection is satisfied. Treating UNSTABLE as ready is what unstrands
-            // fast-CI repos: by the time this job evaluates, the only non-success context
-            // is often its OWN in-progress `automerge` check, which pins the commit to
-            // UNSTABLE, blocks the direct merge, and makes enablePullRequestAutoMerge
-            // fail with "unstable status", leaving the PR clean-but-open with no event to
-            // re-fire it (#404/#405). We do NOT inspect check runs (the App token cannot
-            // read statusCheckRollup): the merge/enqueue mutation itself enforces branch
-            // protection with expectedHeadOid, so a genuinely-unsatisfied required check
-            // still cannot slip through, and non-required checks are advisory (the same
-            // semantics as GitHub's native auto-merge). BLOCKED/DIRTY/UNKNOWN are not ready.
             const isReady = (pr) =>
               pr.mergeStateStatus === 'CLEAN' ||
               (pr.mergeStateStatus === 'UNSTABLE' && pr.mergeable === 'MERGEABLE');
 
-            // mergeStateStatus is computed LAZILY. The first query for a PR GitHub
-            // has not looked at recently returns UNKNOWN and only then kicks off the
-            // computation. On a sweep that means every cold PR reads UNKNOWN and gets
-            // skipped: the first live sweep was a no-op across all 7 open PRs for
-            // exactly this reason. Warm them all first, then read the settled values.
-            if (isSweep) {
-              await Promise.all(numbers.map(n =>
-                github.graphql(Q, {o: owner, r: repo, n}).catch(() => null)));
-              await sleep(5000);
-            }
-
             for (const n of numbers) {
-              // Still retry: the warm-up is best-effort, not a guarantee.
-              const attempts = 6;
               let data;
-              for (let i = 0; i < attempts; i++) {
+              for (let i = 0; i < 6; i++) {
                 data = await github.graphql(Q, {o: owner, r: repo, n});
                 if (data.repository.pullRequest.mergeStateStatus !== 'UNKNOWN') break;
-                if (i < attempts - 1) await sleep(5000);
+                await sleep(5000);
               }
               const pr = data.repository.pullRequest;
               const hasQueue = !!data.repository.mergeQueue;
@@ -156,34 +87,18 @@ jobs:
                   try { await github.graphql(ENQUEUE, {id: pr.id}); core.info(`#${n}: enqueued`); }
                   catch (e) { core.info(`#${n}: enqueue not accepted yet (${e.message})`); }
                 } else {
-                  // Not an error: failing checks, a conflict, or a required review.
-                  // No longer relies on a later event arriving; the sweep re-evaluates
-                  // this PR on the next scheduled run, so it cannot strand
-                  // indefinitely. Expect hours, not minutes: see the cron note above.
-                  core.info(`#${n}: mergeStateStatus=${pr.mergeStateStatus}, leaving for the next sweep`);
+                  core.info(`#${n}: mergeStateStatus=${pr.mergeStateStatus}, waiting for a later workflow_run event`);
                 }
               } else {
-                // Non-merge-queue repo. Prefer a SYNCHRONOUS merge under the App
-                // token when the PR is ready. GitHub's native auto-merge is completed
-                // asynchronously by GitHub itself and has two failure modes this avoids:
-                // it can strand a PR "clean but never merged" with no event left to
-                // re-fire it (#314), and its merge completion hits the no-cascade rule
-                // so push:[main] deploy workflows never run for that commit (#315). A
-                // direct App-token merge is deterministic and lands a normal push that
-                // DOES cascade to the deploy workflows.
                 if (ready) {
                   try {
                     await github.graphql(MERGE, {id: pr.id, oid: pr.headRefOid});
-                    core.info(`#${n}: merged (app-token squash)`);
+                    core.info(`#${n}: merged (squash)`);
                     continue;
                   } catch (e) {
                     core.info(`#${n}: direct merge not accepted (${e.message}); falling back to auto-merge`);
                   }
                 }
-                // Not ready yet, or the direct merge raced a new head: enable native
-                // auto-merge so GitHub merges once branch protection is satisfied. A
-                // later check_suite/review event also re-runs this job and will take
-                // the direct-merge path above once the PR is ready.
                 try { await github.graphql(AUTOMERGE, {id: pr.id}); core.info(`#${n}: auto-merge enabled`); }
                 catch (e) { core.info(`#${n}: auto-merge enable skipped (${e.message})`); }
               }
