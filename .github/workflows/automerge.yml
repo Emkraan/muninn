@@ -16,6 +16,14 @@ name: automerge
 #
 # Branch protection (required reviews/checks) still fully applies: the enqueue
 # and merge mutations enforce it, and expectedHeadOid guards the direct merge.
+#
+# The event triggers alone are not enough: a PR can go green, get enqueued, then
+# fall OUT of the merge queue (a queue hiccup, a preceding entry's merge, a
+# timeout) without ever merging, and with no further PR event to re-fire this
+# workflow it sits clean-but-open forever (this stranded a pin PR >24h and fired
+# the Pin-PR-Stuck alert). The scheduled sweep below is the safety net: it walks
+# every open non-draft PR and re-enqueues/merges any that are ready. Keep it.
+# workflow_dispatch runs the same sweep on demand to unstick a stranded PR now.
 
 on:
   pull_request:
@@ -25,6 +33,9 @@ on:
   workflow_run:
     workflows: ["PR checks"]
     types: [completed]
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -48,6 +59,13 @@ jobs:
               numbers = [context.payload.pull_request.number];
             } else if (context.eventName === 'workflow_run') {
               numbers = (context.payload.workflow_run.pull_requests || []).map(p => p.number);
+            } else if (context.eventName === 'schedule' || context.eventName === 'workflow_dispatch') {
+              // Safety-net sweep: every open, non-draft PR. Recovers a green PR
+              // that stranded with no pending event to re-trigger the paths above.
+              const open = await github.paginate(github.rest.pulls.list, {
+                owner, repo, state: 'open', per_page: 100,
+              });
+              numbers = open.filter(p => !p.draft).map(p => p.number);
             }
             if (numbers.length === 0) { core.info('no candidate PRs'); return; }
 
