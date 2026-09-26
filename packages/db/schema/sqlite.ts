@@ -68,7 +68,6 @@ export const oidcProviders = sqliteTable("oidcProvider", {
   usernameClaim: text(),
   groupsClaim: text(),
   allowedGroups: text(),
-  adminGroups: text(),
   groupsLocalManagement: int({ mode: "boolean" }).default(false).notNull(),
   createdAt: int({ mode: "timestamp" }).notNull(),
   updatedAt: int({ mode: "timestamp" })

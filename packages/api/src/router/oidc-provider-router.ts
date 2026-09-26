@@ -133,7 +133,6 @@ const upsertSchema = z.object({
   usernameClaim: z.string().nullish(),
   groupsClaim: z.string().nullish(),
   allowedGroups: z.string().nullish(),
-  adminGroups: z.string().nullish(),
   groupsLocalManagement: z.boolean().default(false),
 });
 

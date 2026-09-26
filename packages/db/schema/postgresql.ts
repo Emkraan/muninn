@@ -82,7 +82,6 @@ export const oidcProviders = pgTable("oidcProvider", {
   usernameClaim: varchar({ length: 128 }),
   groupsClaim: varchar({ length: 128 }),
   allowedGroups: text(),
-  adminGroups: text(),
   groupsLocalManagement: boolean().default(false).notNull(),
   createdAt: timestamp().notNull(),
   updatedAt: timestamp()

@@ -61,7 +61,7 @@ export interface OidcGroupConfig {
   groupsClaim: string;
   groupsLocalManagement: boolean;
   allowedGroups: string[];
-  adminGroups: string[];
+  providerType: OidcProviderRow["providerType"];
 }
 
 /**
@@ -84,7 +84,7 @@ export const getOidcGroupConfigAsync = async (
     groupsClaim: claim && claim.length > 0 ? claim : "groups",
     groupsLocalManagement: row.groupsLocalManagement,
     allowedGroups: splitList(row.allowedGroups),
-    adminGroups: splitList(row.adminGroups),
+    providerType: row.providerType,
   };
 };
 

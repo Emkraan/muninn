@@ -16,7 +16,7 @@ import { createSignInEventHandler } from "./events";
 import { createCredentialsConfiguration, createLdapConfiguration } from "./providers/credentials/credentials-provider";
 import { EmptyNextAuthProvider } from "./providers/empty/empty-provider";
 import { filterProviders } from "./providers/filter-providers";
-import { getOidcGroupConfigAsync } from "./providers/oidc/load-db-providers";
+import { isOidcSignInAllowedAsync } from "./group-gate";
 import { createRedirectUri } from "./redirect";
 import { expireDateAfter, generateSessionToken, sessionTokenCookieName } from "./session";
 
@@ -79,31 +79,15 @@ export const createConfiguration = (
       session: createSessionCallback(db),
       // eslint-disable-next-line no-restricted-syntax
       signIn: async ({ user, account, profile }) => {
-        // Multi-provider OIDC: enforce the per-provider "allowed groups"
-        // gate. DB OIDC providers dispatch as account.provider "oidc-<key>";
-        // recover the key, load its group config, and deny sign-in when
-        // allowedGroups is non-empty and the profile's groups claim does not
-        // intersect it. Fail closed: a missing/empty/non-array claim => deny.
-        // This is the only hook that can deny (the signIn EVENT runs after auth
-        // and cannot block). Providers that leave allowedGroups empty are
-        // unaffected, as are credentials/ldap.
-        if (account?.provider.startsWith("oidc-")) {
-          const oidcKey = account.provider.slice("oidc-".length);
-          const groupConfig = await getOidcGroupConfigAsync(db, oidcKey);
-          if (groupConfig && groupConfig.allowedGroups.length > 0) {
-            const claimValue = profile?.[groupConfig.groupsClaim];
-            const userGroups = Array.isArray(claimValue)
-              ? claimValue.filter((group): group is string => typeof group === "string")
-              : [];
-            const isAllowed = userGroups.some((group) => groupConfig.allowedGroups.includes(group));
-            if (!isAllowed) {
-              logger.warn("OIDC sign-in denied: user is not a member of any allowed group.", {
-                provider: account.provider,
-                userId: user.id,
-              });
-              return false;
-            }
-          }
+        // Multi-provider OIDC: enforce the per-provider "allowed groups" gate
+        // (see isOidcSignInAllowedAsync for the full rule set - Authentik
+        // group_ids matching, fail-closed, legacy name-based migration
+        // compat). This is the only hook that can deny (the signIn EVENT
+        // runs after auth and cannot block). Non-oidc-prefixed providers
+        // (credentials/ldap) and providers that leave allowedGroups empty are
+        // unaffected.
+        if (!(await isOidcSignInAllowedAsync(db, account?.provider, profile, user.id))) {
+          return false;
         }
 
         /**

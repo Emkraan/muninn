@@ -141,6 +141,13 @@
       "when": 1790446629650,
       "tag": "0019_audit_id_to_text",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1790449410883,
+      "tag": "0020_remove_dead_admin_groups",
+      "breakpoints": true
     }
   ]
 }
