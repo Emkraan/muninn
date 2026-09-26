@@ -976,16 +976,16 @@ export const customWidgetSecretRelations = relations(customWidgetSecrets, ({ one
 export const adminAudit = pgTable("admin_audit", {
   id: varchar({ length: 64 }).notNull().primaryKey(),
   timestamp: timestamp({ mode: "date" }).notNull(),
-  userId: varchar({ length: 64 }).notNull(),
-  userEmail: varchar({ length: 256 }).notNull(),
+  userId: varchar("user_id", { length: 64 }).notNull(),
+  userEmail: varchar("user_email", { length: 256 }).notNull(),
   action: varchar({ length: 128 }).notNull(),
-  targetId: varchar({ length: 64 }), // nullable
+  targetId: varchar("target_id", { length: 64 }), // nullable
   detail: text(), // nullable JSON
   // §2.1 standard columns (never part of the hash payload; existing chain stays valid)
   outcome: varchar({ length: 16 }), // "success" | "failure"; null for legacy rows pre-0015
-  resourceType: varchar({ length: 64 }), // e.g. "invite", "oidcProvider"
-  resourceId: varchar({ length: 64 }), // primary identifier of the affected resource
-  errorMessage: text(), // populated on outcome="failure"; null on success
+  resourceType: varchar("resource_type", { length: 64 }), // e.g. "invite", "oidcProvider"
+  resourceId: varchar("resource_id", { length: 64 }), // primary identifier of the affected resource
+  errorMessage: text("error_message"), // populated on outcome="failure"; null on success
   // §2.2 context columns (never part of the hash payload; added in migration 0016)
   schemaVersion: integer("schema_version").notNull().default(1),
   actorName: varchar("actor_name", { length: 256 }),
@@ -1002,6 +1002,6 @@ export const adminAudit = pgTable("admin_audit", {
   // search_vector (tsvector generated column) exists in the DB but is managed entirely by
   // PostgreSQL; it is not mapped here because Drizzle cannot write to generated columns.
   // Query it via raw SQL: sql`"admin_audit"."search_vector" @@ plainto_tsquery(...)`.
-  prevHash: varchar({ length: 128 }), // null only for first entry
+  prevHash: varchar("prev_hash", { length: 128 }), // null only for first entry
   hash: varchar({ length: 128 }).notNull(),
 });
