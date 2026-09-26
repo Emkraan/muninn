@@ -44,8 +44,13 @@ export const createSignInEventHandler = (db: Database): Exclude<NextAuthConfig["
       // group pk uuids), never on the display-only `groups` names claim.
       //
       // Fail closed: a token without `group_ids` must not touch membership,
-      // and must never fall back to matching by name.
-      if ("group_ids" in profile && Array.isArray(profile.group_ids)) {
+      // and must never fall back to matching by name. Per authentik-broker-standard
+      // Rule 9, an EMPTY group_ids array is treated the same as an absent claim:
+      // the app must not overwrite the cached/linked group membership with an
+      // empty set (a transient IdP/claim-mapping glitch must not read as "remove
+      // this user from every Authentik-linked group", which could include an
+      // admin's own admin-granting group).
+      if ("group_ids" in profile && Array.isArray(profile.group_ids) && profile.group_ids.length > 0) {
         logger.debug(`Using profile group_ids: ${JSON.stringify(profile.group_ids)}`);
         // One-time safe backfill: local groups that predate the group_ids
         // rollout have no stored Authentik id yet. Positionally pair the
@@ -64,8 +69,13 @@ export const createSignInEventHandler = (db: Database): Exclude<NextAuthConfig["
         await synchronizeGroupsByExternalIdForUserAsync(db, user.id, profile.group_ids as string[]);
       } else {
         logger.info(
-          "OIDC profile carried no group_ids claim; leaving group membership unchanged (fail closed per authentik-broker-standard Rule 9).",
-          { userId: user.id, oidcKey, groupsKeyConfigured: groupsKey },
+          "OIDC profile carried no (or an empty) group_ids claim; leaving group membership unchanged (fail closed per authentik-broker-standard Rule 9).",
+          {
+            userId: user.id,
+            oidcKey,
+            groupsKeyConfigured: groupsKey,
+            groupIdsPresent: "group_ids" in profile,
+          },
         );
       }
     }
@@ -176,15 +186,47 @@ const backfillExternalAuthentikGroupIdsByNameAsync = async (
   });
   if (unlinkedGroups.length === 0) return;
 
-  const idByName = new Map(externalGroupNames.map((name, index) => [name, externalGroupIds[index]]));
+  // Build name -> id, but track names that appear more than once in the
+  // token's claims (e.g. two distinct Authentik groups sharing a display
+  // name). An exact-name match against an ambiguous name cannot be trusted
+  // to mean the RIGHT Authentik group, so such names are excluded from the
+  // map entirely rather than silently resolving to whichever entry happened
+  // to appear last.
+  const idsByName = new Map<string, string[]>();
+  externalGroupNames.forEach((name, index) => {
+    const id = externalGroupIds[index];
+    if (id === undefined) return;
+    const existing = idsByName.get(name);
+    if (existing) {
+      existing.push(id);
+    } else {
+      idsByName.set(name, [id]);
+    }
+  });
 
   for (const localGroup of unlinkedGroups) {
-    const matchedId = idByName.get(localGroup.name);
-    if (!matchedId) {
+    const candidateIds = idsByName.get(localGroup.name);
+    if (!candidateIds) {
       logger.debug("No exact Authentik group name match for local group during backfill.", {
         groupId: localGroup.id,
         groupName: localGroup.name,
       });
+      continue;
+    }
+    const distinctCandidateIds = [...new Set(candidateIds)];
+    if (distinctCandidateIds.length > 1) {
+      logger.info(
+        "Skipping backfill for local group: multiple distinct Authentik groups share its name, so an exact name match cannot be trusted (fail closed - link it manually).",
+        {
+          groupId: localGroup.id,
+          groupName: localGroup.name,
+          ambiguousExternalIds: distinctCandidateIds,
+        },
+      );
+      continue;
+    }
+    const matchedId = distinctCandidateIds[0];
+    if (!matchedId) {
       continue;
     }
 

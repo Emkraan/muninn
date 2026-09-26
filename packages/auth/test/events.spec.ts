@@ -281,6 +281,36 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
       });
       expect(dbGroupMembers?.groupId).toBe("1");
     });
+    test("should fail closed: leave group membership unchanged when group_ids is an empty array", async () => {
+      // Arrange: authentik-broker-standard Rule 9 requires that the app "must
+      // also not overwrite the app's cached group ids with an empty set" - an
+      // empty group_ids array (e.g. from a transient IdP/mapping glitch) must
+      // be treated the same as an absent claim, never as "user is in zero
+      // groups now, strip everything" (which could strip an admin's own
+      // admin-granting group).
+      const db = createDb();
+      await createUserAsync(db);
+      await createGroupAsync(db, "test", "authentik-group-1");
+      await createOidcProviderAsync(db);
+      await db.insert(groupMembers).values({
+        userId: "1",
+        groupId: "1",
+      });
+      const eventHandler = createSignInEventHandler(db);
+
+      // Act: profile carries an empty group_ids array.
+      await eventHandler?.({
+        user: { id: "1", name: "test" },
+        profile: { preferred_username: "test", group_ids: [], someRandomGroupsKey: [] },
+        account: oidcAccount,
+      });
+
+      // Assert: membership from before sign-in is untouched.
+      const dbGroupMembers = await db.query.groupMembers.findFirst({
+        where: eq(groupMembers.userId, "1"),
+      });
+      expect(dbGroupMembers?.groupId).toBe("1");
+    });
     test("should backfill externalAuthentikGroupId by exact name match, once, then sync by id", async () => {
       // Arrange: a local group that predates the group_ids rollout (no stored
       // external id yet), whose name matches an entry in the token's
@@ -309,6 +339,39 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
         where: eq(groupMembers.userId, "1"),
       });
       expect(dbGroupMembers?.groupId).toBe("1");
+    });
+    test("should NOT backfill by name when two distinct Authentik groups share that name (ambiguous match)", async () => {
+      // Arrange: the token's group_ids/groups claims contain two DIFFERENT
+      // Authentik group ids that both display as "test" (e.g. one renamed
+      // into a collision, or two separately created groups with the same
+      // name). An exact name match here cannot tell which one is the local
+      // group's real counterpart, so the local group must be left unlinked
+      // rather than silently paired with whichever id happened to be last.
+      const db = createDb();
+      await createUserAsync(db);
+      await createGroupAsync(db, "test");
+      await createOidcProviderAsync(db);
+      const eventHandler = createSignInEventHandler(db);
+
+      // Act
+      await eventHandler?.({
+        user: { id: "1", name: "test" },
+        profile: {
+          preferred_username: "test",
+          group_ids: ["authentik-group-1", "authentik-group-2"],
+          someRandomGroupsKey: ["test", "test"],
+        },
+        account: oidcAccount,
+      });
+
+      // Assert: the local group was NOT backfilled, and membership by id was
+      // not established for either candidate (fail closed on ambiguity).
+      const dbGroup = await db.query.groups.findFirst({ where: eq(groups.id, "1") });
+      expect(dbGroup?.externalAuthentikGroupId).toBeNull();
+      const dbGroupMembers = await db.query.groupMembers.findFirst({
+        where: eq(groupMembers.userId, "1"),
+      });
+      expect(dbGroupMembers).toBeUndefined();
     });
   });
   test.each([
