@@ -969,16 +969,16 @@ export const customWidgetSecretRelations = relations(customWidgetSecrets, ({ one
 export const adminAudit = sqliteTable("admin_audit", {
   id: text().notNull().primaryKey(),
   timestamp: int({ mode: "timestamp" }).notNull(), // stored as unix seconds; returns Date
-  userId: text().notNull(), // stored independently; survives user deletion
-  userEmail: text().notNull(),
+  userId: text("user_id").notNull(), // stored independently; survives user deletion
+  userEmail: text("user_email").notNull(),
   action: text().notNull(), // e.g. "invite.createInvite"
-  targetId: text(), // nullable – the affected entity ID when applicable
+  targetId: text("target_id"), // nullable – the affected entity ID when applicable
   detail: text(), // nullable JSON – extra context (old value, new value, etc.)
   // §2.1 standard columns (never part of the hash payload; existing chain stays valid)
   outcome: text(), // "success" | "failure"; null for legacy rows pre-0047
-  resourceType: text(), // e.g. "invite", "oidcProvider", "serverSettings"
-  resourceId: text(), // the primary identifier of the affected resource
-  errorMessage: text(), // populated on outcome="failure"; null on success
+  resourceType: text("resource_type"), // e.g. "invite", "oidcProvider", "serverSettings"
+  resourceId: text("resource_id"), // the primary identifier of the affected resource
+  errorMessage: text("error_message"), // populated on outcome="failure"; null on success
   // §2.2 context columns (never part of the hash payload; added in migration 0048)
   schemaVersion: int("schema_version").notNull().default(1),
   actorName: text("actor_name"),
@@ -991,6 +991,6 @@ export const adminAudit = sqliteTable("admin_audit", {
   // Stored as unix seconds (same mode as the main `timestamp` column); returns Date.
   createdAt: int("created_at", { mode: "timestamp" }).notNull(),
   searchText: text("search_text"), // denormalised plain text for FTS5 virtual table sync
-  prevHash: text(), // null only for the first entry
+  prevHash: text("prev_hash"), // null only for the first entry
   hash: text().notNull(), // HMAC-SHA256 of canonical entry content + prevHash
 });
