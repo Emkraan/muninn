@@ -224,6 +224,10 @@ export const groups = pgTable("group", {
     onDelete: "set null",
   }),
   position: smallint().notNull(),
+  // Stable Authentik group pk (from the group_ids token claim). Nullable: not
+  // every local group originates from Authentik. Sync must match on this id,
+  // never on name (see Rule 9, docs/standards/authentik-broker-standard.md).
+  externalAuthentikGroupId: varchar({ length: 64 }),
 });
 
 export const groupPermissions = pgTable("groupPermission", {
