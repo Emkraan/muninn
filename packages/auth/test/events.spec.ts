@@ -131,23 +131,23 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
       expect(dbGroupMembers?.groupId).toBe("1");
     });
   });
-  describe("signInEventHandler should synchronize oidc groups", () => {
+  describe("signInEventHandler should synchronize Authentik group_ids (authentik-broker-standard Rule 9)", () => {
     // The groups claim key + local-management flag now come from the DB provider
     // row (keyed by the "oidc-<key>" NextAuth id on the account), not env.
     const oidcAccount = { provider: "oidc-test", providerAccountId: "sub", type: "oidc" } as never;
 
-    test("should add missing group membership", async () => {
+    test("should add missing group membership by external Authentik group id", async () => {
       // Arrange
       const db = createDb();
       await createUserAsync(db);
-      await createGroupAsync(db);
+      await createGroupAsync(db, "test", "authentik-group-1");
       await createOidcProviderAsync(db);
       const eventHandler = createSignInEventHandler(db);
 
       // Act
       await eventHandler?.({
         user: { id: "1", name: "test" },
-        profile: { preferred_username: "test", someRandomGroupsKey: ["test"] },
+        profile: { preferred_username: "test", group_ids: ["authentik-group-1"] },
         account: oidcAccount,
       });
 
@@ -157,11 +157,11 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
       });
       expect(dbGroupMembers?.groupId).toBe("1");
     });
-    test("should remove group membership", async () => {
+    test("should remove group membership no longer present in group_ids", async () => {
       // Arrange
       const db = createDb();
       await createUserAsync(db);
-      await createGroupAsync(db);
+      await createGroupAsync(db, "test", "authentik-group-1");
       await createOidcProviderAsync(db);
       await db.insert(groupMembers).values({
         userId: "1",
@@ -172,7 +172,7 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
       // Act
       await eventHandler?.({
         user: { id: "1", name: "test" },
-        profile: { preferred_username: "test", someRandomGroupsKey: [] },
+        profile: { preferred_username: "test", group_ids: [] },
         account: oidcAccount,
       });
 
@@ -197,7 +197,33 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
       // Act
       await eventHandler?.({
         user: { id: "1", name: "test" },
-        profile: { preferred_username: "test", someRandomGroupsKey: [] },
+        profile: { preferred_username: "test", group_ids: [] },
+        account: oidcAccount,
+      });
+
+      // Assert
+      const dbGroupMembers = await db.query.groupMembers.findFirst({
+        where: eq(groupMembers.userId, "1"),
+      });
+      expect(dbGroupMembers?.groupId).toBe("1");
+    });
+    test("should not touch group membership of a local group with no stored external id", async () => {
+      // Arrange: local group was never linked to Authentik (externalAuthentikGroupId
+      // stays null) and is not in the token's group_ids either; it must be left alone.
+      const db = createDb();
+      await createUserAsync(db);
+      await createGroupAsync(db);
+      await createOidcProviderAsync(db);
+      await db.insert(groupMembers).values({
+        userId: "1",
+        groupId: "1",
+      });
+      const eventHandler = createSignInEventHandler(db);
+
+      // Act
+      await eventHandler?.({
+        user: { id: "1", name: "test" },
+        profile: { preferred_username: "test", group_ids: [] },
         account: oidcAccount,
       });
 
@@ -211,14 +237,14 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
       // Arrange
       const db = createDb();
       await createUserAsync(db);
-      await createGroupAsync(db);
+      await createGroupAsync(db, "test", "authentik-group-1");
       await createOidcProviderAsync(db, { groupsLocalManagement: true });
       const eventHandler = createSignInEventHandler(db);
 
       // Act
       await eventHandler?.({
         user: { id: "1", name: "test" },
-        profile: { preferred_username: "test", someRandomGroupsKey: ["test"] },
+        profile: { preferred_username: "test", group_ids: ["authentik-group-1"] },
         account: oidcAccount,
       });
 
@@ -227,6 +253,62 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
         where: eq(groupMembers.userId, "1"),
       });
       expect(dbGroupMembers).toBeUndefined();
+    });
+    test("should fail closed: leave group membership unchanged when the token carries no group_ids claim", async () => {
+      // Arrange: a token from a provider that never emits group_ids (or an
+      // error) must NOT clobber membership, and must NOT fall back to the
+      // display-only groups names claim.
+      const db = createDb();
+      await createUserAsync(db);
+      await createGroupAsync(db, "test", "authentik-group-1");
+      await createOidcProviderAsync(db);
+      await db.insert(groupMembers).values({
+        userId: "1",
+        groupId: "1",
+      });
+      const eventHandler = createSignInEventHandler(db);
+
+      // Act: profile carries the display-only "groups" names claim but no group_ids.
+      await eventHandler?.({
+        user: { id: "1", name: "test" },
+        profile: { preferred_username: "test", someRandomGroupsKey: [] },
+        account: oidcAccount,
+      });
+
+      // Assert: membership from before sign-in is untouched.
+      const dbGroupMembers = await db.query.groupMembers.findFirst({
+        where: eq(groupMembers.userId, "1"),
+      });
+      expect(dbGroupMembers?.groupId).toBe("1");
+    });
+    test("should backfill externalAuthentikGroupId by exact name match, once, then sync by id", async () => {
+      // Arrange: a local group that predates the group_ids rollout (no stored
+      // external id yet), whose name matches an entry in the token's
+      // display-only groups names claim at the same index as its group_ids entry.
+      const db = createDb();
+      await createUserAsync(db);
+      await createGroupAsync(db, "test");
+      await createOidcProviderAsync(db);
+      const eventHandler = createSignInEventHandler(db);
+
+      // Act
+      await eventHandler?.({
+        user: { id: "1", name: "test" },
+        profile: {
+          preferred_username: "test",
+          group_ids: ["authentik-group-1"],
+          someRandomGroupsKey: ["test"],
+        },
+        account: oidcAccount,
+      });
+
+      // Assert: the local group was backfilled and the user was added by id.
+      const dbGroup = await db.query.groups.findFirst({ where: eq(groups.id, "1") });
+      expect(dbGroup?.externalAuthentikGroupId).toBe("authentik-group-1");
+      const dbGroupMembers = await db.query.groupMembers.findFirst({
+        where: eq(groupMembers.userId, "1"),
+      });
+      expect(dbGroupMembers?.groupId).toBe("1");
     });
   });
   test.each([
@@ -310,11 +392,12 @@ const createUserAsync = async (db: Database) =>
     colorScheme: "dark",
   });
 
-const createGroupAsync = async (db: Database, name = "test") =>
+const createGroupAsync = async (db: Database, name = "test", externalAuthentikGroupId: string | null = null) =>
   await db.insert(groups).values({
     id: "1",
     name,
     position: 1,
+    externalAuthentikGroupId,
   });
 
 const createOidcProviderAsync = async (

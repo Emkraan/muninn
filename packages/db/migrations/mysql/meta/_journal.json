@@ -351,6 +351,13 @@
       "when": 1786982600000,
       "tag": "0049_audit_context_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "5",
+      "when": 1790438256571,
+      "tag": "0050_add_group_external_authentik_id",
+      "breakpoints": true
     }
   ]
 }

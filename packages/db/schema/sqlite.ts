@@ -211,6 +211,10 @@ export const groups = sqliteTable("group", {
     onDelete: "set null",
   }),
   position: int().notNull(),
+  // Stable Authentik group pk (from the group_ids token claim). Nullable: not
+  // every local group originates from Authentik. Sync must match on this id,
+  // never on name (see Rule 9, docs/standards/authentik-broker-standard.md).
+  externalAuthentikGroupId: text(),
 });
 
 export const groupPermissions = sqliteTable("groupPermission", {
