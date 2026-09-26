@@ -76,7 +76,6 @@ const formSchema = z.object({
   usernameClaim: z.string(),
   groupsClaim: z.string(),
   allowedGroups: z.string(),
-  adminGroups: z.string(),
   groupsLocalManagement: z.boolean(),
 });
 
@@ -107,7 +106,6 @@ const emptyValues = (): FormValues => ({
   usernameClaim: "",
   groupsClaim: "",
   allowedGroups: "",
-  adminGroups: "",
   groupsLocalManagement: false,
 });
 
@@ -138,7 +136,6 @@ const fromRow = (row: ProviderRow): FormValues => ({
   usernameClaim: s(row.usernameClaim),
   groupsClaim: s(row.groupsClaim),
   allowedGroups: s(row.allowedGroups),
-  adminGroups: s(row.adminGroups),
   groupsLocalManagement: row.groupsLocalManagement,
 });
 
@@ -261,7 +258,6 @@ export const OidcProviderModal = createModal<{ provider?: ProviderRow }>(({ acti
       usernameClaim: nullIfEmpty(values.usernameClaim),
       groupsClaim: nullIfEmpty(values.groupsClaim),
       allowedGroups: nullIfEmpty(values.allowedGroups),
-      adminGroups: nullIfEmpty(values.adminGroups),
       groupsLocalManagement: values.groupsLocalManagement,
     });
   };
@@ -453,13 +449,12 @@ export const OidcProviderModal = createModal<{ provider?: ProviderRow }>(({ acti
                 />
                 <TextInput
                   label="Allowed groups"
-                  description="Comma-separated. If set, only members of these groups may sign in."
+                  description={
+                    providerType === "authentik"
+                      ? "Comma-separated Authentik group ids (the stable pk, not the display name). If set, only members of these groups (by group_ids) may sign in. Signs in are denied when the token carries no group_ids claim."
+                      : "Comma-separated group names. If set, only members of these groups may sign in."
+                  }
                   {...form.getInputProps("allowedGroups")}
-                />
-                <TextInput
-                  label="Admin groups"
-                  description="Comma-separated. Not yet enforced: to grant admin, create a Muninn group whose name matches the IdP group and give it the admin permission."
-                  {...form.getInputProps("adminGroups")}
                 />
                 <Switch
                   label="Manage group membership locally"
