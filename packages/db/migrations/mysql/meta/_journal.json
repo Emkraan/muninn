@@ -379,6 +379,13 @@
       "when": 1790449000000,
       "tag": "0053_remove_dead_admin_groups",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "5",
+      "when": 1790450947059,
+      "tag": "0054_fix_custom_widget_secret_fk_name",
+      "breakpoints": true
     }
   ]
 }
