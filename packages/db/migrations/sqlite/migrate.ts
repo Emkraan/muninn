@@ -1,18 +1,24 @@
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
 
-import { createSharedDbConfig, createSqliteDb } from "@homarr/core/infrastructure/db";
+import { createSharedDbConfig } from "@homarr/core/infrastructure/db";
+import { dbEnv } from "@homarr/core/infrastructure/db/env";
 
 import * as sqliteSchema from "../../schema/sqlite";
 import { applyCustomMigrationsAsync } from "../custom";
 import { seedDataAsync } from "../seed";
+import { robustMigrateSqlite } from "./robust-migrate";
 
 const migrationsFolder = process.argv[2] ?? ".";
 
 const migrateAsync = async () => {
   const config = createSharedDbConfig(sqliteSchema);
-  const db = createSqliteDb(config);
+  const connection = new Database(dbEnv.URL);
+  const db = drizzle(connection, config);
 
-  migrate(db, { migrationsFolder });
+  // Uses a custom migrator instead of drizzle-orm/better-sqlite3/migrator — see
+  // packages/db/migrations/sqlite/robust-migrate.ts for why (muninn#170).
+  robustMigrateSqlite(connection, { migrationsFolder });
 
   await seedDataAsync(db);
   await applyCustomMigrationsAsync(db);

@@ -124,8 +124,15 @@
     {
       "idx": 17,
       "version": "7",
+      "when": 1790000000000,
+      "tag": "0017_audit_snake_case_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
       "when": 1790438265997,
-      "tag": "0017_add_group_external_authentik_id",
+      "tag": "0018_add_group_external_authentik_id",
       "breakpoints": true
     }
   ]
