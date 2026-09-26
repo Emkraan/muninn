@@ -170,9 +170,13 @@ describe("createSignInEventHandler should create signInEventHandler", () => {
       const eventHandler = createSignInEventHandler(db);
 
       // Act
+      // A non-empty group_ids claim that simply omits this group's external
+      // id: per authentik-broker-standard Rule 9, only a missing/EMPTY
+      // group_ids claim is fail-closed. A present, non-empty claim is
+      // trusted, so a group absent from it is removed.
       await eventHandler?.({
         user: { id: "1", name: "test" },
-        profile: { preferred_username: "test", group_ids: [] },
+        profile: { preferred_username: "test", group_ids: ["authentik-group-other"] },
         account: oidcAccount,
       });
 
