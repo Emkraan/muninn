@@ -8,8 +8,13 @@ ALTER TABLE `admin_audit` ADD `context_user_agent` TEXT;
 ALTER TABLE `admin_audit` ADD `context_request_id` TEXT;
 ALTER TABLE `admin_audit` ADD `context_method` TEXT;
 ALTER TABLE `admin_audit` ADD `context_path` TEXT;
-ALTER TABLE `admin_audit` ADD `created_at` INTEGER NOT NULL DEFAULT (unixepoch());
+-- SQLite rejects a non-constant default on ADD COLUMN, so add with a constant
+-- default and backfill existing rows. 0051 rebuilds admin_audit with the
+-- final DEFAULT (unixepoch()) for new rows.
+ALTER TABLE `admin_audit` ADD `created_at` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `admin_audit` ADD `search_text` TEXT;
+
+UPDATE `admin_audit` SET `created_at` = unixepoch() WHERE `created_at` = 0;
 
 CREATE INDEX IF NOT EXISTS `admin_audit_created_at_idx` ON `admin_audit`(`created_at` DESC);
 CREATE INDEX IF NOT EXISTS `admin_audit_context_request_id_idx` ON `admin_audit`(`context_request_id`);
