@@ -5,6 +5,7 @@ import { beforeAll, describe, expect, test, vi } from "vitest";
 import { createDb } from "@homarr/db/test";
 
 import { Aria2Integration } from "../src";
+import { useContainerCleanup } from "./container-cleanup";
 
 vi.mock("@homarr/db", async (importActual) => {
   // eslint-disable-next-line @typescript-eslint/consistent-type-imports
@@ -29,6 +30,8 @@ const API_KEY = "ARIA2_API_KEY";
 const IMAGE_NAME = "hurlenko/aria2-ariang:latest";
 
 describe("Aria2 integration", () => {
+  const trackContainer = useContainerCleanup();
+
   beforeAll(async () => {
     const containerRuntimeClient = await getContainerRuntimeClient();
     await containerRuntimeClient.image.pull(ImageName.fromString(IMAGE_NAME));
@@ -36,7 +39,7 @@ describe("Aria2 integration", () => {
 
   test("Test connection should work", async () => {
     // Arrange
-    const startedContainer = await createAria2Container().start();
+    const startedContainer = trackContainer(await createAria2Container().start());
     const aria2Integration = createAria2Intergration(startedContainer, API_KEY);
 
     // Act
@@ -44,14 +47,11 @@ describe("Aria2 integration", () => {
 
     // Assert
     expect(result.success).toBe(true);
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000);
 
   test("pauseQueueAsync should work", async () => {
     // Arrange
-    const startedContainer = await createAria2Container().start();
+    const startedContainer = trackContainer(await createAria2Container().start());
     const aria2Integration = createAria2Intergration(startedContainer, API_KEY);
 
     // Acts
@@ -61,14 +61,11 @@ describe("Aria2 integration", () => {
     // Assert
     await expect(actAsync()).resolves.not.toThrow();
     await expect(getAsync()).resolves.toMatchObject({ status: { paused: true } });
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("Items should be empty", async () => {
     // Arrange
-    const startedContainer = await createAria2Container().start();
+    const startedContainer = trackContainer(await createAria2Container().start());
     const aria2Integration = createAria2Intergration(startedContainer, API_KEY);
 
     // Act
@@ -79,14 +76,11 @@ describe("Aria2 integration", () => {
     await expect(getAsync()).resolves.toMatchObject({
       items: [],
     });
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("1 Items should exist after adding one", async () => {
     // Arrange
-    const startedContainer = await createAria2Container().start();
+    const startedContainer = trackContainer(await createAria2Container().start());
     const aria2Integration = createAria2Intergration(startedContainer, API_KEY);
     await aria2AddItemAsync(startedContainer, API_KEY, aria2Integration);
 
@@ -96,14 +90,11 @@ describe("Aria2 integration", () => {
     // Assert
     await expect(getAsync()).resolves.not.toThrow();
     expect((await getAsync()).items).toHaveLength(1);
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("Delete item should result in empty items", async () => {
     // Arrange
-    const startedContainer = await createAria2Container().start();
+    const startedContainer = trackContainer(await createAria2Container().start());
     const aria2Integration = createAria2Intergration(startedContainer, API_KEY);
     const item = await aria2AddItemAsync(startedContainer, API_KEY, aria2Integration);
 
@@ -116,9 +107,6 @@ describe("Aria2 integration", () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     const result = await aria2Integration.getClientJobsAndStatusAsync({ limit: 99 });
     expect(result.items).toHaveLength(0);
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 });
 

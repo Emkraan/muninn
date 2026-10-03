@@ -8,6 +8,7 @@ import { createDb } from "@homarr/db/test";
 import { SabnzbdIntegration } from "../src";
 import { TestConnectionError } from "../src/base/test-connection/test-connection-error";
 import type { DownloadClientItem } from "../src/interfaces/downloads/download-client-items";
+import { useContainerCleanup } from "./container-cleanup";
 
 vi.mock("@homarr/db", async (importActual) => {
   // eslint-disable-next-line @typescript-eslint/consistent-type-imports
@@ -33,6 +34,8 @@ const DEFAULT_API_KEY = "8r45mfes43s3iw7x3oecto6dl9ilxnf9";
 const IMAGE_NAME = "linuxserver/sabnzbd:latest";
 
 describe("Sabnzbd integration", () => {
+  const trackContainer = useContainerCleanup();
+
   beforeAll(async () => {
     const containerRuntimeClient = await getContainerRuntimeClient();
     await containerRuntimeClient.image.pull(ImageName.fromString(IMAGE_NAME));
@@ -40,7 +43,7 @@ describe("Sabnzbd integration", () => {
 
   test("Test connection should work", async () => {
     // Arrange
-    const startedContainer = await createSabnzbdContainer().start();
+    const startedContainer = trackContainer(await createSabnzbdContainer().start());
     const sabnzbdIntegration = createSabnzbdIntegration(startedContainer, DEFAULT_API_KEY);
 
     // Act
@@ -48,14 +51,11 @@ describe("Sabnzbd integration", () => {
 
     // Assert
     expect(result.success).toBe(true);
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("Test connection should fail with wrong ApiKey", async () => {
     // Arrange
-    const startedContainer = await createSabnzbdContainer().start();
+    const startedContainer = trackContainer(await createSabnzbdContainer().start());
     const sabnzbdIntegration = createSabnzbdIntegration(startedContainer, "wrong-api-key");
 
     // Act
@@ -66,14 +66,11 @@ describe("Sabnzbd integration", () => {
     if (result.success) return;
     expect(result.error).toBeInstanceOf(TestConnectionError);
     expect(result.error.type).toBe("authorization");
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("pauseQueueAsync should work", async () => {
     // Arrange
-    const startedContainer = await createSabnzbdContainer().start();
+    const startedContainer = trackContainer(await createSabnzbdContainer().start());
     const sabnzbdIntegration = createSabnzbdIntegration(startedContainer, DEFAULT_API_KEY);
 
     // Acts
@@ -83,14 +80,11 @@ describe("Sabnzbd integration", () => {
     // Assert
     await expect(actAsync()).resolves.not.toThrow();
     await expect(getAsync()).resolves.toMatchObject({ status: { paused: true } });
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("resumeQueueAsync should work", async () => {
     // Arrange
-    const startedContainer = await createSabnzbdContainer().start();
+    const startedContainer = trackContainer(await createSabnzbdContainer().start());
     const sabnzbdIntegration = createSabnzbdIntegration(startedContainer, DEFAULT_API_KEY);
     await sabnzbdIntegration.pauseQueueAsync();
 
@@ -103,14 +97,11 @@ describe("Sabnzbd integration", () => {
     await expect(getAsync()).resolves.toMatchObject({
       status: { paused: false },
     });
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("Items should be empty", async () => {
     // Arrange
-    const startedContainer = await createSabnzbdContainer().start();
+    const startedContainer = trackContainer(await createSabnzbdContainer().start());
     const sabnzbdIntegration = createSabnzbdIntegration(startedContainer, DEFAULT_API_KEY);
 
     // Act
@@ -121,14 +112,11 @@ describe("Sabnzbd integration", () => {
     await expect(getAsync()).resolves.toMatchObject({
       items: [],
     });
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("1 Items should exist after adding one", async () => {
     // Arrange
-    const startedContainer = await createSabnzbdContainer().start();
+    const startedContainer = trackContainer(await createSabnzbdContainer().start());
     const sabnzbdIntegration = createSabnzbdIntegration(startedContainer, DEFAULT_API_KEY);
     await sabNzbdAddItemAsync(startedContainer, DEFAULT_API_KEY, sabnzbdIntegration);
 
@@ -138,14 +126,11 @@ describe("Sabnzbd integration", () => {
     // Assert
     await expect(getAsync()).resolves.not.toThrow();
     expect((await getAsync()).items).toHaveLength(1);
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("Pause item should work", async () => {
     // Arrange
-    const startedContainer = await createSabnzbdContainer().start();
+    const startedContainer = trackContainer(await createSabnzbdContainer().start());
     const sabnzbdIntegration = createSabnzbdIntegration(startedContainer, DEFAULT_API_KEY);
     const item = await sabNzbdAddItemAsync(startedContainer, DEFAULT_API_KEY, sabnzbdIntegration);
 
@@ -157,14 +142,11 @@ describe("Sabnzbd integration", () => {
     await expect(getAsync()).resolves.toMatchObject({ items: [{ ...item, state: "downloading" }] });
     await expect(actAsync()).resolves.not.toThrow();
     await expect(getAsync()).resolves.toMatchObject({ items: [{ ...item, state: "paused" }] });
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("Resume item should work", async () => {
     // Arrange
-    const startedContainer = await createSabnzbdContainer().start();
+    const startedContainer = trackContainer(await createSabnzbdContainer().start());
     const sabnzbdIntegration = createSabnzbdIntegration(startedContainer, DEFAULT_API_KEY);
     const item = await sabNzbdAddItemAsync(startedContainer, DEFAULT_API_KEY, sabnzbdIntegration);
     await sabnzbdIntegration.pauseItemAsync(item);
@@ -177,14 +159,11 @@ describe("Sabnzbd integration", () => {
     await expect(getAsync()).resolves.toMatchObject({ items: [{ ...item, state: "paused" }] });
     await expect(actAsync()).resolves.not.toThrow();
     await expect(getAsync()).resolves.toMatchObject({ items: [{ ...item, state: "downloading" }] });
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("Delete item should result in empty items", async () => {
     // Arrange
-    const startedContainer = await createSabnzbdContainer().start();
+    const startedContainer = trackContainer(await createSabnzbdContainer().start());
     const sabnzbdIntegration = createSabnzbdIntegration(startedContainer, DEFAULT_API_KEY);
     const item = await sabNzbdAddItemAsync(startedContainer, DEFAULT_API_KEY, sabnzbdIntegration);
 
@@ -196,9 +175,6 @@ describe("Sabnzbd integration", () => {
     // Assert
     await expect(actAsync()).resolves.not.toThrow();
     await expect(getAsync()).resolves.toMatchObject({ items: [] });
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 });
 

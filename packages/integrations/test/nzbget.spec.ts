@@ -8,6 +8,7 @@ import { createDb } from "@homarr/db/test";
 
 import { NzbGetIntegration } from "../src";
 import { TestConnectionError } from "../src/base/test-connection/test-connection-error";
+import { useContainerCleanup } from "./container-cleanup";
 
 vi.mock("@homarr/db", async (importActual) => {
   // eslint-disable-next-line @typescript-eslint/consistent-type-imports
@@ -34,6 +35,8 @@ const password = "tegbzn6789";
 const IMAGE_NAME = "linuxserver/nzbget:latest";
 
 describe("Nzbget integration", () => {
+  const trackContainer = useContainerCleanup();
+
   beforeAll(async () => {
     const containerRuntimeClient = await getContainerRuntimeClient();
     await containerRuntimeClient.image.pull(ImageName.fromString(IMAGE_NAME));
@@ -41,7 +44,7 @@ describe("Nzbget integration", () => {
 
   test("Test connection should work", async () => {
     // Arrange
-    const startedContainer = await createNzbGetContainer().start();
+    const startedContainer = trackContainer(await createNzbGetContainer().start());
     const nzbGetIntegration = createNzbGetIntegration(startedContainer, username, password);
 
     // Act
@@ -49,14 +52,11 @@ describe("Nzbget integration", () => {
 
     // Assert
     expect(result.success).toBe(true);
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000);
 
   test("Test connection should fail with wrong credentials", async () => {
     // Arrange
-    const startedContainer = await createNzbGetContainer().start();
+    const startedContainer = trackContainer(await createNzbGetContainer().start());
     const nzbGetIntegration = createNzbGetIntegration(startedContainer, "wrong-user", "wrong-password");
 
     // Act
@@ -68,14 +68,11 @@ describe("Nzbget integration", () => {
 
     expect(result.error).toBeInstanceOf(TestConnectionError);
     expect(result.error.type).toBe("authorization");
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("pauseQueueAsync should work", async () => {
     // Arrange
-    const startedContainer = await createNzbGetContainer().start();
+    const startedContainer = trackContainer(await createNzbGetContainer().start());
     const nzbGetIntegration = createNzbGetIntegration(startedContainer, username, password);
 
     // Acts
@@ -85,14 +82,11 @@ describe("Nzbget integration", () => {
     // Assert
     await expect(actAsync()).resolves.not.toThrow();
     await expect(getAsync()).resolves.toMatchObject({ status: { paused: true } });
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("resumeQueueAsync should work", async () => {
     // Arrange
-    const startedContainer = await createNzbGetContainer().start();
+    const startedContainer = trackContainer(await createNzbGetContainer().start());
     const nzbGetIntegration = createNzbGetIntegration(startedContainer, username, password);
     await nzbGetIntegration.pauseQueueAsync();
 
@@ -105,14 +99,11 @@ describe("Nzbget integration", () => {
     await expect(getAsync()).resolves.toMatchObject({
       status: { paused: false },
     });
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("Items should be empty", async () => {
     // Arrange
-    const startedContainer = await createNzbGetContainer().start();
+    const startedContainer = trackContainer(await createNzbGetContainer().start());
     const nzbGetIntegration = createNzbGetIntegration(startedContainer, username, password);
 
     // Act
@@ -123,14 +114,11 @@ describe("Nzbget integration", () => {
     await expect(getAsync()).resolves.toMatchObject({
       items: [],
     });
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("1 Items should exist after adding one", async () => {
     // Arrange
-    const startedContainer = await createNzbGetContainer().start();
+    const startedContainer = trackContainer(await createNzbGetContainer().start());
     const nzbGetIntegration = createNzbGetIntegration(startedContainer, username, password);
     await nzbGetAddItemAsync(startedContainer, username, password, nzbGetIntegration);
 
@@ -140,14 +128,11 @@ describe("Nzbget integration", () => {
     // Assert
     await expect(getAsync()).resolves.not.toThrow();
     expect((await getAsync()).items).toHaveLength(1);
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 
   test("Delete item should result in empty items", async () => {
     // Arrange
-    const startedContainer = await createNzbGetContainer().start();
+    const startedContainer = trackContainer(await createNzbGetContainer().start());
     const nzbGetIntegration = createNzbGetIntegration(startedContainer, username, password);
     const item = await nzbGetAddItemAsync(startedContainer, username, password, nzbGetIntegration);
 
@@ -160,9 +145,6 @@ describe("Nzbget integration", () => {
     await new Promise((resolve) => setTimeout(resolve, 5000));
     const result = await nzbGetIntegration.getClientJobsAndStatusAsync({ limit: 99 });
     expect(result.items).toHaveLength(0);
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 });
 

@@ -120,6 +120,9 @@ type ContainerEntry = {
 };
 
 const pool: Record<string, ContainerEntry> = {};
+// Every container that started, registered before any further setup so that a
+// failure later in beforeAll (e.g. fetching the API token) still tears it down.
+const startedContainers: StartedTestContainer[] = [];
 
 beforeAll(async () => {
   await Promise.all(
@@ -131,6 +134,7 @@ beforeAll(async () => {
         .withEnvironment({ DNS_SERVER_ADMIN_PASSWORD: DEFAULT_PASSWORD })
         .withWaitStrategy(Wait.forLogMessage("Technitium DNS Server was started successfully."))
         .start();
+      startedContainers.push(container);
       const baseUrl = `http://${container.getHost()}:${container.getMappedPort(5380)}`;
       const apiToken = await fetchApiToken(baseUrl, apiVersion);
       pool[tag] = { container, baseUrl, apiToken };
@@ -139,7 +143,12 @@ beforeAll(async () => {
 }, 120_000);
 
 afterAll(async () => {
-  await Promise.all(Object.values(pool).map(({ container }) => container.stop()));
+  const results = await Promise.allSettled(startedContainers.splice(0).map((container) => container.stop()));
+  for (const result of results) {
+    if (result.status === "rejected") {
+      console.warn("Failed to stop test container", result.reason);
+    }
+  }
 });
 
 // ─── version-parameterised suites ────────────────────────────────────────────
