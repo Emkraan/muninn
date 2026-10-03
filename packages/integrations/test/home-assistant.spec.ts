@@ -7,6 +7,7 @@ import { createDb } from "@homarr/db/test";
 
 import { HomeAssistantIntegration } from "../src";
 import { TestConnectionError } from "../src/base/test-connection/test-connection-error";
+import { useContainerCleanup } from "./container-cleanup";
 
 vi.mock("@homarr/db", async (importActual) => {
   // eslint-disable-next-line @typescript-eslint/consistent-type-imports
@@ -33,6 +34,8 @@ const DEFAULT_API_KEY =
 const IMAGE_NAME = "ghcr.io/home-assistant/home-assistant:stable";
 
 describe("Home Assistant integration", () => {
+  const trackContainer = useContainerCleanup();
+
   beforeAll(async () => {
     const containerRuntimeClient = await getContainerRuntimeClient();
     await containerRuntimeClient.image.pull(ImageName.fromString(IMAGE_NAME));
@@ -40,7 +43,7 @@ describe("Home Assistant integration", () => {
 
   test("Test connection should work", async () => {
     // Arrange
-    const startedContainer = await prepareHomeAssistantContainerAsync();
+    const startedContainer = await prepareHomeAssistantContainerAsync(trackContainer);
     const homeAssistantIntegration = createHomeAssistantIntegration(startedContainer);
 
     // Act
@@ -48,13 +51,10 @@ describe("Home Assistant integration", () => {
 
     // Assert
     expect(result.success).toBe(true);
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
   test("Test connection should fail with wrong credentials", async () => {
     // Arrange
-    const startedContainer = await prepareHomeAssistantContainerAsync();
+    const startedContainer = await prepareHomeAssistantContainerAsync(trackContainer);
     const homeAssistantIntegration = createHomeAssistantIntegration(startedContainer, "wrong-api-key");
 
     // Act
@@ -66,15 +66,15 @@ describe("Home Assistant integration", () => {
 
     expect(result.error).toBeInstanceOf(TestConnectionError);
     expect(result.error.type).toBe("authorization");
-
-    // Cleanup
-    await startedContainer.stop();
   }, 30_000); // Timeout of 30 seconds
 });
 
-const prepareHomeAssistantContainerAsync = async () => {
+const prepareHomeAssistantContainerAsync = async (
+  trackContainer: <TContainer extends StartedTestContainer>(container: TContainer) => TContainer,
+) => {
   const homeAssistantContainer = createHomeAssistantContainer();
-  const startedContainer = await homeAssistantContainer.start();
+  // Track before exec/restart so a failure there still tears the container down
+  const startedContainer = trackContainer(await homeAssistantContainer.start());
   await startedContainer.exec(["unzip", "-o", "/tmp/config.zip", "-d", "/config"]);
   await startedContainer.restart();
   return startedContainer;
