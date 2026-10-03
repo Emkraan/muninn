@@ -146,7 +146,7 @@ catalog:
   mantine-react-table: npm:mantine-react-table-open@9.0.3
   mcp-handler: ^1.1.0
   maria2: ^0.4.1
-  mysql2: 3.22.6
+  mysql2: 3.23.1
   next: 16.3.6
   next-auth: 5.0.0-beta.32
   next-intl: 4.13.1
@@ -222,6 +222,8 @@ minimumReleaseAgeExclude:
   - adm-zip@0.6.1
   # Renovate security update: fastify@5.12.5
   - fastify@5.12.5
+  # Renovate security update: mysql2@3.23.1
+  - mysql2@3.23.1
 overrides:
   "@babel/helpers@<7.26.10": ">=7.29.7"
   "@babel/runtime@<7.26.10": ">=7.29.7"
