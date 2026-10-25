@@ -22,7 +22,7 @@ catalog:
   "@immich/sdk": ^3.0.2
   "@jellyfin/sdk": ^0.13.0
   "@kubernetes/client-node": ^1.4.0
-  "@modelcontextprotocol/sdk": 1.29.0
+  "@modelcontextprotocol/sdk": 1.32.0
   "@mantine/charts": ^9.4.1
   "@mantine/colors-generator": ^9.4.1
   "@mantine/core": ^9.4.1
@@ -226,6 +226,8 @@ minimumReleaseAgeExclude:
   - mysql2@3.23.1
   # Renovate security update: vite@8.1.6
   - vite@8.1.6
+  # Renovate security update: @modelcontextprotocol/sdk@1.32.0
+  - "@modelcontextprotocol/sdk@1.32.0"
 overrides:
   "@babel/helpers@<7.26.10": ">=7.29.7"
   "@babel/runtime@<7.26.10": ">=7.29.7"
