@@ -16,8 +16,8 @@ catalogs:
       specifier: ^9.0.0
       version: 9.0.1
     '@ctrl/qbittorrent':
-      specifier: ^9.14.0
-      version: 9.14.0
+      specifier: ^10.0.0
+      version: 10.1.1
     '@ctrl/transmission':
       specifier: ^8.0.0
       version: 8.0.1
@@ -1945,7 +1945,7 @@ importers:
         version: 9.0.1
       '@ctrl/qbittorrent':
         specifier: 'catalog:'
-        version: 9.14.0
+        version: 10.1.1
       '@ctrl/transmission':
         specifier: 'catalog:'
         version: 8.0.1
@@ -3995,23 +3995,13 @@ packages:
     resolution: {integrity: sha512-+SnfZgT7pOyl4DU2UOdz8kSUTunGF92gIQp1LOA8sM6bakKeQuiEStsIpnP0iuaqgJRbpm5a05qfRqeu9d+L9w==}
     engines: {node: '>=24'}
 
-  '@ctrl/magnet-link@4.3.0':
-    resolution: {integrity: sha512-fEfw3AeQ8XhVsNzogZrnyTNDD/Tpbfl3ybHsspBMvj0UKctabApv1JV3JJUQG/hoX6hiO+DtQS+acN7dMPX01g==}
-    engines: {node: '>20'}
-
   '@ctrl/magnet-link@5.0.1':
     resolution: {integrity: sha512-TQb384eD73RDT3VumJ9TRP1/UoLYhhCKMkgEOkwT498d9YDPbfAYb/7DhmDx1sxzabKcOZKfFCmxioCcbR4R2w==}
     engines: {node: '>20'}
 
-  '@ctrl/qbittorrent@9.14.0':
-    resolution: {integrity: sha512-Ye1yX6zahOugx6RHQoiBkE8Od21RmO3i1gbSrOSYtoDIqr+9Utz8Rf6FkY7IEKB8JbeWjwuEhQt23usmhcFt5Q==}
-    engines: {node: '>=18'}
-
-  '@ctrl/shared-torrent@6.5.1':
-    resolution: {integrity: sha512-ZdItYUwzHOu+8s416oRIEwvqDUC3aON4Lv/Ev4H5KxEkbjfkQiaONS/7+jos2+yJWleiXlRdBsoIpZR5Cd1UHQ==}
-    engines: {node: '>20'}
-    peerDependencies:
-      ofetch: ^1.5.0
+  '@ctrl/qbittorrent@10.1.1':
+    resolution: {integrity: sha512-3n2JfrAh3DQ+C8lt9yn60LJ0ZWTFHo3XZkpOyp4lw9IpQZvTHr0gdKsp6N8gSCD+9a2FOuA2yJL31YgCHZMIVg==}
+    engines: {node: '>=24'}
 
   '@ctrl/shared-torrent@6.6.1':
     resolution: {integrity: sha512-1viCM4QC2g84IFVwl6+QXX1mK9DWfr9qPdm8OBeZlGb9FD3W7RCzJz7LfZ/tjjHLTCcI14bOHK/Fcfv5k5lNYg==}
@@ -4019,8 +4009,8 @@ packages:
     peerDependencies:
       ofetch: ^1.5.0
 
-  '@ctrl/torrent-file@4.5.0':
-    resolution: {integrity: sha512-ECzdbioAXLx7E3w/G9wMBz64K7MD5gRH6A2ypDcax+3cDmELdlKQfJIzX7q+if7E2TO+nbcabx76g0su3t01mQ==}
+  '@ctrl/torrent-file@4.5.2':
+    resolution: {integrity: sha512-jCxALcowJolp0L5FDEfk2yRqAAydUY5WsgwbsO1OuNinyG/tvNieTWhMH2fk5NvW1gsVsLSt3eJI6vbLj7bLsw==}
     engines: {node: '>20'}
 
   '@ctrl/transmission@8.0.1':
@@ -14388,10 +14378,6 @@ packages:
     engines: {node: '>=0.8.0'}
     hasBin: true
 
-  uint8array-extras@1.5.0:
-    resolution: {integrity: sha512-rvKSBiC5zqCCiDZ9kAOszZcDvdAHwwIKJG33Ykj43OKcWsnmcBRL09YTU4nOeHZ8Y2a7l1MgTd08SBe9A8Qj6A==}
-    engines: {node: '>=18'}
-
   uint8array-extras@1.6.0:
     resolution: {integrity: sha512-8iAasVS4wUx0gPLjH8Xtz2PeDzTSiy8QiLGu2DT3X5GU+egFEQhpnbtkehbAwjvDcxIERmCYcysiODFmE3Ud0Q==}
     engines: {node: '>=18'}
@@ -16611,37 +16597,28 @@ snapshots:
       ufo: 1.6.4
       uint8array-extras: 1.6.0
 
-  '@ctrl/magnet-link@4.3.0':
-    dependencies:
-      rfc4648: 1.5.4
-      uint8array-extras: 1.5.0
-
   '@ctrl/magnet-link@5.0.1':
     dependencies:
       rfc4648: 1.5.4
       uint8array-extras: 1.6.0
 
-  '@ctrl/qbittorrent@9.14.0':
+  '@ctrl/qbittorrent@10.1.1':
     dependencies:
-      '@ctrl/magnet-link': 4.3.0
-      '@ctrl/shared-torrent': 6.5.1(ofetch@1.5.1)
-      '@ctrl/torrent-file': 4.5.0
-      cookie: 1.1.1
+      '@ctrl/magnet-link': 5.0.1
+      '@ctrl/shared-torrent': 6.6.1(ofetch@1.5.1)
+      '@ctrl/torrent-file': 4.5.2
+      cookie: 2.0.1
       node-fetch-native: 1.6.7
       ofetch: 1.5.1
-      type-fest: 5.6.0
+      type-fest: 5.10.0
       ufo: 1.6.4
-      uint8array-extras: 1.5.0
-
-  '@ctrl/shared-torrent@6.5.1(ofetch@1.5.1)':
-    dependencies:
-      ofetch: 1.5.1
+      uint8array-extras: 1.6.0
 
   '@ctrl/shared-torrent@6.6.1(ofetch@1.5.1)':
     dependencies:
       ofetch: 1.5.1
 
-  '@ctrl/torrent-file@4.5.0': {}
+  '@ctrl/torrent-file@4.5.2': {}
 
   '@ctrl/transmission@8.0.1':
     dependencies:
@@ -20521,7 +20498,7 @@ snapshots:
     dependencies:
       '@scalar/helpers': 0.9.0
       nanoid: 5.1.16
-      type-fest: 5.7.0
+      type-fest: 5.10.0
       zod: 4.4.3
 
   '@scalar/use-codemirror@0.14.12(@typescript/typescript6@6.0.2)':
@@ -29448,8 +29425,6 @@ snapshots:
 
   uglify-js@3.19.3:
     optional: true
-
-  uint8array-extras@1.5.0: {}
 
   uint8array-extras@1.6.0: {}
 
