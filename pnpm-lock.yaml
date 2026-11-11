@@ -19,8 +19,8 @@ catalogs:
       specifier: ^9.14.0
       version: 9.14.0
     '@ctrl/transmission':
-      specifier: ^7.4.0
-      version: 7.4.0
+      specifier: ^8.0.0
+      version: 8.0.1
     '@dnd-kit/core':
       specifier: ^6.3.1
       version: 6.3.1
@@ -1948,7 +1948,7 @@ importers:
         version: 9.14.0
       '@ctrl/transmission':
         specifier: 'catalog:'
-        version: 7.4.0
+        version: 8.0.1
       '@homarr/common':
         specifier: workspace:^0.1.0
         version: link:../common
@@ -4023,9 +4023,9 @@ packages:
     resolution: {integrity: sha512-ECzdbioAXLx7E3w/G9wMBz64K7MD5gRH6A2ypDcax+3cDmELdlKQfJIzX7q+if7E2TO+nbcabx76g0su3t01mQ==}
     engines: {node: '>20'}
 
-  '@ctrl/transmission@7.4.0':
-    resolution: {integrity: sha512-Y6+dKaktS33oE/1R2hx+aGU8G35oO+dhOThtUlOm8784eOg/rkXyzwNecPIzp77XuIRXam8sLxO/g+yS7yHSpQ==}
-    engines: {node: '>=18'}
+  '@ctrl/transmission@8.0.1':
+    resolution: {integrity: sha512-vM20IMU/gAL+N7wa1SQ5yzEq6iBRGcHR8uG1PLd7u7sPOeX45F3hIA9BypL/tdJaqv8MKNDwm0Yai8TwH+ghhQ==}
+    engines: {node: '>=24'}
 
   '@dabh/diagnostics@2.0.8':
     resolution: {integrity: sha512-R4MSXTVnuMzGD7bzHdW2ZhhdPC/igELENcq5IjEverBvq5hn1SXCWcsi6eSsdWP0/Ur+SItRRjAktmdoX/8R/Q==}
@@ -16643,14 +16643,14 @@ snapshots:
 
   '@ctrl/torrent-file@4.5.0': {}
 
-  '@ctrl/transmission@7.4.0':
+  '@ctrl/transmission@8.0.1':
     dependencies:
-      '@ctrl/magnet-link': 4.3.0
-      '@ctrl/shared-torrent': 6.5.1(ofetch@1.5.1)
+      '@ctrl/magnet-link': 5.0.1
+      '@ctrl/shared-torrent': 6.6.1(ofetch@1.5.1)
       ofetch: 1.5.1
-      type-fest: 4.41.0
+      type-fest: 5.10.0
       ufo: 1.6.4
-      uint8array-extras: 1.5.0
+      uint8array-extras: 1.6.0
 
   '@dabh/diagnostics@2.0.8':
     dependencies:
@@ -20576,7 +20576,7 @@ snapshots:
       '@scalar/types': 0.16.2
       '@scalar/validation': 0.6.0
       js-base64: 3.7.8
-      type-fest: 5.7.0
+      type-fest: 5.10.0
       vue: 3.5.35(@typescript/typescript6@6.0.2)
       yaml: 2.9.0
     transitivePeerDependencies:
@@ -26440,7 +26440,7 @@ snapshots:
       statuses: 2.0.2
       strict-event-emitter: 0.5.1
       tough-cookie: 6.0.1
-      type-fest: 5.7.0
+      type-fest: 5.10.0
       until-async: 3.0.2
       yargs: 17.7.2
     optionalDependencies:
