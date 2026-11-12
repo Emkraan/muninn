@@ -43,8 +43,8 @@ catalogs:
       specifier: ^0.2.17
       version: 0.2.17
     '@extractus/feed-extractor':
-      specifier: 7.2.1
-      version: 7.2.1
+      specifier: 8.0.3
+      version: 8.0.3
     '@gfazioli/mantine-onboarding-tour':
       specifier: ^4.0.6
       version: 4.0.6
@@ -2274,7 +2274,7 @@ importers:
     dependencies:
       '@extractus/feed-extractor':
         specifier: 'catalog:'
-        version: 7.2.1
+        version: 8.0.3
       '@homarr/common':
         specifier: workspace:^0.1.0
         version: link:../common
@@ -4489,9 +4489,8 @@ packages:
       '@noble/hashes':
         optional: true
 
-  '@extractus/feed-extractor@7.2.1':
-    resolution: {integrity: sha512-vc84NZST31wLDTesAkmHL8GBxSB2zw2/h9ZKiQMB71az13sC65EeAcDeLJ2z3atsIhtxESnCMaKmQdOrFiFLcg==}
-    engines: {node: '>= 20'}
+  '@extractus/feed-extractor@8.0.3':
+    resolution: {integrity: sha512-T6kdUtm3JbHTtFSKM4MXPAOw83imGq2i77fzeUwVraZy8rY/1ka6ngHeSno8Jh8QkEbFVeM3WG3RUXCxscs1fA==}
 
   '@fastify/ajv-compiler@4.0.5':
     resolution: {integrity: sha512-KoWKW+MhvfTRWL4qrhUwAAZoaChluo0m0vbiJlGMt2GXvL4LVPQEjt8kSpHI3IBq5Rez8fg+XeH3cneztq+C7A==}
@@ -6144,10 +6143,6 @@ packages:
 
   '@protobufjs/utf8@1.1.2':
     resolution: {integrity: sha512-b1UQwcEZ4yCnMCD8DAL1VlbvBJE9/IX4FTIp7BG1xYpf29SLazLSrqUkj4w7Y5y7cCVP6E5tcqqcI0xemPkHug==}
-
-  '@pwshub/bellajs@13.0.2':
-    resolution: {integrity: sha512-OWOaE7Ieufo7VMv957iahOzv/w5oXyyXO28Jh2x6rLU96ZLqC508kAKTgdMJRXgVjda2s+/0C6Kno+k16OmJsQ==}
-    engines: {bun: '>=1.0.0', node: '>=20.0.0'}
 
   '@react-spring/animated@10.1.0':
     resolution: {integrity: sha512-dvGVSfNYhbkzTAnyB1S1940ZiKp6/Ey+b2vQc70dJ5k6gzH/GdlfeDzCh65V94b6OPqF7Xl4VUICVUQpc07iUg==}
@@ -10390,9 +10385,6 @@ packages:
   html-encoding-sniffer@6.0.0:
     resolution: {integrity: sha512-CV9TW3Y3f8/wT0BRFc1/KAVQ3TUHiXmaAb6VW9vtiMFf7SLoMd1PdAc4W3KFOFETBJUb90KatHqlsZMWV+R9Gg==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
-
-  html-entities@2.6.0:
-    resolution: {integrity: sha512-kig+rMn/QOVRvr7c86gQ8lWXq+Hkv6CbAH1hLu+RG338StTpE8Z0b44SDVaqVu7HGKf27frdmUYEs9hTUX/cLQ==}
 
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
@@ -18300,11 +18292,9 @@ snapshots:
     optionalDependencies:
       '@noble/hashes': 2.4.0
 
-  '@extractus/feed-extractor@7.2.1':
+  '@extractus/feed-extractor@8.0.3':
     dependencies:
-      '@pwshub/bellajs': 13.0.2
       fast-xml-parser: 5.10.1
-      html-entities: 2.6.0
 
   '@fastify/ajv-compiler@4.0.5':
     dependencies:
@@ -20019,8 +20009,6 @@ snapshots:
   '@protobufjs/pool@1.1.0': {}
 
   '@protobufjs/utf8@1.1.2': {}
-
-  '@pwshub/bellajs@13.0.2': {}
 
   '@react-spring/animated@10.1.0(react@19.2.7)':
     dependencies:
@@ -24863,8 +24851,6 @@ snapshots:
       '@exodus/bytes': 1.15.0(@noble/hashes@2.4.0)
     transitivePeerDependencies:
       - '@noble/hashes'
-
-  html-entities@2.6.0: {}
 
   html-escaper@2.0.2: {}
 
