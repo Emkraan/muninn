@@ -21,7 +21,7 @@ catalog:
   "@homarr/node-unifi": ^2.6.0
   "@immich/sdk": ^3.0.2
   "@jellyfin/sdk": ^0.13.0
-  "@kubernetes/client-node": ^1.4.0
+  "@kubernetes/client-node": ^2.0.0
   "@modelcontextprotocol/sdk": 1.32.0
   "@mantine/charts": ^9.4.1
   "@mantine/colors-generator": ^9.4.1
