@@ -343,8 +343,8 @@ catalogs:
       specifier: ^5.0.1
       version: 5.0.1
     dotenv:
-      specifier: ^17.4.2
-      version: 17.4.2
+      specifier: ^18.0.0
+      version: 18.0.10
     dotenv-cli:
       specifier: ^11.0.0
       version: 11.0.0
@@ -1007,7 +1007,7 @@ importers:
         version: 1.11.21
       dotenv:
         specifier: 'catalog:'
-        version: 17.4.2
+        version: 18.0.10
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.2(@electric-sql/pglite@0.2.17)(@libsql/client-wasm@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@9.6.0)(@types/pg@8.20.0)(better-sqlite3@12.11.1)(gel@2.0.0)(kysely@0.29.2)(mysql2@3.23.1(@types/node@24.13.3))(pg@8.22.0)(sql.js@1.14.1)
@@ -1176,7 +1176,7 @@ importers:
         version: 1.11.21
       dotenv:
         specifier: 'catalog:'
-        version: 17.4.2
+        version: 18.0.10
       fastify:
         specifier: 'catalog:'
         version: 5.9.0
@@ -1234,7 +1234,7 @@ importers:
         version: link:../../packages/validation
       dotenv:
         specifier: 'catalog:'
-        version: 17.4.2
+        version: 18.0.10
       tsx:
         specifier: 'catalog:'
         version: 4.20.4
@@ -1500,7 +1500,7 @@ importers:
         version: link:../validation
       dotenv:
         specifier: 'catalog:'
-        version: 17.4.2
+        version: 18.0.10
     devDependencies:
       '@homarr/tsconfig':
         specifier: workspace:^0.1.0
@@ -1737,7 +1737,7 @@ importers:
         version: 12.11.1
       dotenv:
         specifier: 'catalog:'
-        version: 17.4.2
+        version: 18.0.10
       drizzle-kit:
         specifier: 'catalog:'
         version: 0.31.10
@@ -9460,6 +9460,11 @@ packages:
   dotenv@17.4.2:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
+
+  dotenv@18.0.10:
+    resolution: {integrity: sha512-89FAA1xchzK2mxVWdr5F/0rldwiueXs6zJM86rO66EzekR1iBdiXRthyG+m5GvkJaFH3C2LESzamTkgndmLT2A==}
+    engines: {node: '>=12'}
+    hasBin: true
 
   drizzle-kit@0.31.10:
     resolution: {integrity: sha512-7OZcmQUrdGI+DUNNsKBn1aW8qSoKuTH7d0mYgSP8bAzdFzKoovxEFnoGQp2dVs82EOJeYycqRtciopszwUf8bw==}
@@ -23727,6 +23732,8 @@ snapshots:
   dotenv@16.6.1: {}
 
   dotenv@17.4.2: {}
+
+  dotenv@18.0.10: {}
 
   drizzle-kit@0.31.10:
     dependencies:
