@@ -114,7 +114,7 @@ catalog:
   conventional-changelog-conventionalcommits: ^10.2.0
   cookie: 2.0.1
   cookies: ^0.9.1
-  croner: 10.0.1
+  croner: 11.0.0
   cross-env: ^10.1.0
   crypto-js: ^4.2.0
   dayjs: ^1.11.21
