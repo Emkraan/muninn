@@ -1,5 +1,3 @@
-import { FetchError } from "node-fetch";
-
 import { RequestError } from "../request-error";
 import type { AnyRequestError } from "../request-error";
 import type { ResponseError } from "../response-error";
@@ -7,9 +5,20 @@ import { matchErrorCode } from "./fetch-http-error-handler";
 import { HttpErrorHandler } from "./http-error-handler";
 
 /**
+ * Shape of the FetchError that node-fetch throws.
+ * The node-fetch package is no longer a dependency of the workspace, so the error is detected by its name.
+ */
+interface NodeFetchError extends Error {
+  name: "FetchError";
+  code?: string;
+}
+
+const isNodeFetchError = (error: unknown): error is NodeFetchError => {
+  return error instanceof Error && error.name === "FetchError";
+};
+
+/**
  * node-fetch was a defacto standard to use fetch in nodejs.
- *
- * It is for example used within the cross-fetch package which is used in tsdav.
  */
 export class NodeFetchHttpErrorHandler extends HttpErrorHandler {
   constructor(private type = "node-fetch") {
@@ -17,7 +26,7 @@ export class NodeFetchHttpErrorHandler extends HttpErrorHandler {
   }
 
   handleRequestError(error: unknown): AnyRequestError | undefined {
-    if (!(error instanceof FetchError)) return undefined;
+    if (!isNodeFetchError(error)) return undefined;
     if (error.code === undefined) return undefined;
 
     this.logRequestError({
