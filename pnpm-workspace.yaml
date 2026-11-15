@@ -132,7 +132,7 @@ catalog:
   flag-icons: ^7.5.0
   glob: ^14.0.0
   ical.js: ^2.2.1
-  ioredis: 5.11.1
+  ioredis: 6.0.0
   isomorphic-dompurify: ^3.18.0
   jotai: ^2.20.1
   jsdom: ^29.1.1
