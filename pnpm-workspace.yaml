@@ -20,8 +20,8 @@ catalog:
   "@homarr/gridstack": ^1.12.0
   "@homarr/node-unifi": ^2.6.0
   "@immich/sdk": ^3.0.2
-  "@jellyfin/sdk": ^0.13.0
-  "@kubernetes/client-node": ^1.4.0
+  "@jellyfin/sdk": ^1.0.0
+  "@kubernetes/client-node": ^2.0.0
   "@modelcontextprotocol/sdk": 1.32.2
   "@mantine/charts": ^9.4.1
   "@mantine/colors-generator": ^9.4.1
@@ -121,7 +121,9 @@ catalog:
   deepmerge: 4.3.1
   dns-caching: ^0.2.9
   dockerode: ^5.0.1
-  dotenv: ^18.0.0
+  # Held at 17: dotenv 18 ships its own `dotenv` CLI (`dotenv run -f`), which shadows dotenv-cli's
+  # `dotenv -e ... --` in every package that depends on both and breaks `next build` (2026-11-14).
+  dotenv: ^17.4.2
   dotenv-cli: ^11.0.0
   drizzle-kit: ^0.31.10
   drizzle-orm: ^0.45.2
@@ -132,7 +134,7 @@ catalog:
   flag-icons: ^7.5.0
   glob: ^14.0.0
   ical.js: ^2.2.1
-  ioredis: 5.11.1
+  ioredis: 6.0.0
   isomorphic-dompurify: ^4.0.0
   jotai: ^2.20.1
   jsdom: ^29.1.1
