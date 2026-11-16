@@ -58,8 +58,8 @@ catalogs:
       specifier: ^3.0.2
       version: 3.0.2
     '@jellyfin/sdk':
-      specifier: ^0.13.0
-      version: 0.13.0
+      specifier: ^1.0.0
+      version: 1.0.2
     '@kubernetes/client-node':
       specifier: ^1.4.0
       version: 1.4.0
@@ -1981,7 +1981,7 @@ importers:
         version: 3.0.2
       '@jellyfin/sdk':
         specifier: 'catalog:'
-        version: 0.13.0(axios@1.18.1)
+        version: 1.0.2(axios@1.18.1)
       ical.js:
         specifier: 'catalog:'
         version: 2.2.1
@@ -4979,8 +4979,8 @@ packages:
   '@isaacs/nonrecursive-glob-match@1.0.3':
     resolution: {integrity: sha512-SI7kyKHq4XXDRozw+r9GlRZkia1ZkFrpLW98r2IC2Bpr8YkFGE3fvjzmxCG0x78A++69HmDNrDvSMYBZmHGpKA==}
 
-  '@jellyfin/sdk@0.13.0':
-    resolution: {integrity: sha512-oiBAOXH6s+dKdReSsYgNktBDzbxtg4JVWhEzIxZSxKcWMdSKmBtK41MhXRO7IWAC40DguKUm3nU/Z493qPAlWA==}
+  '@jellyfin/sdk@1.0.2':
+    resolution: {integrity: sha512-aO++9TsHIhtHFuK3c+kewt/7iFJKGgZ1080Vp1VwSFZsRvKDdr/UhQo4g7ZIKrZMCYWzvcD+2vKuC2ZZkcb+Wg==}
     peerDependencies:
       axios: '>=1.18.0'
 
@@ -18766,7 +18766,7 @@ snapshots:
 
   '@isaacs/nonrecursive-glob-match@1.0.3': {}
 
-  '@jellyfin/sdk@0.13.0(axios@1.18.1)':
+  '@jellyfin/sdk@1.0.2(axios@1.18.1)':
     dependencies:
       axios: 1.18.1
 

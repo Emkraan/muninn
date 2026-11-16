@@ -1,9 +1,9 @@
 import { Jellyfin } from "@jellyfin/sdk";
 import { BaseItemKind } from "@jellyfin/sdk/lib/generated-client/models";
+import { getLibraryApi } from "@jellyfin/sdk/lib/utils/api/library-api";
 import { getSessionApi } from "@jellyfin/sdk/lib/utils/api/session-api";
 import { getSystemApi } from "@jellyfin/sdk/lib/utils/api/system-api";
 import { getUserApi } from "@jellyfin/sdk/lib/utils/api/user-api";
-import { getUserLibraryApi } from "@jellyfin/sdk/lib/utils/api/user-library-api";
 import type { AxiosInstance } from "axios";
 
 import { createAxiosCertificateInstanceAsync } from "@homarr/core/infrastructure/http";
@@ -118,7 +118,7 @@ export class JellyfinIntegration extends Integration implements IMediaServerInte
 
   public async getMediaReleasesAsync(): Promise<MediaRelease[]> {
     const apiClient = await this.getApiAsync();
-    const userLibraryApi = getUserLibraryApi(apiClient);
+    const libraryApi = getLibraryApi(apiClient);
     const userApi = getUserApi(apiClient);
 
     const users = await userApi.getUsers();
@@ -127,7 +127,7 @@ export class JellyfinIntegration extends Integration implements IMediaServerInte
       throw new Error("No users found");
     }
 
-    const result = await userLibraryApi.getLatestMedia({
+    const result = await libraryApi.getLatestMedia({
       fields: ["CustomRating", "Studios", "Genres", "ChildCount", "DateCreated", "Overview", "Taglines"],
       userId,
       limit: 100,
