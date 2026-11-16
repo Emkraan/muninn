@@ -3,7 +3,6 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import ICAL from "ical.js";
-import type { RequestInit as NodeFetchRequestInit } from "node-fetch";
 import { tzlib_get_ical_block, tzlib_get_timezones } from "timezones-ical-library";
 import { DAVClient } from "tsdav";
 import { z } from "zod";
@@ -166,11 +165,12 @@ export class NextcloudIntegration extends Integration implements ICalendarIntegr
 
   public async getNotificationsAsync(): Promise<Notification[]> {
     const url = this.url("/ocs/v2.php/apps/notifications/api/v2/notifications", { format: "json" });
+    const encodedCredentials = Buffer.from(
+      `${this.getSecretValue("username")}:${this.getSecretValue("password")}`,
+    ).toString("base64");
     const response = await fetchWithTrustedCertificatesAsync(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(
-          `${this.getSecretValue("username")}:${this.getSecretValue("password")}`,
-        ).toString("base64")}`,
+        Authorization: `Basic ${encodedCredentials}`,
         "OCS-APIRequest": "true",
       },
     });
@@ -197,10 +197,10 @@ export class NextcloudIntegration extends Integration implements ICalendarIntegr
       authMethod: "Basic",
       defaultAccountType: "caldav",
       fetchOptions: {
-        // tsdav is using cross-fetch which uses node-fetch for nodejs environments.
+        // tsdav uses a node-fetch compatible fetch for nodejs environments.
         // There is an agent property that is the same type as the http(s) agents of nodejs
         agent: agent ?? (await createHttpsAgentAsync()),
-      } satisfies NodeFetchRequestInit as RequestInit,
+      } as unknown as RequestInit,
     });
   }
 }
