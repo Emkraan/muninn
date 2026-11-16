@@ -121,7 +121,9 @@ catalog:
   deepmerge: 4.3.1
   dns-caching: ^0.2.9
   dockerode: ^5.0.1
-  dotenv: ^18.0.0
+  # Held at 17: dotenv 18 ships its own `dotenv` CLI (`dotenv run -f`), which shadows dotenv-cli's
+  # `dotenv -e ... --` in every package that depends on both and breaks `next build` (2026-11-14).
+  dotenv: ^17.4.2
   dotenv-cli: ^11.0.0
   drizzle-kit: ^0.31.10
   drizzle-orm: ^0.45.2
