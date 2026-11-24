@@ -1,7 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>Emkraan/.github"],
-  "minimumReleaseAge": "3 days",
   "packageRules": [
     {
       "description": "Hold dotenv below 18: 18 ships its own `dotenv` CLI (`dotenv run -f`) that shadows dotenv-cli's `dotenv -e ... --` used by every with-env script and breaks next build. Lift the hold in the change that migrates the scripts.",
